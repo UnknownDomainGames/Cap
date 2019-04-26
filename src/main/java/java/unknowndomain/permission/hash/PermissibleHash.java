@@ -1,58 +1,27 @@
 package java.unknowndomain.permission.hash;
 
 import java.unknowndomain.permission.Permissible;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.HashMap;
 
 public class PermissibleHash implements Permissible {
 
-    private HashSet<String> permissionSet = new HashSet();
+    private HashMap<String, Boolean> permissionMap = new HashMap<>();
 
     @Override
-    public synchronized boolean hasPermission(String permission) {
-        String[] permissionSplit = permission.split(".");
-        for(int i = 0;i<permissionSplit.length;i++){
-            StringBuilder split = new StringBuilder();
-            for(int j =0;j<i;j++){
-                split.append(permissionSplit[j]);
-                split.append('.');
-            }
-            split.append(permissionSplit[i]);
-            if(permissionSet.contains(split.toString())){
-                return true;
-            }
-        }
-        return false;
+    public boolean hasPermission(String permission) {
+        if(permission==null||permission.isEmpty())
+            return false;
+        if(permissionMap.containsKey(permission))
+            return permissionMap.get(permission);
+        return hasPermission(permission.substring(0,permission.lastIndexOf('.')));
     }
 
     @Override
-    public synchronized void addPermission(String permission) {
-        String[] permissionSplit = permission.split(".");
-
-        for(int i = 0;i<permissionSplit.length;i++){
-            StringBuilder split = new StringBuilder();
-            for(int j =0;j<i;j++){
-                split.append(permissionSplit[j]);
-                split.append('.');
-            }
-            split.append(permissionSplit[i]);
-            if(hasPermission(split.toString())){
-                return;
-            }
-        }
-        permissionSet.add(permission);
-
-        Iterator<String> iterator = permissionSet.iterator();
-
-        while(iterator.hasNext()){
-            String p = iterator.next();
-            if(p.startsWith(permission))
-                iterator.remove();
-        }
+    public void setPermission(String permission, boolean bool) {
+        permissionMap.put(permission,bool);
     }
 
-    @Override
-    public synchronized void removePermission(String permission) {
-        permissionSet.remove(permission);
+    public void undefinePermission(String permission) {
+        permissionMap.remove(permission);
     }
 }
