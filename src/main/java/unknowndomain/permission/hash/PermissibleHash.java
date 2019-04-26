@@ -1,7 +1,9 @@
-package java.unknowndomain.permission.hash;
+package unknowndomain.permission.hash;
 
-import java.unknowndomain.permission.Permissible;
+import unknowndomain.permission.Permissible;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class PermissibleHash implements Permissible {
@@ -48,5 +50,8 @@ public class PermissibleHash implements Permissible {
         writeLock.unlock();
     }
 
+    public Map<String,Boolean> getPermissionMap(){
+        return Collections.unmodifiableMap(permissionMap);
+    }
 
 }

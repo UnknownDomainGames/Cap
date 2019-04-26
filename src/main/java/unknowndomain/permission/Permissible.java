@@ -1,4 +1,4 @@
-package java.unknowndomain.permission;
+package unknowndomain.permission;
 
 public interface Permissible {
 
