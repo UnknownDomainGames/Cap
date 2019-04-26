@@ -1,4 +1,4 @@
-package java.unknowndomain.permission.tree;
+package java.unknowndomain.permission.hash;
 
 import java.unknowndomain.permission.Permissible;
 import java.util.HashSet;
