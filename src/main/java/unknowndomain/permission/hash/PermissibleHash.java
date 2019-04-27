@@ -37,6 +37,8 @@ public class PermissibleHash implements Permissible {
 
     @Override
     public void definePermission(String permission, boolean bool) {
+        if(permission==null)
+            return;
         ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
         writeLock.lock();
         permissionMap.put(permission, bool);

@@ -26,7 +26,7 @@ public class PermissibleHashTest {
 
         List<String> parentTestPermissions = getRandomPermissions();
         Permissible permissible2 = new PermissibleHash();
-        parentTestPermissions.stream().filter(s->s.indexOf('.')>0).forEach(s->permissible2.definePermission(s,true));
+        parentTestPermissions.stream().filter(s->s.indexOf('.')>0).forEach(s->permissible2.definePermission(s.substring(0,s.indexOf('.')),true));
         parentTestPermissions.stream().filter(s->s.indexOf('.')>0).forEach(s->Assert.assertEquals(permissible2.hasPermission(s),true));
         parentTestPermissions.stream().filter(s->s.indexOf('.')<=0).forEach(s->Assert.assertEquals(permissible2.hasPermission(s),false));
     }
@@ -35,8 +35,7 @@ public class PermissibleHashTest {
         ArrayList<String> permission = new ArrayList<>();
         Random random = new Random(System.currentTimeMillis());
         for(int i = 0;i<100;i++)
-            permission.add(new Double(random.nextDouble()).toString());
-
+            permission.add(new Double(random.nextDouble()).toString()+new Double(random.nextDouble()).toString());
         return permission;
     }
 }
