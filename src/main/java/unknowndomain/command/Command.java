@@ -9,8 +9,6 @@ public abstract class Command {
     private String description;
     private String helpMessage;
 
-
-
     public Command(String name) {
         this(name,"/"+name);
     }

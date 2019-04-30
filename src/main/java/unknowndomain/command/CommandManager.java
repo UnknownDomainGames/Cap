@@ -6,6 +6,10 @@ public abstract class CommandManager {
 
     private static CommandManager instance;
 
+    static {
+        instance = new HashCommandManager();
+    }
+
     public static CommandManager getInstance(){
         return instance;
     }
@@ -13,5 +17,7 @@ public abstract class CommandManager {
     public abstract void registeCommand(Command command);
 
     public abstract void doCommand(CommandSender sender,String command,String[] args);
+
+    public abstract void unregisterCommand(String command);
 
 }
