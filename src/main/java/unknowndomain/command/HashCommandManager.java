@@ -1,6 +1,8 @@
 package unknowndomain.command;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 public class HashCommandManager extends CommandManager {
@@ -13,8 +15,19 @@ public class HashCommandManager extends CommandManager {
     }
 
     @Override
-    public void doCommand(CommandSender sender, String command, String[] args) {
-        Optional.ofNullable(commandHashMap.get(command)).ifPresent(command1 -> command1.execute(sender,args));
+    public boolean doCommand(CommandSender sender, String command, String[] args) {
+        Command command1 = commandHashMap.get(command);
+        if(command1==null)
+            return false;
+        return command1.execute(sender,args);
+    }
+
+    @Override
+    public List<String> getCompletionList(CommandSender sender, String command, String[] args) {
+        Command command1 = commandHashMap.get(command);
+        if(command1==null)
+            return new ArrayList<>();
+        return command1.complete(sender,args);
     }
 
     @Override

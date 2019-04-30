@@ -1,5 +1,6 @@
 package unknowndomain.command;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,7 +24,7 @@ public abstract class Command {
         this.helpMessage = helpMessage;
     }
 
-    public abstract boolean execute(CommandSender executor, String[] args);
+    public abstract boolean execute(CommandSender sender, String[] args);
 
     public String getDescription() {
         return description;
@@ -39,6 +40,10 @@ public abstract class Command {
 
     public void setHelpMessage(String helpMessage) {
         this.helpMessage = helpMessage;
+    }
+
+    public List<String> complete(CommandSender sender, String[] args){
+        return new ArrayList<>();
     }
 
     @Override

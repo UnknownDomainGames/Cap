@@ -1,6 +1,7 @@
 package unknowndomain.command;
 
 import java.util.HashMap;
+import java.util.List;
 
 public abstract class CommandManager {
 
@@ -16,7 +17,9 @@ public abstract class CommandManager {
 
     public abstract void registeCommand(Command command);
 
-    public abstract void doCommand(CommandSender sender,String command,String[] args);
+    public abstract boolean doCommand(CommandSender sender,String command,String[] args);
+
+    public abstract List<String> getCompletionList(CommandSender sender, String command, String[] args);
 
     public abstract void unregisterCommand(String command);
 
