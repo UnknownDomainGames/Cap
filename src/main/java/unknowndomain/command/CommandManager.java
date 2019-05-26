@@ -17,9 +17,9 @@ public abstract class CommandManager {
 
     public abstract void registeCommand(Command command);
 
-    public abstract boolean doCommand(CommandSender sender,String command,String[] args);
+    public abstract CommandResult doCommand(CommandSender sender,String command,String[] args);
 
-    public abstract List<String> getCompletionList(CommandSender sender, String command, String[] args);
+    public abstract List<String> getCompleteList(CommandSender sender, String command, String[] args);
 
     public abstract void unregisterCommand(String command);
 

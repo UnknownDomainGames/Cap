@@ -15,15 +15,15 @@ public class HashCommandManager extends CommandManager {
     }
 
     @Override
-    public boolean doCommand(CommandSender sender, String command, String[] args) {
+    public CommandResult doCommand(CommandSender sender, String command, String[] args) {
         Command command1 = commandHashMap.get(command);
         if(command1==null)
-            return false;
+            return new CommandResult(false,"command does not exist");
         return command1.execute(sender,args);
     }
 
     @Override
-    public List<String> getCompletionList(CommandSender sender, String command, String[] args) {
+    public List<String> getCompleteList(CommandSender sender, String command, String[] args) {
         Command command1 = commandHashMap.get(command);
         if(command1==null)
             return new ArrayList<>();

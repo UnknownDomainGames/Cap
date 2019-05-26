@@ -24,7 +24,7 @@ public abstract class Command {
         this.helpMessage = helpMessage;
     }
 
-    public abstract boolean execute(CommandSender sender, String[] args);
+    public abstract CommandResult execute(CommandSender sender, String[] args);
 
     public String getDescription() {
         return description;
@@ -44,6 +44,10 @@ public abstract class Command {
 
     public List<String> complete(CommandSender sender, String[] args){
         return new ArrayList<>();
+    }
+
+    public String getParameterDescription(CommandSender sender,String[] args){
+        return "";
     }
 
     @Override

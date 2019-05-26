@@ -10,15 +10,14 @@ public class PermissibleHash implements Permissible {
 
     private HashMap<String, Boolean> permissionMap = new HashMap<>();
 
-    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
 
     @Override
     public boolean hasPermission(String permission) {
-        ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
         try {
             if (permission == null || permission.isEmpty())
                 return false;
-            readLock.lock();
+            lock.readLock().lock();
             if (permissionMap.containsKey(permission))
                 return permissionMap.get(permission);
             while(true){
@@ -30,7 +29,7 @@ public class PermissibleHash implements Permissible {
                     return permissionMap.get(permission);
             }
         } finally {
-            readLock.unlock();
+            lock.readLock().unlock();
         }
         return false;
     }
@@ -39,17 +38,15 @@ public class PermissibleHash implements Permissible {
     public void definePermission(String permission, boolean bool) {
         if(permission==null)
             return;
-        ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
-        writeLock.lock();
+        lock.writeLock().lock();
         permissionMap.put(permission, bool);
-        writeLock.unlock();
+        lock.writeLock().unlock();
     }
 
     public void undefinePermission(String permission) {
-        ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
-        writeLock.lock();
+        lock.writeLock().lock();
         permissionMap.remove(permission);
-        writeLock.unlock();
+        lock.writeLock().unlock();
     }
 
     public Map<String,Boolean> getPermissionMap(){
