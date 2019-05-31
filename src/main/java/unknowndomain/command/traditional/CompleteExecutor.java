@@ -4,6 +4,6 @@ import unknowndomain.command.CommandSender;
 
 import java.util.List;
 
-public interface CompletionExecutor {
+public interface CompleteExecutor {
     List<String> complete(CommandSender executor, String label, String[] args);
 }

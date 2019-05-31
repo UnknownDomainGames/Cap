@@ -1,6 +1,7 @@
 package unknowndomain.command.traditional;
 
 import unknowndomain.command.Command;
+import unknowndomain.command.CommandResult;
 import unknowndomain.command.CommandSender;
 
 import java.util.ArrayList;
@@ -10,16 +11,16 @@ import java.util.Optional;
 public class TraditionalCommand extends Command {
 
     private CommandExecutor executer;
-    private CompletionExecutor completionExecutor;
+    private CompleteExecutor completionExecutor;
 
     public TraditionalCommand(String name) {
         super(name);
     }
 
     @Override
-    public boolean execute(CommandSender executor, String[] args) {
+    public CommandResult execute(CommandSender executor, String[] args) {
         if(executer==null)
-            return false;
+            return new CommandResult(false,"no execute in "+this.name);
         return executer.execute(executor,this.name,args);
     }
 
@@ -27,7 +28,7 @@ public class TraditionalCommand extends Command {
         this.executer = executer;
     }
 
-    public void setCompletionExecutor(CompletionExecutor completionExecutor) {
+    public void setCompletionExecutor(CompleteExecutor completionExecutor) {
         this.completionExecutor = completionExecutor;
     }
 

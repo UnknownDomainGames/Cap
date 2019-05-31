@@ -15,11 +15,13 @@ public abstract class CommandManager {
         return instance;
     }
 
-    public abstract void registeCommand(Command command);
+    public abstract void registerCommand(Command command);
 
-    public abstract boolean doCommand(CommandSender sender,String command,String[] args);
+    public abstract CommandResult doCommand(CommandSender sender,String command,String... args);
 
-    public abstract List<String> getCompletionList(CommandSender sender, String command, String[] args);
+    public abstract Command getCommand(String command);
+
+    public abstract List<String> getCompleteList(CommandSender sender, String command, String... args);
 
     public abstract void unregisterCommand(String command);
 
