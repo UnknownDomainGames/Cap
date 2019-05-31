@@ -1,10 +1,10 @@
 package unknowndomain.command.exception;
 
-public class DontHavePermissionException extends CommandException{
+public class PermissionNotEnoughException extends CommandException{
 
     private String permission;
 
-    public DontHavePermissionException(String command, String permission) {
+    public PermissionNotEnoughException(String command, String permission) {
         super(command);
         this.permission = permission;
     }

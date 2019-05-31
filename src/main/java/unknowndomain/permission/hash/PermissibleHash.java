@@ -35,7 +35,7 @@ public class PermissibleHash implements Permissible {
     }
 
     @Override
-    public void definePermission(String permission, boolean bool) {
+    public void setPermission(String permission, boolean bool) {
         if(permission==null)
             return;
         lock.writeLock().lock();
@@ -43,7 +43,7 @@ public class PermissibleHash implements Permissible {
         lock.writeLock().unlock();
     }
 
-    public void undefinePermission(String permission) {
+    public void removePermission(String permission) {
         lock.writeLock().lock();
         permissionMap.remove(permission);
         lock.writeLock().unlock();

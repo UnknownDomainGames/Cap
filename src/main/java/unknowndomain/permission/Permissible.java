@@ -4,8 +4,8 @@ public interface Permissible {
 
     boolean hasPermission(String permission);
 
-    void definePermission(String permission, boolean bool);
+    void setPermission(String permission, boolean bool);
 
-    void undefinePermission(String permission);
+    void removePermission(String permission);
 
 }

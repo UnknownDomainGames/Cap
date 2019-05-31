@@ -1,8 +1,9 @@
 package unknowndomain.command.traditional;
 
+import unknowndomain.command.Command;
 import unknowndomain.command.CommandResult;
 import unknowndomain.command.CommandSender;
 
 public interface CommandExecutor {
-    CommandResult execute(CommandSender executor, String label, String[] args);
+    CommandResult execute(CommandSender executor, Command command, String[] args);
 }

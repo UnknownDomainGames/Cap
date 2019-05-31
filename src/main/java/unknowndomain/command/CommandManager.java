@@ -1,6 +1,5 @@
 package unknowndomain.command;
 
-import java.util.HashMap;
 import java.util.List;
 
 public abstract class CommandManager {
@@ -17,7 +16,7 @@ public abstract class CommandManager {
 
     public abstract void registerCommand(Command command);
 
-    public abstract CommandResult doCommand(CommandSender sender,String command,String... args);
+    public abstract CommandResult executeCommand(CommandSender sender, String command, String... args);
 
     public abstract Command getCommand(String command);
 

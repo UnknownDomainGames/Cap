@@ -1,26 +1,26 @@
 package unknowndomain.command;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class HashCommandManager extends CommandManager {
 
-    private HashMap<String, Command> commandHashMap = new HashMap<>();
+    private Map<String, Command> commandHashMap = new HashMap<>();
 
+    // TODO: Remove it.
     private WeakHashMap<String, List<String>> completeCacheMap = new WeakHashMap<>();
 
     @Override
     public void registerCommand(Command command) {
-        if(commandHashMap.containsKey(command.name))
-            throw new RuntimeException("command: "+command.name+" already exist");
+        if (commandHashMap.containsKey(command.name))
+            throw new RuntimeException("command: " + command.name + " already exist");
         commandHashMap.put(command.name, command);
     }
 
     @Override
-    public CommandResult doCommand(CommandSender sender, String command, String[] args) {
+    public CommandResult executeCommand(CommandSender sender, String command, String[] args) {
+        // TODO: executeCommand(CommandSender sender, String command)
+        // TODO: parse command
         Command command1 = commandHashMap.get(command);
         if (command1 == null)
             return new CommandResult(false, "command does not exist");
@@ -55,6 +55,5 @@ public class HashCommandManager extends CommandManager {
     public void unregisterCommand(String command) {
         commandHashMap.remove(command);
     }
-
 
 }

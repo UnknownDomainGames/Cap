@@ -13,17 +13,17 @@ public class Argument {
 
     private Class handleClass;
 
-    private BiFunction<CommandSender,String,Object> handleFunction;
+    private BiFunction<CommandSender, String, Object> handleFunction;
 
     public Argument(Class handleClass, BiFunction<CommandSender, String, Object> handleFunction) {
-        this(handleClass,handleFunction,handleClass.getName());
+        this(handleClass, handleFunction, handleClass.getName());
     }
 
-    public Argument(Class handleClass, BiFunction<CommandSender, String, Object> handleFunction,String argumentName) {
-        this(handleClass,handleFunction,argumentName,argumentName);
+    public Argument(Class handleClass, BiFunction<CommandSender, String, Object> handleFunction, String argumentName) {
+        this(handleClass, handleFunction, argumentName, argumentName);
     }
 
-    public Argument( Class handleClass, BiFunction<CommandSender, String, Object> handleFunction,String argumentName, String desc) {
+    public Argument(Class handleClass, BiFunction<CommandSender, String, Object> handleFunction, String argumentName, String desc) {
         this.argumentName = argumentName;
         this.desc = desc;
         this.handleClass = handleClass;

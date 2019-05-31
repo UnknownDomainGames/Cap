@@ -2,42 +2,38 @@ package unknowndomain.command;
 
 public class CommandResult {
 
-    public final boolean success;
-
-    private String message;
-
-    private Throwable throwable;
+    private final boolean success;
+    private final String message;
+    private final Throwable cause;
 
     public CommandResult(boolean success) {
-        this.success = success;
+        this(success, (String) null);
     }
 
     public CommandResult(boolean success, String message) {
-        this.success = success;
-        this.message = message;
+        this(success, message, null);
     }
 
-    public CommandResult(boolean success, Throwable throwable) {
-        this.success = success;
-        this.throwable = throwable;
+    public CommandResult(boolean success, Throwable cause) {
+        this(success, null, cause);
     }
 
-    public CommandResult(boolean success, String message, Throwable throwable) {
+    public CommandResult(boolean success, String message, Throwable cause) {
         this.success = success;
         this.message = message;
-        this.throwable = throwable;
+        this.cause = cause;
+    }
+
+    public boolean isSuccess() {
+        return success;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public Throwable getThrowable(){
-        return throwable;
+    public Throwable getCause() {
+        return cause;
     }
 
     @Override
@@ -45,7 +41,7 @@ public class CommandResult {
         return "CommandResult{" +
                 "success=" + success +
                 ", message='" + message + '\'' +
-                ", throwable=" + throwable +
+                ", cause=" + cause +
                 '}';
     }
 }
