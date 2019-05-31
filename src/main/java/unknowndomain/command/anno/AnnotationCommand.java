@@ -42,15 +42,16 @@ public class AnnotationCommand extends Command {
 
         Object handleMethodSender;
 
+        List<Object> handleMethodArgument = new ArrayList<>();
+
         if (commandSenderClass == null) {
             handleMethodSender = null;
         } else {
             handleMethodSender = commandSenderClass.cast(sender);
+            handleMethodArgument.add(handleMethodSender);
         }
 
-        List<Object> handleMethodArgument = new ArrayList<>();
 
-        handleMethodArgument.add(handleMethodSender);
 
         for (int i = 0; i < arguments.size(); i++) {
             handleMethodArgument.add(arguments.get(i).getHandleFunction().apply(sender, args[i]));
@@ -106,7 +107,7 @@ public class AnnotationCommand extends Command {
 
     @Override
     public String getHelpMessage() {
-        if(helpMessage==null)
+        if (helpMessage == null)
             return super.getHelpMessage();
         else return helpMessage;
     }
@@ -116,7 +117,7 @@ public class AnnotationCommand extends Command {
         this.helpMessage = helpMessage;
     }
 
-    protected void appendArgument(Argument argument){
+    protected void appendArgument(Argument argument) {
         this.arguments.add(argument);
     }
 }
