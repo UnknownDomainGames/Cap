@@ -1,41 +1,122 @@
 package unknowndomain.command.anno;
 
 import unknowndomain.command.Command;
+import unknowndomain.command.CommandResult;
 import unknowndomain.command.CommandSender;
+import unknowndomain.command.argument.Argument;
+import unknowndomain.command.completion.CompleteManager;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-public abstract class AnnotationCommand extends Command {
+public class AnnotationCommand extends Command {
 
-    private HashSet<CommandArgument> parameters = new HashSet<>();
+    private final Object instance;
 
-    public AnnotationCommand(String name) {
+    private final Class<? extends CommandSender> commandSenderClass;
+
+    private final List<Argument> arguments = new ArrayList<>();
+
+    private final Method handlerMethod;
+
+    private String desc;
+
+    private String helpMessage;
+
+
+    public AnnotationCommand(String name, Object instance, Class<? extends CommandSender> commandSenderClass, Method handlerMethod, String desc, String helpMessage) {
         super(name);
+        this.instance = instance;
+        this.commandSenderClass = commandSenderClass;
+        this.handlerMethod = handlerMethod;
+        this.desc = desc;
+        this.helpMessage = helpMessage;
     }
 
-    public void registerCommand(Class clazz){
-        for(Method method : clazz.getMethods()){
 
-            unknowndomain.command.anno.Command anno =  method.getAnnotation(unknowndomain.command.anno.Command.class);
-            if(anno!=null){
-                Class[] methodParameters = method.getParameterTypes();
-                ArrayList list = new ArrayList<>();
-                Collections.addAll(list, Arrays.copyOfRange(methodParameters,1,methodParameters.length));
-                parameters.add(new CommandArgument(list,method));
-            }
+    @Override
+    public CommandResult execute(CommandSender sender, String[] args) {
+        CommandResult result;
+
+        Object handleMethodSender;
+
+        if (commandSenderClass == null) {
+            handleMethodSender = null;
+        } else {
+            handleMethodSender = commandSenderClass.cast(sender);
         }
+
+        List<Object> handleMethodArgument = new ArrayList<>();
+
+        handleMethodArgument.add(handleMethodSender);
+
+        for (int i = 0; i < arguments.size(); i++) {
+            handleMethodArgument.add(arguments.get(i).getHandleFunction().apply(sender, args[i]));
+        }
+
+        try {
+            if (handleMethodSender == null) {
+                Object o = handlerMethod.invoke(instance, handleMethodArgument.toArray());
+                if (o instanceof CommandResult)
+                    result = (CommandResult) o;
+                else if (o instanceof Boolean) {
+                    result = new CommandResult((Boolean) o);
+                } else
+                    result = new CommandResult(true);
+            } else {
+                Object o = handlerMethod.invoke(instance, handleMethodArgument.toArray());
+                if (o instanceof CommandResult)
+                    result = (CommandResult) o;
+                else if (o instanceof Boolean) {
+                    result = new CommandResult((Boolean) o);
+                } else
+                    result = new CommandResult(true);
+            }
+        } catch (Exception exception) {
+            result = new CommandResult(false, exception);
+        }
+
+        return result;
     }
 
     @Override
-    public boolean execute(CommandSender sender, String[] args) {
+    public List<String> complete(CommandSender sender, String[] args) {
+        int completeIndex = 0;
 
+        if (args != null && args.length != 0) {
+            completeIndex = args.length - 1;
+        }
 
-
-        return false;
+        return CompleteManager.complete(sender, this.arguments.get(completeIndex).getHandleClass());
     }
 
-    public List<List<Class>> getAllMethodPath(){
+    @Override
+    public String getDescription() {
+        if (desc == null)
+            return super.getDescription();
+        else return desc;
+    }
 
+    @Override
+    public void setDescription(String description) {
+        this.desc = description;
+    }
+
+    @Override
+    public String getHelpMessage() {
+        if(helpMessage==null)
+            return super.getHelpMessage();
+        else return helpMessage;
+    }
+
+    @Override
+    public void setHelpMessage(String helpMessage) {
+        this.helpMessage = helpMessage;
+    }
+
+    protected void appendArgument(Argument argument){
+        this.arguments.add(argument);
     }
 }

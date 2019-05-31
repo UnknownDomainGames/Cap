@@ -7,4 +7,6 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Sender {}
+public @interface ArgumentHandler {
+    String value();
+}

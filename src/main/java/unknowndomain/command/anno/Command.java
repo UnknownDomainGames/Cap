@@ -9,4 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Command {
     String value();
+
+    String desc() default "";
+    String helpMessage() default "";
 }
