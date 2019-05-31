@@ -1,0 +1,14 @@
+# Gradle
+.gradle/
+
+# Idea
+.idea/
+out/
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Java
+*.class
