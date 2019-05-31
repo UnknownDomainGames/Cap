@@ -21,6 +21,11 @@ public class AnnotationCommandManager {
                 continue;
             }
 
+            Permission permission = method.getAnnotation(Permission.class);
+            String[] permissions = new String[0];
+            if (permission != null)
+                permissions = permission.value();
+
             String commandName = command.value();
             String desc = command.desc();
             String helpMessage = command.helpMessage();
@@ -75,7 +80,13 @@ public class AnnotationCommandManager {
                 }
 
                 AnnotationCommand annotationCommand = new AnnotationCommand(commandName, commandHandler, senderClass, method, desc, helpMessage);
+
                 arguments.forEach(argument -> annotationCommand.appendArgument(argument));
+
+                if (parameters != null && permissions.length >= 0)
+                    for (String permission1 : permissions)
+                        annotationCommand.appendPermission(permission1);
+
                 CommandManager.getInstance().registerCommand(annotationCommand);
             }
         }
@@ -95,7 +106,7 @@ public class AnnotationCommandManager {
         if (markedClass.equals(Object.class)) {
             return false;
         }
-        if(markedClass.equals(clazz))
+        if (markedClass.equals(clazz))
             return true;
 
         for (Class interfaceClass : markedClass.getInterfaces()) {

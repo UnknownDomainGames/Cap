@@ -3,6 +3,7 @@ package main;
 import unknowndomain.command.CommandResult;
 import unknowndomain.command.CommandSender;
 import unknowndomain.command.anno.Command;
+import unknowndomain.command.anno.Permission;
 import unknowndomain.command.anno.Sender;
 
 public class AnnotationCommandClass {
@@ -24,6 +25,12 @@ public class AnnotationCommandClass {
 
     @Command(value = "annotationCommandVoid",desc = "desc",helpMessage = "test help")
     public void voidMethod(@Sender CommandSender sender, String text){
+
+    }
+
+    @Command(value = "annotationCommandPermission",desc = "desc",helpMessage = "test help")
+    @Permission("testPermission")
+    public void PermissionMethod(@Sender CommandSender sender, String text){
 
     }
 

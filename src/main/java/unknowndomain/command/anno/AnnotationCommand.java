@@ -5,6 +5,7 @@ import unknowndomain.command.CommandResult;
 import unknowndomain.command.CommandSender;
 import unknowndomain.command.argument.Argument;
 import unknowndomain.command.completion.CompleteManager;
+import unknowndomain.command.exception.DontHavePermissionException;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -25,6 +26,8 @@ public class AnnotationCommand extends Command {
 
     private String helpMessage;
 
+    private List<String> permissions = new ArrayList<>();
+
 
     public AnnotationCommand(String name, Object instance, Class<? extends CommandSender> commandSenderClass, Method handlerMethod, String desc, String helpMessage) {
         super(name);
@@ -38,6 +41,10 @@ public class AnnotationCommand extends Command {
 
     @Override
     public CommandResult execute(CommandSender sender, String[] args) {
+
+        for(String permission : permissions)
+            if(!sender.hasPermission(permission))
+                return new CommandResult(false,new DontHavePermissionException(this.name,permission));
         CommandResult result;
 
         Object handleMethodSender;
@@ -50,8 +57,6 @@ public class AnnotationCommand extends Command {
             handleMethodSender = commandSenderClass.cast(sender);
             handleMethodArgument.add(handleMethodSender);
         }
-
-
 
         for (int i = 0; i < arguments.size(); i++) {
             handleMethodArgument.add(arguments.get(i).getHandleFunction().apply(sender, args[i]));
@@ -119,5 +124,9 @@ public class AnnotationCommand extends Command {
 
     protected void appendArgument(Argument argument) {
         this.arguments.add(argument);
+    }
+
+    protected void appendPermission(String permission){
+        this.permissions.add(permission);
     }
 }

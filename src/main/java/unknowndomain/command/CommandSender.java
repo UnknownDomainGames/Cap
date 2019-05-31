@@ -1,6 +1,8 @@
 package unknowndomain.command;
 
-public interface CommandSender {
+import unknowndomain.permission.Permissible;
+
+public interface CommandSender extends Permissible {
 
     void sendMessage(String message);
 
