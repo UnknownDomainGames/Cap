@@ -9,6 +9,11 @@ public class PermissionNotEnoughException extends CommandException{
         this.permission = permission;
     }
 
+    @Override
+    public String getMessage() {
+        return "command: "+command+" permission: "+permission;
+    }
+
     public String getPermission(){
         return permission;
     }

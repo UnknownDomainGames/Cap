@@ -4,16 +4,16 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import unknowndomain.permission.Permissible;
-import unknowndomain.permission.hash.PermissibleHash;
+import unknowndomain.permission.hash.HashPermissible;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class PermissibleHashTest {
+public class HashPermissibleTest {
 
     @Test
     public void permissibleTest() {
-        Permissible permissible = new PermissibleHash();
+        Permissible permissible = new HashPermissible();
         List<String> truePermissions = getRandomPermissions();
         List<String> falsePermissions = getRandomPermissions();
 
@@ -25,7 +25,7 @@ public class PermissibleHashTest {
         truePermissions.forEach(permission->Assert.assertEquals(permissible.hasPermission(permission),true));
 
         List<String> parentTestPermissions = getRandomPermissions();
-        Permissible permissible2 = new PermissibleHash();
+        Permissible permissible2 = new HashPermissible();
         parentTestPermissions.stream().filter(s->s.indexOf('.')>0).forEach(s->permissible2.setPermission(s.substring(0,s.indexOf('.')),true));
         parentTestPermissions.stream().filter(s->s.indexOf('.')>0).forEach(s->Assert.assertEquals(permissible2.hasPermission(s),true));
         parentTestPermissions.stream().filter(s->s.indexOf('.')<=0).forEach(s->Assert.assertEquals(permissible2.hasPermission(s),false));

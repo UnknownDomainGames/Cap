@@ -1,5 +1,7 @@
 package unknowndomain.command;
 
+import unknowndomain.command.argument.SimpleArgumentManager;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -10,6 +12,8 @@ public class HashCommandManager extends CommandManager {
     // TODO: Remove it.
     private WeakHashMap<String, List<String>> completeCacheMap = new WeakHashMap<>();
 
+    private SimpleArgumentManager argumentManager = new SimpleArgumentManager();
+
     @Override
     public void registerCommand(Command command) {
         if (commandHashMap.containsKey(command.name))
@@ -18,12 +22,15 @@ public class HashCommandManager extends CommandManager {
     }
 
     @Override
-    public CommandResult executeCommand(CommandSender sender, String command, String[] args) {
+    public CommandResult executeCommand(CommandSender sender, String command, String... args) {
         // TODO: executeCommand(CommandSender sender, String command)
         // TODO: parse command
         Command command1 = commandHashMap.get(command);
         if (command1 == null)
             return new CommandResult(false, "command does not exist");
+
+        if(args==null)
+            args = new String[0];
         return command1.execute(sender, args);
     }
 
@@ -33,7 +40,7 @@ public class HashCommandManager extends CommandManager {
     }
 
     @Override
-    public List<String> getCompleteList(CommandSender sender, String command, String[] args) {
+    public List<String> getCompleteList(CommandSender sender, String command, String... args) {
 
         if (args == null || args.length == 0) {
             if (completeCacheMap.containsKey(command)) {
@@ -56,4 +63,8 @@ public class HashCommandManager extends CommandManager {
         commandHashMap.remove(command);
     }
 
+    @Override
+    public SimpleArgumentManager getArgumentManager() {
+        return argumentManager;
+    }
 }

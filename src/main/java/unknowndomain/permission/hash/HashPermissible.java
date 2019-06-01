@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class PermissibleHash implements Permissible {
+public class HashPermissible implements Permissible {
 
     private HashMap<String, Boolean> permissionMap = new HashMap<>();
 

@@ -1,36 +1,16 @@
 package unknowndomain.command.argument;
 
-import java.util.HashMap;
+public interface ArgumentManager {
 
-public class ArgumentManager {
+    void setClassDefaultArgument(Argument argument);
 
-    private static HashMap<Class, Argument> argumentByClass = new HashMap<>();
-    private static HashMap<String, Argument> argumentByName = new HashMap<>();
+    void appendArgument(Argument argument);
 
-    public static void setClassArgument(Argument argument) {
-        if (argumentByName.containsKey(argument.getArgumentName()))
-            throw new RuntimeException(argument.getArgumentName() + " already exist");
+    void removeArgument(Argument argument);
 
-        argumentByClass.put(argument.getHandleClass(), argument);
-        argumentByName.put(argument.getArgumentName(), argument);
-    }
+    void removeArgument(String argumentName);
 
-    public static void appendArgument(Argument argument) {
-        if (argumentByName.containsKey(argument.getArgumentName()))
-            throw new RuntimeException(argument.getArgumentName() + " already exist");
-        argumentByName.put(argument.getArgumentName(), argument);
-    }
+    Argument getArgument(Class clazz);
 
-    public static Argument getArgumentByClass(Class clazz) {
-        return argumentByClass.get(clazz);
-    }
-
-    public static Argument getArgumentByName(String argumentName) {
-        return argumentByName.get(argumentName);
-    }
-
-    public static void unregisterArgument(String argumentName) {
-        argumentByName.remove(argumentName);
-    }
-
+    Argument getArgument(String argumentName);
 }
