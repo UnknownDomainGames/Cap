@@ -9,8 +9,6 @@ public class HashCommandManager extends CommandManager {
 
     private Map<String, Command> commandHashMap = new HashMap<>();
 
-    private SimpleArgumentManager argumentManager = new SimpleArgumentManager();
-
     @Override
     public void registerCommand(Command command) {
         if (commandHashMap.containsKey(command.name))
@@ -51,10 +49,5 @@ public class HashCommandManager extends CommandManager {
     @Override
     public void unregisterCommand(String command) {
         commandHashMap.remove(command);
-    }
-
-    @Override
-    public SimpleArgumentManager getArgumentManager() {
-        return argumentManager;
     }
 }

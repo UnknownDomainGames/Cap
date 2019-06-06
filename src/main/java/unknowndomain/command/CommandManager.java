@@ -16,6 +16,4 @@ public abstract class CommandManager {
 
     public abstract void unregisterCommand(String command);
 
-    public abstract SimpleArgumentManager getArgumentManager();
-
 }

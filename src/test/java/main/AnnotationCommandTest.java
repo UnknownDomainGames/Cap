@@ -11,6 +11,7 @@ import unknowndomain.command.anno.Command;
 import unknowndomain.command.anno.Sender;
 import unknowndomain.command.argument.Argument;
 import unknowndomain.command.argument.MultiArgument;
+import unknowndomain.command.argument.SimpleArgumentManager;
 import unknowndomain.permission.Permissible;
 import unknowndomain.permission.hash.HashPermissible;
 
@@ -27,15 +28,16 @@ public class AnnotationCommandTest {
 
         HashCommandManager commandManager = new HashCommandManager();
 
+        SimpleArgumentManager simpleArgumentManager = new SimpleArgumentManager();
 
         //TODO input message test
-        commandManager.getArgumentManager().appendArgument(new MultiArgument(data.class,"data") {
+        simpleArgumentManager.appendArgument(new MultiArgument(data.class,"data") {
 
             @Override
             public Collection<SupportArguments> getSupportArgumentsOrders() {
                 ArrayList<Argument> arguments = new ArrayList<>();
-                arguments.add(commandManager.getArgumentManager().getArgument(Integer.class));
-                arguments.add(commandManager.getArgumentManager().getArgument(String.class));
+                arguments.add(simpleArgumentManager.getArgument(Integer.class));
+                arguments.add(simpleArgumentManager.getArgument(String.class));
                 SupportArguments supportArguments = new SupportArguments(arguments,objects -> new data((Integer) objects.get(0),(String)objects.get(1)));
                 ArrayList<SupportArguments> list = new ArrayList<>();
                 list.add(supportArguments);
@@ -45,13 +47,13 @@ public class AnnotationCommandTest {
             @Override
             public List<Argument> recommendInputArguments() {
                 ArrayList<Argument> arguments = new ArrayList<>();
-                arguments.add(commandManager.getArgumentManager().getArgument(Integer.class));
-                arguments.add(commandManager.getArgumentManager().getArgument(String.class));
+                arguments.add(simpleArgumentManager.getArgument(Integer.class));
+                arguments.add(simpleArgumentManager.getArgument(String.class));
                 return arguments;
             }
         });
 
-        AnnotationCommand.as(commandManager.getArgumentManager(), this).forEach(command -> commandManager.registerCommand(command));
+        AnnotationCommand.as(simpleArgumentManager, this).forEach(command -> commandManager.registerCommand(command));
 
         CommandSender sender = new CommandSender() {
             @Override
