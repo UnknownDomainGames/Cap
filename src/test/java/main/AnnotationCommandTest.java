@@ -1,6 +1,7 @@
 package main;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import unknowndomain.command.CommandResult;
 import unknowndomain.command.CommandSender;
@@ -10,12 +11,10 @@ import unknowndomain.command.anno.Command;
 import unknowndomain.command.anno.Sender;
 import unknowndomain.command.argument.Argument;
 import unknowndomain.command.argument.MultiArgument;
-import unknowndomain.command.argument.ParseResult;
 import unknowndomain.permission.Permissible;
 import unknowndomain.permission.hash.HashPermissible;
 
 import java.util.*;
-import java.util.function.Function;
 
 public class AnnotationCommandTest {
 
@@ -31,26 +30,18 @@ public class AnnotationCommandTest {
         commandManager.getArgumentManager().appendArgument(new MultiArgument(data.class,"data") {
 
             @Override
-            public Set<Map<List<Argument>, Function<List<Object>, Object>>> getSupportArgumentOrder() {
-
-                HashSet<Map<List<Argument>, Function<List<Object>, Object>>> set = new HashSet<>();
-
-                HashMap<List<Argument>, Function<List<Object>, Object>> map = new HashMap();
-
-                ArrayList<Argument> list = new ArrayList();
-
-                list.add(commandManager.getArgumentManager().getArgument(String.class));
-                list.add(commandManager.getArgumentManager().getArgument(Integer.class));
-
-                map.put(list,objects -> new data((int)objects.get(1),(String)objects.get(0)));
-
-                set.add(map);
-
-                return set;
+            public Collection<SupportArguments> getSupportArgumentsOrders() {
+                ArrayList<Argument> arguments = new ArrayList<>();
+                arguments.add(commandManager.getArgumentManager().getArgument(Integer.class));
+                arguments.add(commandManager.getArgumentManager().getArgument(String.class));
+                SupportArguments supportArguments = new SupportArguments(arguments,objects -> new data((Integer) objects.get(0),(String)objects.get(1)));
+                ArrayList<SupportArguments> list = new ArrayList<>();
+                list.add(supportArguments);
+                return list;
             }
 
             @Override
-            public List<Argument> defaultArgument() {
+            public List<Argument> recommendInputArguments() {
                 return null;
             }
         });
@@ -105,8 +96,7 @@ public class AnnotationCommandTest {
         Assert.assertTrue(!result6.isSuccess());
 
 
-
-        CommandResult result7 = commandManager.executeCommand(sender, "data","test","1");
+        CommandResult result7 = commandManager.executeCommand(sender, "data","1","test");
 
         Assert.assertEquals("test1", result7.getMessage());
     }
@@ -136,8 +126,6 @@ public class AnnotationCommandTest {
     public CommandResult resultCommand(data data) {
         return new CommandResult(true, data.s+data.i);
     }
-
-
 
 
     private class data {

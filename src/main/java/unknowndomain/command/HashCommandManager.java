@@ -9,9 +9,6 @@ public class HashCommandManager extends CommandManager {
 
     private Map<String, Command> commandHashMap = new HashMap<>();
 
-    // TODO: Remove it.
-    private WeakHashMap<String, List<String>> completeCacheMap = new WeakHashMap<>();
-
     private SimpleArgumentManager argumentManager = new SimpleArgumentManager();
 
     @Override
@@ -23,13 +20,11 @@ public class HashCommandManager extends CommandManager {
 
     @Override
     public CommandResult executeCommand(CommandSender sender, String command, String... args) {
-        // TODO: executeCommand(CommandSender sender, String command)
-        // TODO: parse command
         Command command1 = commandHashMap.get(command);
         if (command1 == null)
             return new CommandResult(false, "command does not exist");
 
-        if(args==null)
+        if (args == null)
             args = new String[0];
         return command1.execute(sender, args);
     }
@@ -43,13 +38,8 @@ public class HashCommandManager extends CommandManager {
     public List<String> getCompleteList(CommandSender sender, String command, String... args) {
 
         if (args == null || args.length == 0) {
-            if (completeCacheMap.containsKey(command)) {
-                return completeCacheMap.get(command);
-            } else {
-                List list = commandHashMap.keySet().stream().filter(commandName -> commandName.startsWith(command)).collect(Collectors.toList());
-                completeCacheMap.put(command, list);
-                return list;
-            }
+            List list = commandHashMap.keySet().stream().filter(commandName -> commandName.startsWith(command)).collect(Collectors.toList());
+            return list;
         }
 
         Command command1 = commandHashMap.get(command);

@@ -25,7 +25,7 @@ public class TraditionalCommand extends Command {
     @Override
     public CommandResult execute(CommandSender executor, String[] args) {
         if (this.executor == null)
-            return new CommandResult(false, "no execute in " + this.name);
+            return new CommandResult(false, "no executor in " + this.name);
         return this.executor.execute(executor, this, args);
     }
 

@@ -3,6 +3,7 @@ package unknowndomain.command.argument;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public abstract class MultiArgument implements Argument {
 
@@ -16,64 +17,80 @@ public abstract class MultiArgument implements Argument {
     }
 
     @Override
-    public String getName() {
+    public final String getName() {
         return argumentName;
     }
 
     @Override
-    public Class responsibleClass() {
+    public final Class responsibleClass() {
         return responsibleClass;
     }
 
     @Override
     public ParseResult parseArgs(String[] args) {
-        ParseResult result = new ParseResult(null, 1, true);
-        Set<Map<List<Argument>, Function<List<Object>, Object>>> supportArguments = getSupportArgumentOrder();
-        parseResultLoop:
-        for (Map<List<Argument>, Function<List<Object>, Object>> arguments : supportArguments) {
-            if (arguments.size() > args.length)
+        ParseResult result = new ParseResult(null, 0, true);
+        Collection<SupportArguments> supportArguments = getSupportArgumentsOrders();
+
+        for (SupportArguments entry : supportArguments) {
+            List<? extends Argument> argumentList = entry.arguments;
+
+            if (argumentList.size() > args.length)
                 continue;
-            Set<Map.Entry<List<Argument>, Function<List<Object>, Object>>> entrySet = arguments.entrySet();
 
-            entryLoop:
-            for (Map.Entry<List<Argument>, Function<List<Object>, Object>> entry : entrySet) {
-                List<ParseResult> parseResults = tryParse(entry.getKey(), args);
-                for (ParseResult parseResult : parseResults) {
-                    if (parseResult.fail)
-                        break entryLoop;
-                }
+            List<ParseResult> parseResults = tryParse(argumentList, args);
 
-                ArrayList<Object> arrayList = new ArrayList<>();
+            //TODO fail message support
+            if (hasAnyFail(parseResults))
+                continue;
 
-                for(ParseResult parseResult : parseResults){
-                    arrayList.add(parseResult.result);
-                }
+            int usedCount = parseResults.stream().flatMapToInt(parseResult -> IntStream.of(parseResult.uesdArgsNum)).sum();
+            result = new ParseResult(entry.instanceFunction
+                    .apply(parseResults.stream().map(parseResult -> parseResult.result).collect(Collectors.toList()))
+                    , usedCount, false);
+            break;
+        }
 
-                result = new ParseResult(entry.getValue().apply(arrayList), entry.getKey().size(), false);
-                break parseResultLoop;
-            }
+        return result;
+    }
+
+    private List<ParseResult> tryParse(List<? extends Argument> arguments, String[] args) {
+        ArrayList<ParseResult> result = new ArrayList();
+        int index = 0;
+        for (int i = 0; i < arguments.size(); i++) {
+            ParseResult parseResult = arguments.get(i).parseArgs(Arrays.copyOfRange(args, index, args.length));
+            result.add(parseResult);
+            index += parseResult.uesdArgsNum;
         }
         return result;
     }
 
-    public List<ParseResult> tryParse(List<Argument> arguments, String[] args) {
-        ArrayList<ParseResult> result = new ArrayList();
-        int index = 0;
-        for (int i = 0; i < arguments.size(); i++) {
-            ParseResult parseResult = arguments.get(i).parseArgs(Arrays.copyOfRange(args,index,args.length));
-            result.add(parseResult);
-            index+=parseResult.uesdArgsNum;
+    private static boolean hasAnyFail(List<ParseResult> parseResults) {
+        for (ParseResult parseResult : parseResults) {
+            if (parseResult.fail)
+                return true;
         }
-        return result;
+        return false;
     }
 
     @Override
     public String getInputHelp() {
-        return defaultArgument().stream().map(Argument::getInputHelp).reduce((s, s2) -> s + " " + s2).get();
+        return recommendInputArguments().stream().map(Argument::getInputHelp).reduce((s, s2) -> s + " " + s2).get();
     }
 
-    public abstract Set<Map<List<Argument>, Function<List<Object>, Object>>> getSupportArgumentOrder();
+    public abstract Collection<SupportArguments> getSupportArgumentsOrders();
 
-    public abstract List<Argument> defaultArgument();
+    public abstract List<Argument> recommendInputArguments();
+
+    public class SupportArguments {
+
+        public final List<? extends Argument> arguments;
+
+        public final Function<List<? extends Object>, Object> instanceFunction;
+
+        public SupportArguments(List<? extends Argument> arguments, Function<List<? extends Object>, Object> instanceFunction) {
+            this.arguments = arguments;
+            this.instanceFunction = instanceFunction;
+        }
+    }
 
 }
