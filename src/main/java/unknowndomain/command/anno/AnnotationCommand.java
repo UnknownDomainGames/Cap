@@ -40,6 +40,8 @@ public class AnnotationCommand extends Command {
         this.helpMessage = helpMessage;
     }
 
+    //TODO custom annotation api
+
     @Override
     public CommandResult execute(CommandSender sender, String[] args) {
         if (!hasPermission(sender.getPermissible()))

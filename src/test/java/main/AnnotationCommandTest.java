@@ -27,6 +27,8 @@ public class AnnotationCommandTest {
 
         HashCommandManager commandManager = new HashCommandManager();
 
+
+        //TODO input message test
         commandManager.getArgumentManager().appendArgument(new MultiArgument(data.class,"data") {
 
             @Override
@@ -42,7 +44,10 @@ public class AnnotationCommandTest {
 
             @Override
             public List<Argument> recommendInputArguments() {
-                return null;
+                ArrayList<Argument> arguments = new ArrayList<>();
+                arguments.add(commandManager.getArgumentManager().getArgument(Integer.class));
+                arguments.add(commandManager.getArgumentManager().getArgument(String.class));
+                return arguments;
             }
         });
 
