@@ -1,7 +1,6 @@
 package main;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import unknowndomain.command.CommandResult;
 import unknowndomain.command.CommandSender;
@@ -12,16 +11,16 @@ import unknowndomain.command.anno.Sender;
 import unknowndomain.command.argument.Argument;
 import unknowndomain.command.argument.MultiArgument;
 import unknowndomain.command.argument.SimpleArgumentManager;
+import unknowndomain.command.completion.CompleteManager;
+import unknowndomain.command.completion.SimpleCompleteManager;
+import unknowndomain.permission.HashPermissible;
 import unknowndomain.permission.Permissible;
-import unknowndomain.permission.hash.HashPermissible;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class AnnotationCommandTest {
-
-    String text = "test";
-
-    boolean testBoolean = false;
 
     @Test
     public void test() {
@@ -30,36 +29,12 @@ public class AnnotationCommandTest {
 
         SimpleArgumentManager simpleArgumentManager = new SimpleArgumentManager();
 
-        //TODO input message test
-        simpleArgumentManager.appendArgument(new MultiArgument(data.class,"data") {
-
-            @Override
-            public Collection<SupportArguments> getSupportArgumentsOrders() {
-                ArrayList<Argument> arguments = new ArrayList<>();
-                arguments.add(simpleArgumentManager.getArgument(Integer.class));
-                arguments.add(simpleArgumentManager.getArgument(String.class));
-                SupportArguments supportArguments = new SupportArguments(arguments,objects -> new data((Integer) objects.get(0),(String)objects.get(1)));
-                ArrayList<SupportArguments> list = new ArrayList<>();
-                list.add(supportArguments);
-                return list;
-            }
-
-            @Override
-            public List<Argument> recommendInputArguments() {
-                ArrayList<Argument> arguments = new ArrayList<>();
-                arguments.add(simpleArgumentManager.getArgument(Integer.class));
-                arguments.add(simpleArgumentManager.getArgument(String.class));
-                return arguments;
-            }
-        });
-
-        AnnotationCommand.as(simpleArgumentManager, this).forEach(command -> commandManager.registerCommand(command));
+        CompleteManager completeManager = new SimpleCompleteManager();
 
         CommandSender sender = new CommandSender() {
+            HashPermissible permissible = new HashPermissible();
             @Override
-            public void sendMessage(String message) {
-            }
-
+            public void sendMessage(String message) { }
             @Override
             public String getSenderName() {
                 return "test";
@@ -67,83 +42,103 @@ public class AnnotationCommandTest {
 
             @Override
             public Permissible getPermissible() {
-                return new HashPermissible();
+                return permissible;
             }
         };
 
-        CommandResult result1 = commandManager.executeCommand(sender, "changeText", text);
+        simpleArgumentManager.appendArgument(new MultiArgument(Location.class, "location") {
+            @Override
+            public Collection<SupportArguments> getSupportArgumentsOrders() {
+                ArrayList list = new ArrayList();
+                list.add(simpleArgumentManager.getArgument(Integer.class));
+                list.add(simpleArgumentManager.getArgument(Integer.class));
+                list.add(simpleArgumentManager.getArgument(Integer.class));
 
+                SupportArguments supportArguments = new SupportArguments(list, l -> new Location((Integer) l.get(0), (Integer) l.get(1), (Integer) l.get(2)));
+
+                ArrayList supportList = new ArrayList();
+                supportList.add(supportArguments);
+                return supportList;
+            }
+
+            @Override
+            public List<Argument> recommendArguments() {
+                ArrayList list = new ArrayList();
+                list.add(simpleArgumentManager.getArgument(Integer.class));
+                list.add(simpleArgumentManager.getArgument(Integer.class));
+                list.add(simpleArgumentManager.getArgument(Integer.class));
+                return list;
+            }
+        });
+
+        List<unknowndomain.command.Command> commands = AnnotationCommand.as(commandManager, simpleArgumentManager,completeManager, this);
+        for (unknowndomain.command.Command command : commands)
+            if (!commandManager.hasCommand(command.name))
+                commandManager.registerCommand(command);
+
+        CommandResult result = commandManager.executeCommand(sender, "say", "hamburger");
+        Assert.assertTrue(result.isSuccess());
+        Assert.assertEquals(sender.getSenderName()+": "+"hamburger",result.getMessage());
+
+        CommandResult result1 = commandManager.executeCommand(sender, "say", "hamburger", "is delicious");
         Assert.assertTrue(result1.isSuccess());
+        Assert.assertEquals(result1.getMessage(),sender.getSenderName()+": "+"hamburger is delicious");
 
-        CommandResult result2 = commandManager.executeCommand(sender, "changeTextWithSender", text);
-
+        CommandResult result2 = commandManager.executeCommand(sender, "say", "1","2","3");
         Assert.assertTrue(result2.isSuccess());
-        Assert.assertEquals(text, sender.getSenderName());
-
-        CommandResult result3 = commandManager.executeCommand(sender, "returnTest");
-
-        Assert.assertTrue(!result3.isSuccess());
-
-        testBoolean = true;
-
-        CommandResult result4 = commandManager.executeCommand(sender, "returnTest");
-
-        Assert.assertTrue(result4.isSuccess());
-
-        CommandResult result5 = commandManager.executeCommand(sender, "returnResult");
-
-        Assert.assertEquals(sender.getSenderName() + new Boolean(testBoolean), result5.getMessage());
-        Assert.assertTrue(result5.isSuccess());
-
-        testBoolean = false;
-
-        CommandResult result6 = commandManager.executeCommand(sender, "returnResult");
-
-        Assert.assertEquals(sender.getSenderName() + new Boolean(testBoolean), result6.getMessage());
-        Assert.assertTrue(!result6.isSuccess());
+        Assert.assertEquals(result2.getMessage(),new Location(1,2,3).toString());
 
 
-        CommandResult result7 = commandManager.executeCommand(sender, "data","1","test");
-
-        Assert.assertEquals("test1", result7.getMessage());
-    }
-
-    @Command("changeText")
-    public void textChangeWithOutSender(String text) {
-        Assert.assertEquals(text, text);
-    }
-
-    @Command("changeTextWithSender")
-    public void textChange(@Sender CommandSender sender, String text) {
-        Assert.assertEquals(text, text);
-        text = sender.getSenderName();
-    }
-
-    @Command("returnTest")
-    public boolean returnCommand() {
-        return testBoolean;
-    }
-
-    @Command("returnResult")
-    public CommandResult resultCommand(@Sender CommandSender sender) {
-        return new CommandResult(testBoolean, sender.getSenderName() + new Boolean(testBoolean));
-    }
-
-    @Command("data")
-    public CommandResult resultCommand(data data) {
-        return new CommandResult(true, data.s+data.i);
     }
 
 
-    private class data {
+    @Command("say")
+    public CommandResult say(String text) {
+        return new CommandResult(true,text);
+    }
 
-        int i;
-        String s;
+    @Command("say")
+    public CommandResult say(String text, @Sender CommandSender sender, String text2) {
+        return new CommandResult(true,sender.getSenderName() + ": " + text +" "+ text2);
+    }
 
-        public data(int i, String s) {
-            this.i = i;
-            this.s = s;
+    @Command("say")
+    public CommandResult say(Location location){
+        return new CommandResult(true,location.toString());
+    }
+
+    @Command("say")
+    public CommandResult say(@Sender CommandSender sender,String text){
+        return new CommandResult(true,sender.getSenderName()+": "+text);
+    }
+
+    @Command("say")
+    public CommandResult say(@Sender CommandSender sender,String text,String text2){
+        return new CommandResult(true,sender.getSenderName()+": "+text+" "+text2);
+    }
+
+
+    class Location {
+
+        int x;
+        int y;
+        int z;
+
+        public Location(int x, int y, int z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        @Override
+        public String toString() {
+            return "Location{" +
+                    "x=" + x +
+                    ", y=" + y +
+                    ", z=" + z +
+                    '}';
         }
     }
+
 
 }

@@ -7,6 +7,7 @@ import unknowndomain.command.CommandSender;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class TraditionalCommand extends Command {
 
@@ -38,7 +39,7 @@ public class TraditionalCommand extends Command {
     }
 
     @Override
-    public List<String> complete(CommandSender sender, String[] args) {
-        return completer.orElse((sender1, string, args1) -> Collections.emptyList()).complete(sender, this.name, args);
+    public Set<String> complete(CommandSender sender, String[] args) {
+        return completer.orElse((sender1, string, args1) -> Collections.emptySet()).complete(sender, this.name, args);
     }
 }

@@ -1,8 +1,9 @@
 package unknowndomain.command;
 
-import unknowndomain.command.argument.SimpleArgumentManager;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HashCommandManager extends CommandManager {
@@ -12,7 +13,7 @@ public class HashCommandManager extends CommandManager {
     @Override
     public void registerCommand(Command command) {
         if (commandHashMap.containsKey(command.name))
-            throw new RuntimeException("command: " + command.name + " already exist");
+            throw new RuntimeException("command: [" + command.name + "] already exist");
         commandHashMap.put(command.name, command);
     }
 
@@ -30,6 +31,11 @@ public class HashCommandManager extends CommandManager {
     @Override
     public Command getCommand(String command) {
         return commandHashMap.get(command);
+    }
+
+    @Override
+    public boolean hasCommand(String command) {
+        return commandHashMap.containsKey(command);
     }
 
     @Override

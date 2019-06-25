@@ -1,5 +1,7 @@
 package unknowndomain.command.argument;
 
+import java.util.List;
+
 public interface Argument<T> {
 
     String getName();

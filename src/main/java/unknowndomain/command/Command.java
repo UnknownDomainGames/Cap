@@ -1,8 +1,6 @@
 package unknowndomain.command;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public abstract class Command {
 
@@ -42,8 +40,8 @@ public abstract class Command {
         this.helpMessage = helpMessage;
     }
 
-    public List<String> complete(CommandSender sender, String[] args){
-        return new ArrayList<>();
+    public Set<String> complete(CommandSender sender, String[] args){
+        return new HashSet<>();
     }
 
     public String getParameterDescription(CommandSender sender,String[] args){

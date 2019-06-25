@@ -1,5 +1,8 @@
 package unknowndomain.command.argument;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class IntegerArgument extends SingleArgument {
 
     public IntegerArgument() {
@@ -13,6 +16,6 @@ public class IntegerArgument extends SingleArgument {
 
     @Override
     public String getInputHelp() {
-        return "num:";
+        return "[num]";
     }
 }

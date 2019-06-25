@@ -17,6 +17,6 @@ public class IllegalArgumentException extends CommandException {
 
     @Override
     public String getMessage() {
-        return "command: "+command+" argument"+argument.getName()+" inputHelp: "+argument.getInputHelp();
+        return "command: "+command+" argument "+argument.getName()+" inputHelp: "+argument.getInputHelp();
     }
 }

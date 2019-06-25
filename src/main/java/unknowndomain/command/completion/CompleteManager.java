@@ -1,18 +1,16 @@
 package unknowndomain.command.completion;
 
-import unknowndomain.command.CommandSender;
+public interface CompleteManager {
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Function;
+    void putCompleter(Completer completer);
 
-public class CompleteManager {
+    void setClassCompleter(Class clazz,Completer completer);
 
-    private static Map<Class, Function<CommandSender, List<String>>> functionHashMap = new HashMap<>();
+    Completer getCompleter(String name);
+
+    Completer getCompleter(Class clazz);
+
+    /*private static Map<Class, Function<CommandSender, List<String>>> functionHashMap = new HashMap<>();
 
     private static ReadWriteLock lock = new ReentrantReadWriteLock(false);
 
@@ -29,6 +27,6 @@ public class CompleteManager {
         lock.writeLock().lock();
         functionHashMap.put(clazz, function);
         lock.writeLock().unlock();
-    }
+    }*/
 
 }

@@ -74,12 +74,12 @@ public abstract class MultiArgument implements Argument {
 
     @Override
     public String getInputHelp() {
-        return recommendInputArguments().stream().map(Argument::getInputHelp).reduce((s, s2) -> s + " " + s2).get();
+        return recommendArguments().stream().map(Argument::getInputHelp).reduce((s, s2) -> s + " " + s2).get();
     }
 
     public abstract Collection<SupportArguments> getSupportArgumentsOrders();
 
-    public abstract List<Argument> recommendInputArguments();
+    public abstract List<Argument> recommendArguments();
 
     public class SupportArguments {
 
@@ -93,4 +93,17 @@ public abstract class MultiArgument implements Argument {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MultiArgument that = (MultiArgument) o;
+        return Objects.equals(argumentName, that.argumentName) &&
+                Objects.equals(responsibleClass, that.responsibleClass);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(argumentName, responsibleClass);
+    }
 }

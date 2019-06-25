@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import unknowndomain.permission.Permissible;
-import unknowndomain.permission.hash.HashPermissible;
+import unknowndomain.permission.HashPermissible;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;

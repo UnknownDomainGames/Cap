@@ -2,8 +2,9 @@ package unknowndomain.command.traditional;
 
 import unknowndomain.command.CommandSender;
 
-import java.util.List;
+import java.util.Set;
 
 public interface CommandCompleter {
-    List<String> complete(CommandSender executor, String label, String[] args);
+
+    Set<String> complete(CommandSender sender, String label, String[] args);
 }

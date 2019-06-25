@@ -1,4 +1,4 @@
-package unknowndomain.permission.hash;
+package unknowndomain.permission;
 
 import unknowndomain.permission.Permissible;
 import java.util.Collections;
@@ -52,5 +52,7 @@ public class HashPermissible implements Permissible {
     public Map<String,Boolean> getPermissionMap(){
         return Collections.unmodifiableMap(permissionMap);
     }
+
+
 
 }
