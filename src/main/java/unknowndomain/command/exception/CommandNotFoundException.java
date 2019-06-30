@@ -2,11 +2,11 @@ package unknowndomain.command.exception;
 
 import java.util.Arrays;
 
-public class CommandFoundException extends CommandException {
+public class CommandNotFoundException extends CommandException {
     
     private String[] args;
     
-    public CommandFoundException(String command, String[] args) {
+    public CommandNotFoundException(String command, String[] args) {
         super(command);
         this.args = args;
     }

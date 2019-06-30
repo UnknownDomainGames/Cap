@@ -2,7 +2,7 @@ package unknowndomain.command.argument;
 
 import java.util.Objects;
 
-public abstract class SingleArgument implements Argument {
+public abstract class SingleArgument extends Argument {
 
     private String argumentName;
 
@@ -21,6 +21,14 @@ public abstract class SingleArgument implements Argument {
     @Override
     public Class responsibleClass() {
         return responsibleClass;
+    }
+
+    @Override
+    public String toString() {
+        return "SingleArgument{" +
+                "argumentName='" + argumentName + '\'' +
+                ", responsibleClass=" + responsibleClass +
+                '}';
     }
 
     @Override

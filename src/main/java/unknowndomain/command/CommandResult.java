@@ -14,6 +14,10 @@ public class CommandResult {
         this(success, message, null);
     }
 
+    public CommandResult(Throwable cause) {
+        this(false,cause);
+    }
+
     public CommandResult(boolean success, Throwable cause) {
         this(success, null, cause);
     }

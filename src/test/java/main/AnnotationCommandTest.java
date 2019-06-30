@@ -4,117 +4,101 @@ import org.junit.Assert;
 import org.junit.Test;
 import unknowndomain.command.CommandResult;
 import unknowndomain.command.CommandSender;
-import unknowndomain.command.HashCommandManager;
 import unknowndomain.command.anno.AnnotationCommand;
-import unknowndomain.command.anno.Command;
-import unknowndomain.command.anno.Sender;
-import unknowndomain.command.argument.Argument;
-import unknowndomain.command.argument.MultiArgument;
-import unknowndomain.command.argument.SimpleArgumentManager;
-import unknowndomain.command.completion.CompleteManager;
-import unknowndomain.command.completion.SimpleCompleteManager;
+import unknowndomain.command.anno.node.ArgumentNode;
+import unknowndomain.command.anno.node.CommandNode;
+import unknowndomain.command.anno.node.SenderNode;
+import unknowndomain.command.argument.IntegerArgument;
+import unknowndomain.command.argument.StringArgument;
+import unknowndomain.command.exception.CommandSenderErrorException;
 import unknowndomain.permission.HashPermissible;
 import unknowndomain.permission.Permissible;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 
 public class AnnotationCommandTest {
 
+    CommandSender sender = new TestSender();
+
     @Test
-    public void test() {
+    public void Test1() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchFieldException {
 
-        HashCommandManager commandManager = new HashCommandManager();
+        Constructor constructor = AnnotationCommand.class.getDeclaredConstructor(String.class,String.class,String.class);
+        constructor.setAccessible(true);
 
-        SimpleArgumentManager simpleArgumentManager = new SimpleArgumentManager();
+        Field field = AnnotationCommand.class.getDeclaredField("annotationNode");
 
-        CompleteManager completeManager = new SimpleCompleteManager();
+        field.setAccessible(true);
 
-        CommandSender sender = new CommandSender() {
-            HashPermissible permissible = new HashPermissible();
-            @Override
-            public void sendMessage(String message) { }
-            @Override
-            public String getSenderName() {
-                return "test";
-            }
+        AnnotationCommand annotationCommand = (AnnotationCommand) constructor.newInstance("test","description","helpMessage");
 
-            @Override
-            public Permissible getPermissible() {
-                return permissible;
-            }
-        };
+        CommandNode commandNode = (CommandNode) field.get(annotationCommand);
 
-        simpleArgumentManager.appendArgument(new MultiArgument(Location.class, "location") {
-            @Override
-            public Collection<SupportArguments> getSupportArgumentsOrders() {
-                ArrayList list = new ArrayList();
-                list.add(simpleArgumentManager.getArgument(Integer.class));
-                list.add(simpleArgumentManager.getArgument(Integer.class));
-                list.add(simpleArgumentManager.getArgument(Integer.class));
+        CommandNode node = new ArgumentNode(new StringArgument());
+        node.setInstance(this);
+        node.setMethod(getClass().getMethod("test",String.class));
+        commandNode.addChild(node);
 
-                SupportArguments supportArguments = new SupportArguments(list, l -> new Location((Integer) l.get(0), (Integer) l.get(1), (Integer) l.get(2)));
+        CommandNode node2 = new ArgumentNode(new IntegerArgument());
+        CommandNode node3 = new ArgumentNode(new StringArgument());
+        node2.addChild(node3);
 
-                ArrayList supportList = new ArrayList();
-                supportList.add(supportArguments);
-                return supportList;
-            }
+        node3.setInstance(this);
+        node3.setMethod(getClass().getMethod("test2", int.class, String.class));
 
-            @Override
-            public List<Argument> recommendArguments() {
-                ArrayList list = new ArrayList();
-                list.add(simpleArgumentManager.getArgument(Integer.class));
-                list.add(simpleArgumentManager.getArgument(Integer.class));
-                list.add(simpleArgumentManager.getArgument(Integer.class));
-                return list;
-            }
-        });
+        commandNode.addChild(node2);
 
-        List<unknowndomain.command.Command> commands = AnnotationCommand.as(commandManager, simpleArgumentManager,completeManager, this);
-        for (unknowndomain.command.Command command : commands)
-            if (!commandManager.hasCommand(command.name))
-                commandManager.registerCommand(command);
+        annotationCommand.execute(sender,new String[]{"zsd"});
+        annotationCommand.execute(sender,new String[]{"2","asd"});
 
-        CommandResult result = commandManager.executeCommand(sender, "say", "hamburger");
-        Assert.assertTrue(result.isSuccess());
-        Assert.assertEquals(sender.getSenderName()+": "+"hamburger",result.getMessage());
+    }
 
-        CommandResult result1 = commandManager.executeCommand(sender, "say", "hamburger", "is delicious");
+    public void test(String a){
+        System.out.println(a);
+    }
+
+    public void test2(int value,String text){
+        System.out.println(value+" -- "+text);
+
+    }
+
+    @Test
+    public void senderTest() throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException, InstantiationException {
+
+        Constructor constructor = AnnotationCommand.class.getDeclaredConstructor(String.class,String.class,String.class);
+        constructor.setAccessible(true);
+
+        Field field = AnnotationCommand.class.getDeclaredField("annotationNode");
+
+        field.setAccessible(true);
+
+        AnnotationCommand annotationCommand = (AnnotationCommand) constructor.newInstance("test","description","helpMessage");
+
+        CommandNode commandNode = (CommandNode) field.get(annotationCommand);
+
+        CommandNode senderNode = new SenderNode(TestSender.class);
+        CommandNode stringNode = new ArgumentNode(new StringArgument());
+        senderNode.addChild(stringNode);
+
+        stringNode.setInstance(this);
+        stringNode.setMethod(getClass().getMethod("senderTest", CommandSender.class, String.class));
+
+        commandNode.addChild(senderNode);
+
+        CommandResult result = annotationCommand.execute(new TestSender2(),new String[]{"abc"});
+        CommandResult result1 = annotationCommand.execute(sender,new String[]{"abc"});
+
+        Assert.assertFalse(result.isSuccess());
         Assert.assertTrue(result1.isSuccess());
-        Assert.assertEquals(result1.getMessage(),sender.getSenderName()+": "+"hamburger is delicious");
 
-        CommandResult result2 = commandManager.executeCommand(sender, "say", "1","2","3");
-        Assert.assertTrue(result2.isSuccess());
-        Assert.assertEquals(result2.getMessage(),new Location(1,2,3).toString());
-
-
+        Assert.assertEquals(result1.getMessage(),sender.getSenderName()+" --- "+"abc");
+        Assert.assertEquals(result.getCause().getClass(), CommandSenderErrorException.class);
     }
 
-
-    @Command("say")
-    public CommandResult say(String text) {
-        return new CommandResult(true,text);
-    }
-
-    @Command("say")
-    public CommandResult say(String text, @Sender CommandSender sender, String text2) {
-        return new CommandResult(true,sender.getSenderName() + ": " + text +" "+ text2);
-    }
-
-    @Command("say")
-    public CommandResult say(Location location){
-        return new CommandResult(true,location.toString());
-    }
-
-    @Command("say")
-    public CommandResult say(@Sender CommandSender sender,String text){
-        return new CommandResult(true,sender.getSenderName()+": "+text);
-    }
-
-    @Command("say")
-    public CommandResult say(@Sender CommandSender sender,String text,String text2){
-        return new CommandResult(true,sender.getSenderName()+": "+text+" "+text2);
+    public CommandResult senderTest(CommandSender sender,String text){
+        return new CommandResult(true,sender.getSenderName()+" --- "+text);
     }
 
 
@@ -137,6 +121,42 @@ public class AnnotationCommandTest {
                     ", y=" + y +
                     ", z=" + z +
                     '}';
+        }
+    }
+
+    private class TestSender implements CommandSender{
+        private HashPermissible hashPermissible = new HashPermissible();
+        @Override
+        public void sendMessage(String message) {
+
+        }
+
+        @Override
+        public String getSenderName() {
+            return "test sender";
+        }
+
+        @Override
+        public Permissible getPermissible() {
+            return hashPermissible;
+        }
+    }
+
+    private class TestSender2 implements CommandSender{
+        private HashPermissible hashPermissible = new HashPermissible();
+        @Override
+        public void sendMessage(String message) {
+
+        }
+
+        @Override
+        public String getSenderName() {
+            return "test2 sender";
+        }
+
+        @Override
+        public Permissible getPermissible() {
+            return hashPermissible;
         }
     }
 

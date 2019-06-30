@@ -1,23 +1,18 @@
 package unknowndomain.command.argument;
 
+import unknowndomain.command.CommandSender;
+
 import java.util.List;
+import java.util.Optional;
 
-public interface Argument<T> {
+public abstract class Argument<T> {
 
-    String getName();
+    public abstract String getName();
 
-    Class<T> responsibleClass();
+    public abstract Class<T> responsibleClass();
 
-    /**
-     *
-     * parse args to object.
-     * method need's args must be first in array.
-     * method will not pay attention to args of after it need args
-     *
-     * @param args
-     * @return parseResult
-     */
-    ParseResult<T> parseArgs(String[] args);
+    public abstract Optional<T> parse(String arg);
 
-    String getInputHelp();
+    public abstract List<String> getComplete(CommandSender sender, String arg);
+
 }

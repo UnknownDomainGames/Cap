@@ -5,7 +5,6 @@ import unknowndomain.command.CommandResult;
 import unknowndomain.command.CommandSender;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 

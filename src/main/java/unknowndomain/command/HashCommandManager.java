@@ -1,9 +1,6 @@
 package unknowndomain.command;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class HashCommandManager extends CommandManager {
@@ -39,16 +36,16 @@ public class HashCommandManager extends CommandManager {
     }
 
     @Override
-    public List<String> getCompleteList(CommandSender sender, String command, String... args) {
+    public Set<String> getCompleteList(CommandSender sender, String command, String... args) {
 
         if (args == null || args.length == 0) {
-            List list = commandHashMap.keySet().stream().filter(commandName -> commandName.startsWith(command)).collect(Collectors.toList());
+            Set list = commandHashMap.keySet().stream().filter(commandName -> commandName.startsWith(command)).collect(Collectors.toSet());
             return list;
         }
 
         Command command1 = commandHashMap.get(command);
         if (command1 == null)
-            return new ArrayList<>();
+            return new HashSet<>();
         return command1.complete(sender, args);
     }
 

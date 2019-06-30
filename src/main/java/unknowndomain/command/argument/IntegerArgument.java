@@ -1,7 +1,11 @@
 package unknowndomain.command.argument;
 
-import java.util.ArrayList;
+
+import com.google.common.collect.Lists;
+import unknowndomain.command.CommandSender;
+
 import java.util.List;
+import java.util.Optional;
 
 public class IntegerArgument extends SingleArgument {
 
@@ -10,12 +14,18 @@ public class IntegerArgument extends SingleArgument {
     }
 
     @Override
-    public ParseResult<Integer> parseArgs(String[] args) {
-        return new ParseResult(Integer.valueOf(args[0]),1,false);
+    public Optional parse(String arg) {
+        try {
+            return Optional.of(Integer.valueOf(arg));
+        }catch (Exception e){
+            return Optional.empty();
+        }
     }
 
     @Override
-    public String getInputHelp() {
-        return "[num]";
+    public List<String> getComplete(CommandSender sender, String arg) {
+        return Lists.asList("[num]",new String[1]);
     }
+
+
 }

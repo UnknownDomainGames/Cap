@@ -1,6 +1,7 @@
 package unknowndomain.command;
 
 import java.util.List;
+import java.util.Set;
 
 public abstract class CommandManager {
 
@@ -12,7 +13,7 @@ public abstract class CommandManager {
 
     public abstract boolean hasCommand(String command);
 
-    public abstract List<String> getCompleteList(CommandSender sender, String command, String... args);
+    public abstract Set<String> getCompleteList(CommandSender sender, String command, String... args);
 
     public abstract void unregisterCommand(String command);
 

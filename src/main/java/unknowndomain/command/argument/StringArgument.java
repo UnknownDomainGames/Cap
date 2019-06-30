@@ -1,7 +1,10 @@
 package unknowndomain.command.argument;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
+import unknowndomain.command.CommandSender;
+
 import java.util.List;
+import java.util.Optional;
 
 public class StringArgument extends SingleArgument {
 
@@ -10,12 +13,13 @@ public class StringArgument extends SingleArgument {
     }
 
     @Override
-    public ParseResult<String> parseArgs(String[] args) {
-        return new ParseResult(args[0],1,false);
+    public Optional parse(String arg) {
+        return Optional.of(arg);
     }
 
+
     @Override
-    public String getInputHelp() {
-        return "[text]";
+    public List<String> getComplete(CommandSender sender, String arg) {
+        return Lists.asList("[text]",new String[1]);
     }
 }

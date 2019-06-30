@@ -12,4 +12,5 @@ public @interface Command {
 
     String desc() default "";
     String helpMessage() default "";
+
 }
