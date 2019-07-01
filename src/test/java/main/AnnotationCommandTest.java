@@ -7,13 +7,14 @@ import unknowndomain.command.CommandSender;
 import unknowndomain.command.HashCommandManager;
 import unknowndomain.command.anno.AnnotationCommand;
 import unknowndomain.command.anno.Command;
+import unknowndomain.command.anno.Required;
 import unknowndomain.command.anno.Sender;
 import unknowndomain.command.anno.node.ArgumentNode;
 import unknowndomain.command.anno.node.CommandNode;
 import unknowndomain.command.anno.node.SenderNode;
-import unknowndomain.command.argument.IntegerArgument;
+import unknowndomain.command.argument.base.IntegerArgument;
 import unknowndomain.command.argument.SimpleArgumentManager;
-import unknowndomain.command.argument.StringArgument;
+import unknowndomain.command.argument.base.StringArgument;
 import unknowndomain.command.exception.CommandSenderErrorException;
 import unknowndomain.permission.HashPermissible;
 import unknowndomain.permission.Permissible;
@@ -128,6 +129,13 @@ public class AnnotationCommandTest {
         Assert.assertTrue(result1.isSuccess());
         Assert.assertEquals(result1.getMessage(), "12");
 
+        CommandResult result2 = commandManager.executeCommand(sender, "build3", "test","1");
+        Assert.assertTrue(result2.isSuccess());
+        Assert.assertEquals(result2.getMessage(), "12");
+
+        CommandResult result3 = commandManager.executeCommand(sender, "build3", "tes1t","1");
+        Assert.assertFalse(result3.isSuccess());
+
     }
 
     @Command("build")
@@ -138,6 +146,12 @@ public class AnnotationCommandTest {
 
     @Command("build2")
     public CommandResult buildTest(@Sender CommandSender sender, Integer text) {
+        return new CommandResult(true, text + "2");
+    }
+
+    @Command("build3")
+    public CommandResult buildTest(@Sender CommandSender sender, @Required("test") String a , Integer text) {
+        Assert.assertEquals(a,"test");
         return new CommandResult(true, text + "2");
     }
 

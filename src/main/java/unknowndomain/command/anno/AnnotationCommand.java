@@ -6,9 +6,11 @@ import unknowndomain.command.CommandResult;
 import unknowndomain.command.CommandSender;
 import unknowndomain.command.anno.node.ArgumentNode;
 import unknowndomain.command.anno.node.CommandNode;
+import unknowndomain.command.anno.node.RequiredNode;
 import unknowndomain.command.anno.node.SenderNode;
 import unknowndomain.command.argument.Argument;
 import unknowndomain.command.argument.ArgumentManager;
+import unknowndomain.command.completion.CompleteManager;
 import unknowndomain.command.exception.CommandException;
 import unknowndomain.command.exception.PermissionNotEnoughException;
 import unknowndomain.permission.Permissible;
@@ -213,6 +215,8 @@ public class AnnotationCommand extends Command {
 
         private CommandManager commandManager;
 
+        private CompleteManager completeManager;
+
         private AnnotationCommandBuilder(CommandManager commandManager) {
             this.commandManager = commandManager;
         }
@@ -224,6 +228,11 @@ public class AnnotationCommand extends Command {
 
         public AnnotationCommandBuilder addCommandHandler(Object object) {
             commandHandler.add(object);
+            return this;
+        }
+
+        public AnnotationCommandBuilder setCompleteManager(CompleteManager completeManager) {
+            this.completeManager = completeManager;
             return this;
         }
 
@@ -245,7 +254,7 @@ public class AnnotationCommand extends Command {
                 Command command = commandManager.getCommand(commandAnnotation.value());
 
                 if (command != null && !(command instanceof AnnotationCommand)) {
-                    throw new RuntimeException("command already exist "+command.name+" and not AnnotationCommand");
+                    throw new RuntimeException("command already exist " + command.name + " and not AnnotationCommand");
                 }
 
                 AnnotationCommand annotationCommand = (AnnotationCommand) command;
@@ -261,7 +270,7 @@ public class AnnotationCommand extends Command {
 
                 Permission permission = method.getAnnotation(Permission.class);
                 HashSet<String> permissions = new HashSet();
-                if(permission!=null)
+                if (permission != null)
                     permissions.addAll(Arrays.asList(permission.value()));
 
                 node.setNeedPermission(permissions);
@@ -277,14 +286,45 @@ public class AnnotationCommand extends Command {
 
         private CommandNode getChildOrCreateAndAdd(Parameter type, CommandNode node) {
             Sender sender = type.getAnnotation(Sender.class);
+            Required required = type.getAnnotation(Required.class);
+
+            CommandNode child = null;
 
             if (sender != null)
-                return handleSender(type.getType(), node);
-            else {
-                return handleArgument(type.getType(), node, type.getAnnotation(ArgumentHandler.class));
+                child = handleSender(type.getType(), node);
+            else if (required != null) {
+                child = handleRequired(required, node);
+            } else {
+                child = handleArgument(type.getType(), node, type.getAnnotation(ArgumentHandler.class));
             }
 
+            Completer completer = type.getAnnotation(Completer.class);
+            if (completer != null)
+                child.setCompleter(completeManager.getCompleter(completer.value()));
 
+            return child;
+        }
+
+        private CommandNode handleSender(Class<?> type, CommandNode node) {
+            CommandNode child = new SenderNode((Class<? extends CommandSender>) type);
+            return foundChildOrAdd(node, child);
+        }
+
+        private CommandNode foundChildOrAdd(CommandNode node, CommandNode child) {
+
+            for (CommandNode loopChild : node.getChildren()) {
+                if (loopChild.equals(child))
+                    return loopChild;
+            }
+
+            node.addChild(child);
+
+            return child;
+        }
+
+        private CommandNode handleRequired(Required required, CommandNode node) {
+            CommandNode child = new RequiredNode(required.value());
+            return foundChildOrAdd(node, child);
         }
 
         private CommandNode handleArgument(Class<?> type, CommandNode node, ArgumentHandler annotation) {
@@ -300,29 +340,9 @@ public class AnnotationCommand extends Command {
                 else
                     throw new RuntimeException("argument not found:" + type);
 
-            CommandNode commandNode = new ArgumentNode(argument);
+            CommandNode child = new ArgumentNode(argument);
 
-            for (CommandNode child : node.getChildren()) {
-                if (child.equals(commandNode))
-                    return child;
-            }
-
-            node.addChild(commandNode);
-
-            return commandNode;
-        }
-
-        private CommandNode handleSender(Class<?> type, CommandNode node) {
-            CommandNode commandNode = new SenderNode((Class<? extends CommandSender>) type);
-
-            for (CommandNode child : node.getChildren()) {
-                if (child.equals(commandNode))
-                    return child;
-            }
-
-            node.addChild(commandNode);
-
-            return commandNode;
+            return foundChildOrAdd(node, child);
         }
     }
 }

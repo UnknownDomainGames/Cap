@@ -7,12 +7,9 @@ import unknowndomain.command.exception.CommandException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-public abstract class CommandNode {
+public abstract class CommandNode implements Comparable<CommandNode>{
 
     private CommandNode parent;
 
@@ -20,7 +17,7 @@ public abstract class CommandNode {
 
     private Object instance;
 
-    private ArrayList<CommandNode> children = new ArrayList<>();
+    private TreeSet<CommandNode> children = new TreeSet<>();
 
     private Set<String> needPermission = new HashSet();
 
@@ -36,7 +33,7 @@ public abstract class CommandNode {
         return parent;
     }
 
-    public List<CommandNode> getChildren(){
+    public Collection<CommandNode> getChildren(){
         return children;
     }
 
@@ -104,5 +101,10 @@ public abstract class CommandNode {
 
     public void setCompleter(Completer completer) {
         this.completer = completer;
+    }
+
+    @Override
+    public int compareTo(CommandNode o) {
+        return getNeedArgs() - o.getNeedArgs();
     }
 }

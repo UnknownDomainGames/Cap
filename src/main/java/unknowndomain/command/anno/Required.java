@@ -8,6 +8,8 @@ import static java.lang.annotation.ElementType.PARAMETER;
 
 @Target({PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Completer {
-    Class<? extends Completer> value();
+public @interface Required {
+
+    String value();
+
 }

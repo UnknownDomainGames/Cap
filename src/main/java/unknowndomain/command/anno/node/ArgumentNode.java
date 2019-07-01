@@ -2,6 +2,7 @@ package unknowndomain.command.anno.node;
 
 import unknowndomain.command.CommandSender;
 import unknowndomain.command.argument.Argument;
+import unknowndomain.command.completion.Completer;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -49,5 +50,20 @@ public class ArgumentNode extends CommandNode {
     public void setArgument(Argument argument) {
         this.argument = argument;
     }
+
+    @Override
+    public int compareTo(CommandNode o) {
+        if(argument.responsibleClass().equals(String.class))
+            return -1;
+        return super.compareTo(o);
+    }
+
+    @Override
+    public Completer getCompleter() {
+        if(super.getCompleter()!=null)
+            return super.getCompleter();
+        return argument.getCompleter();
+    }
+
 
 }

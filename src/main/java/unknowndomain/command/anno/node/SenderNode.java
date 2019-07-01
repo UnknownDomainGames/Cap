@@ -13,8 +13,7 @@ public class SenderNode extends CommandNode {
 
     private Class<? extends CommandSender> allowedSender;
 
-    public SenderNode() {
-    }
+    public SenderNode() {}
 
     public SenderNode(Class<? extends CommandSender> clazz) {
         allowedSender = clazz;

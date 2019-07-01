@@ -1,15 +1,23 @@
 package unknowndomain.command.argument;
 
+import com.google.common.collect.Lists;
+import unknowndomain.command.argument.base.BooleanArgument;
+import unknowndomain.command.argument.base.FloatArgument;
+import unknowndomain.command.argument.base.IntegerArgument;
+import unknowndomain.command.argument.base.StringArgument;
+
 import java.util.HashMap;
+import java.util.List;
 
 public class SimpleArgumentManager implements ArgumentManager{
+
+    private static List<Argument> baseArguments = Lists.newArrayList(new IntegerArgument(),new StringArgument(),new BooleanArgument(),new FloatArgument());
 
     private HashMap<Class, Argument> argumentByClass = new HashMap<>();
     private HashMap<String, Argument> argumentByName = new HashMap<>();
 
     public SimpleArgumentManager() {
-        appendArgument(new IntegerArgument());
-        appendArgument(new StringArgument());
+        baseArguments.stream().forEach(this::appendArgument);
     }
 
     @Override

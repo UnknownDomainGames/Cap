@@ -1,26 +1,22 @@
-package unknowndomain.command.argument;
-
+package unknowndomain.command.argument.base;
 
 import com.google.common.collect.Sets;
 import unknowndomain.command.CommandSender;
+import unknowndomain.command.argument.SingleArgument;
 import unknowndomain.command.completion.Completer;
 
 import java.util.Optional;
 import java.util.Set;
 
-public class IntegerArgument extends SingleArgument {
+public class StringArgument extends SingleArgument {
 
-    public IntegerArgument() {
-        super(Integer.class,"Integer");
+    public StringArgument() {
+        super(String.class, "String");
     }
 
     @Override
     public Optional parse(String arg) {
-        try {
-            return Optional.of(Integer.valueOf(arg));
-        }catch (Exception e){
-            return Optional.empty();
-        }
+        return Optional.of(arg);
     }
 
     @Override
@@ -33,7 +29,7 @@ public class IntegerArgument extends SingleArgument {
 
             @Override
             public Set<String> complete(CommandSender sender, String command, String[] args) {
-                return Sets.newHashSet("[num]");
+                return Sets.newHashSet("[text]");
             }
         };
     }
