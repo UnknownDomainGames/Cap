@@ -1,10 +1,11 @@
 package unknowndomain.command.argument;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import unknowndomain.command.CommandSender;
+import unknowndomain.command.completion.Completer;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class StringArgument extends SingleArgument {
 
@@ -17,9 +18,18 @@ public class StringArgument extends SingleArgument {
         return Optional.of(arg);
     }
 
-
     @Override
-    public List<String> getComplete(CommandSender sender, String arg) {
-        return Lists.asList("[text]",new String[1]);
+    public Completer getCompleter() {
+        return new Completer() {
+            @Override
+            public String getName() {
+                return this.toString();
+            }
+
+            @Override
+            public Set<String> complete(CommandSender sender, String command, String[] args) {
+                return Sets.newHashSet("[text]");
+            }
+        };
     }
 }

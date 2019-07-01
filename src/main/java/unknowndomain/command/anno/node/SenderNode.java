@@ -11,12 +11,13 @@ import java.util.Set;
 
 public class SenderNode extends CommandNode {
 
-    private Set<Class<? extends CommandSender>> allowedSenders = new HashSet<>();
+    private Class<? extends CommandSender> allowedSender;
 
-    public SenderNode() {}
+    public SenderNode() {
+    }
 
-    public SenderNode(Class<? extends CommandSender>... classes) {
-        allowedSenders.addAll(Arrays.asList(classes));
+    public SenderNode(Class<? extends CommandSender> clazz) {
+        allowedSender = clazz;
     }
 
     @Override
@@ -25,33 +26,23 @@ public class SenderNode extends CommandNode {
     }
 
     @Override
-    public Object parseArgs(CommandSender sender, String command, String... args){
-        boolean allow = false;
-        for (Class<? extends CommandSender> allowedSender : allowedSenders)
-            if(allow)
-                break;
-            else
-            if (allowedSender.isAssignableFrom(sender.getClass()))
-                allow = true;
-
-        if (!allow)
-            throw new CommandSenderErrorException(command, sender);
-
-        return sender;
+    public Object parseArgs(CommandSender sender, String command, String... args) {
+        if (allowedSender.isAssignableFrom(sender.getClass()))
+            return sender;
+        throw new CommandSenderErrorException(command, sender);
     }
+
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SenderNode that = (SenderNode) o;
-        return Objects.equals(allowedSenders, that.allowedSenders);
+        return Objects.equals(allowedSender, that.allowedSender);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(allowedSenders);
+        return Objects.hash(allowedSender);
     }
-
-
 }

@@ -2,12 +2,15 @@ package unknowndomain.command.anno.node;
 
 import unknowndomain.command.CommandResult;
 import unknowndomain.command.CommandSender;
+import unknowndomain.command.completion.Completer;
 import unknowndomain.command.exception.CommandException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public abstract class CommandNode {
 
@@ -18,6 +21,10 @@ public abstract class CommandNode {
     private Object instance;
 
     private ArrayList<CommandNode> children = new ArrayList<>();
+
+    private Set<String> needPermission = new HashSet();
+
+    private Completer completer;
 
     public CommandNode() {}
 
@@ -64,6 +71,14 @@ public abstract class CommandNode {
         return instance;
     }
 
+    public Set<String> getNeedPermission() {
+        return needPermission;
+    }
+
+    public void setNeedPermission(Set<String> needPermission) {
+        this.needPermission = needPermission;
+    }
+
     public CommandResult execute(Object... args){
         try {
             Object result = method.invoke(instance,args);
@@ -81,5 +96,13 @@ public abstract class CommandNode {
             return new CommandResult(e);
         }
         return new CommandResult(false,"unknown reason");
+    }
+
+    public Completer getCompleter() {
+        return completer;
+    }
+
+    public void setCompleter(Completer completer) {
+        this.completer = completer;
     }
 }

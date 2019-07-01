@@ -31,9 +31,7 @@ public class ArgumentNode extends CommandNode {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ArgumentNode that = (ArgumentNode) o;
-        return Objects.equals(argument, that.argument) &&
-                Objects.equals(this.getChildren(),that.getChildren()) &&
-                Objects.equals(this.getParent()!=null?this.getParent().getClass():null,that.getParent()!=null?this.getParent().getClass():null);
+        return Objects.equals(argument, that.argument);
     }
 
     @Override

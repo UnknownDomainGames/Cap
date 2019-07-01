@@ -1,8 +1,7 @@
 package unknowndomain.command.argument;
 
-import unknowndomain.command.CommandSender;
+import unknowndomain.command.completion.Completer;
 
-import java.util.List;
 import java.util.Optional;
 
 public abstract class Argument<T> {
@@ -13,6 +12,6 @@ public abstract class Argument<T> {
 
     public abstract Optional<T> parse(String arg);
 
-    public abstract List<String> getComplete(CommandSender sender, String arg);
+    public abstract Completer getCompleter();
 
 }
