@@ -1,4 +1,4 @@
-package unknowndomain.command.traditional;
+package unknowndomain.command.simple;
 
 import unknowndomain.command.CommandSender;
 
