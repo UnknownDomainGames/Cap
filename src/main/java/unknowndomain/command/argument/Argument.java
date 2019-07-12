@@ -15,3 +15,4 @@ public abstract class Argument<T> {
     public abstract Completer getCompleter();
 
 }
+

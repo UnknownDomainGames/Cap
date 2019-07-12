@@ -4,17 +4,17 @@ import unknowndomain.command.Command;
 import unknowndomain.command.CommandManager;
 import unknowndomain.command.CommandResult;
 import unknowndomain.command.CommandSender;
-import unknowndomain.command.anno.node.ArgumentNode;
-import unknowndomain.command.anno.node.CommandNode;
-import unknowndomain.command.anno.node.RequiredNode;
-import unknowndomain.command.anno.node.SenderNode;
+import unknowndomain.command.anno.node.*;
 import unknowndomain.command.argument.Argument;
 import unknowndomain.command.argument.ArgumentManager;
+import unknowndomain.command.argument.SimpleArgumentManager;
 import unknowndomain.command.completion.CompleteManager;
 import unknowndomain.command.exception.CommandException;
 import unknowndomain.command.exception.PermissionNotEnoughException;
 import unknowndomain.permission.Permissible;
 
+import javax.management.InstanceNotFoundException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -209,9 +209,11 @@ public class AnnotationCommand extends Command {
 
     public static class AnnotationCommandBuilder {
 
+        private static ArgumentManager staticArgumentManage = new SimpleArgumentManager();
+
         private Set<Object> commandHandler = new HashSet<>();
 
-        private ArgumentManager argumentManager;
+        private ArgumentManager argumentManager = staticArgumentManage;
 
         private CommandManager commandManager;
 
@@ -287,6 +289,7 @@ public class AnnotationCommand extends Command {
         private CommandNode getChildOrCreateAndAdd(Parameter type, CommandNode node) {
             Sender sender = type.getAnnotation(Sender.class);
             Required required = type.getAnnotation(Required.class);
+            Generator generator = type.getAnnotation(Generator.class);
 
             CommandNode child = null;
 
@@ -295,7 +298,7 @@ public class AnnotationCommand extends Command {
             else if (required != null) {
                 child = handleRequired(required, node);
             } else {
-                child = handleArgument(type.getType(), node, type.getAnnotation(ArgumentHandler.class));
+                child = handleArgument(type, node);
             }
 
             Completer completer = type.getAnnotation(Completer.class);
@@ -305,9 +308,9 @@ public class AnnotationCommand extends Command {
             return child;
         }
 
-        private CommandNode handleSender(Class<?> type, CommandNode node) {
+        private SenderNode handleSender(Class<?> type, CommandNode node) {
             CommandNode child = new SenderNode((Class<? extends CommandSender>) type);
-            return foundChildOrAdd(node, child);
+            return (SenderNode) foundChildOrAdd(node, child);
         }
 
         private CommandNode foundChildOrAdd(CommandNode node, CommandNode child) {
@@ -322,27 +325,147 @@ public class AnnotationCommand extends Command {
             return child;
         }
 
-        private CommandNode handleRequired(Required required, CommandNode node) {
+        private RequiredNode handleRequired(Required required, CommandNode node) {
             CommandNode child = new RequiredNode(required.value());
-            return foundChildOrAdd(node, child);
+            return (RequiredNode) foundChildOrAdd(node, child);
         }
 
-        private CommandNode handleArgument(Class<?> type, CommandNode node, ArgumentHandler annotation) {
-            Argument argument;
+        private ArgumentNode handleArgument(Parameter parameter, CommandNode node) {
+            return (ArgumentNode) foundChildOrAdd(node, parseParameter2Argument(parameter));
+        }
 
-            if (annotation != null)
-                argument = argumentManager.getArgument(annotation.value());
+        private ArgumentNode parseParameter2Argument(Parameter parameter) {
+            Argument argument;
+            ArgumentHandler argumentHandler = parameter.getAnnotation(ArgumentHandler.class);
+
+            Class type = packing(parameter.getType());
+
+            if (argumentHandler != null)
+                argument = argumentManager.getArgument(argumentHandler.value());
             else argument = argumentManager.getArgument(type);
 
+            if (argument == null) {
+                Generator generator = null;
+                Constructor noteConstructor = null;
+
+                Class clazz = type;
+
+                for (Constructor constructor : clazz.getConstructors()) {
+
+                    if (generator != null)
+                        break;
+
+                    generator = (Generator) constructor.getAnnotation(Generator.class);
+                    noteConstructor = constructor;
+                }
+
+                if (generator != null) {
+
+                    ArgumentNode[] argumentNodes = buildArgumentNodes(noteConstructor);
+
+                    Constructor finalNoteConstructor = noteConstructor;
+                    return new MultiArgumentNode(objects -> {
+                        try {
+                            if (finalNoteConstructor.getDeclaringClass().isMemberClass()) {
+                                ArrayList list = new ArrayList();
+                                list.add(tryInstanceOuterClass(finalNoteConstructor.getDeclaringClass().getDeclaringClass()));
+                                list.addAll(Arrays.asList(objects));
+                                return finalNoteConstructor.newInstance(list.toArray());
+                            } else
+                                return finalNoteConstructor.newInstance(objects);
+                        } catch (InstantiationException e) {
+                            e.printStackTrace();
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        } catch (InvocationTargetException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }, argumentNodes);
+
+                }
+
+            }
+
             if (argument == null)
-                if (annotation != null)
-                    throw new RuntimeException("argument not found:" + type + " argument:" + annotation.value());
+                if (argumentHandler != null)
+                    throw new RuntimeException("argument not found: {" + parameter + "} argument:" + argumentHandler.value());
                 else
-                    throw new RuntimeException("argument not found:" + type);
+                    throw new RuntimeException("argument not found: {" + parameter + "}");
 
-            CommandNode child = new ArgumentNode(argument);
-
-            return foundChildOrAdd(node, child);
+            return new ArgumentNode(argument);
         }
+
+        private Object tryInstanceOuterClass(Class declaringClass) {
+            if(declaringClass.isMemberClass()) {
+                try {
+                    return declaringClass.getConstructor(declaringClass.getDeclaringClass()).newInstance(tryInstanceOuterClass(declaringClass.getDeclaringClass()));
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
+            }else {
+                try {
+                    return declaringClass.getConstructor().newInstance();
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
+            }
+            throw new RuntimeException("no constructor to instance");
+        }
+
+        private Class packing(Class clazz) {
+
+            switch (clazz.getName()) {
+                case "int":
+                    return Integer.class;
+                case "float":
+                    return Float.class;
+                case "boolean":
+                    return Boolean.class;
+                case "double":
+                    return Double.class;
+                case "char":
+                    return Character.class;
+                case "long":
+                    return Long.class;
+                case "short":
+                    return Short.class;
+            }
+            return clazz;
+        }
+
+        private ArgumentNode[] buildArgumentNodes(Constructor noteConstructor) {
+            ArrayList<ArgumentNode> list = new ArrayList();
+
+            Class clazz = noteConstructor.getDeclaringClass();
+
+            boolean isMember = clazz.isMemberClass();
+
+            int i = 0;
+
+            //the first field in constructor of member class is who holds this member class
+            if (isMember)
+                i++;
+
+            for (; i < noteConstructor.getParameters().length; i++) {
+
+                list.add(parseParameter2Argument(noteConstructor.getParameters()[i]));
+            }
+
+            return list.toArray(new ArgumentNode[0]);
+        }
+
     }
 }

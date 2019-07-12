@@ -1,10 +1,7 @@
 package unknowndomain.command.argument;
 
 import com.google.common.collect.Lists;
-import unknowndomain.command.argument.base.BooleanArgument;
-import unknowndomain.command.argument.base.FloatArgument;
-import unknowndomain.command.argument.base.IntegerArgument;
-import unknowndomain.command.argument.base.StringArgument;
+import unknowndomain.command.argument.base.*;
 
 import java.util.HashMap;
 import java.util.List;

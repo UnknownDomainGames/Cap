@@ -5,10 +5,7 @@ import org.junit.Test;
 import unknowndomain.command.CommandResult;
 import unknowndomain.command.CommandSender;
 import unknowndomain.command.HashCommandManager;
-import unknowndomain.command.anno.AnnotationCommand;
-import unknowndomain.command.anno.Command;
-import unknowndomain.command.anno.Required;
-import unknowndomain.command.anno.Sender;
+import unknowndomain.command.anno.*;
 import unknowndomain.command.anno.node.ArgumentNode;
 import unknowndomain.command.anno.node.CommandNode;
 import unknowndomain.command.anno.node.SenderNode;
@@ -155,12 +152,46 @@ public class AnnotationCommandTest {
         return new CommandResult(true, text + "2");
     }
 
-    class Location {
+
+    @Test
+    public void multiArgumentTest(){
+
+        HashCommandManager commandManager = new HashCommandManager();
+
+        for (unknowndomain.command.Command command : AnnotationCommand
+                .getBuilder(commandManager)
+                .setArgumentManager(new SimpleArgumentManager())
+                .addCommandHandler(this)
+                .build()) {
+            if (!commandManager.hasCommand(command.name))
+                commandManager.registerCommand(command);
+        }
+
+        CommandResult result = commandManager.executeCommand(sender,"multi","1","1","1");
+        Assert.assertEquals(result.getMessage(),new Location(1,1,1).toString());
+
+        CommandResult result1 = commandManager.executeCommand(sender,"multi1","1","1","1","abc");
+        Assert.assertEquals(result1.getMessage(),new Location(1,1,1).toString()+sender.getSenderName()+"abc");
+
+    }
+
+    @Command("multi")
+    public CommandResult multiTest(Location location){
+        return new CommandResult(true,location.toString());
+    }
+
+    @Command("multi1")
+    public CommandResult multiTest(Location location,@Sender CommandSender sender,String text){
+        return new CommandResult(true,location.toString()+sender.getSenderName()+text);
+    }
+
+    public class Location {
 
         int x;
         int y;
         int z;
 
+        @Generator
         public Location(int x, int y, int z) {
             this.x = x;
             this.y = y;

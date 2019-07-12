@@ -44,4 +44,11 @@ public class SenderNode extends CommandNode {
     public int hashCode() {
         return Objects.hash(allowedSender);
     }
+
+    @Override
+    public String toString() {
+        return "SenderNode{" +
+                "allowedSender=" + allowedSender +
+                '}';
+    }
 }

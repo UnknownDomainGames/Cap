@@ -4,7 +4,6 @@ import unknowndomain.command.CommandSender;
 import unknowndomain.command.argument.Argument;
 import unknowndomain.command.completion.Completer;
 
-import java.lang.reflect.Method;
 import java.util.Objects;
 
 public class ArgumentNode extends CommandNode {

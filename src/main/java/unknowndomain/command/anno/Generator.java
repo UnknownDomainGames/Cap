@@ -1,13 +1,11 @@
 package unknowndomain.command.anno;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.ElementType.PARAMETER;
-
-@Target({PARAMETER})
+@Target(ElementType.CONSTRUCTOR)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Completer {
-    String value();
+public @interface Generator {
 }
