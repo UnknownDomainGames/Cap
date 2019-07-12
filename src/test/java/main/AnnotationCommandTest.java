@@ -107,14 +107,11 @@ public class AnnotationCommandTest {
     public void buildTest() {
         HashCommandManager commandManager = new HashCommandManager();
 
-        for (unknowndomain.command.Command command : AnnotationCommand
+        AnnotationCommand
                 .getBuilder(commandManager)
                 .setArgumentManager(new SimpleArgumentManager())
                 .addCommandHandler(this)
-                .build()) {
-            if (!commandManager.hasCommand(command.name))
-                commandManager.registerCommand(command);
-        }
+                .register();
 
         CommandResult result = commandManager.executeCommand(sender, "build", "block");
 
@@ -158,14 +155,12 @@ public class AnnotationCommandTest {
 
         HashCommandManager commandManager = new HashCommandManager();
 
-        for (unknowndomain.command.Command command : AnnotationCommand
+        AnnotationCommand
                 .getBuilder(commandManager)
                 .setArgumentManager(new SimpleArgumentManager())
                 .addCommandHandler(this)
-                .build()) {
-            if (!commandManager.hasCommand(command.name))
-                commandManager.registerCommand(command);
-        }
+                .register();
+
 
         CommandResult result = commandManager.executeCommand(sender,"multi","1","1","1");
         Assert.assertEquals(result.getMessage(),new Location(1,1,1).toString());

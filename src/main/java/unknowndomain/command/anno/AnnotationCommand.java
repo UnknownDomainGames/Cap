@@ -238,8 +238,16 @@ public class AnnotationCommand extends Command {
             return this;
         }
 
-        public List<Command> build() {
+        private List<Command> build() {
             return commandHandler.stream().map(object -> parse(object)).collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll);
+        }
+
+        public void register(){
+            for(Command command : build()){
+                if(!commandManager.hasCommand(command.name))
+                    commandManager.registerCommand(command);
+            }
+
         }
 
         private List<Command> parse(Object o) {
