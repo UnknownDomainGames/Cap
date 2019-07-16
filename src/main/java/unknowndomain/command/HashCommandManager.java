@@ -1,5 +1,7 @@
 package unknowndomain.command;
 
+import unknowndomain.command.exception.CommandNotFoundException;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -18,7 +20,7 @@ public class HashCommandManager extends CommandManager {
     public CommandResult executeCommand(CommandSender sender, String command, String... args) {
         Command command1 = commandHashMap.get(command);
         if (command1 == null)
-            return new CommandResult(false, "command does not exist");
+            return new CommandResult(new CommandNotFoundException(command));
 
         if (args == null)
             args = new String[0];
@@ -38,10 +40,8 @@ public class HashCommandManager extends CommandManager {
     @Override
     public Set<String> getCompleteList(CommandSender sender, String command, String... args) {
 
-        if (args == null || args.length == 0) {
-            Set list = commandHashMap.keySet().stream().filter(commandName -> commandName.startsWith(command)).collect(Collectors.toSet());
-            return list;
-        }
+        if (args == null || args.length == 0)
+            return commandHashMap.keySet().stream().filter(commandName -> commandName.startsWith(command)).collect(Collectors.toSet());
 
         Command command1 = commandHashMap.get(command);
         if (command1 == null)

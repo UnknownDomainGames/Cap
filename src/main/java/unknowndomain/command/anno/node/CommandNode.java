@@ -25,9 +25,28 @@ public abstract class CommandNode implements Comparable<CommandNode>{
 
     public CommandNode() {}
 
+    protected Object parseResult;
+
+    public boolean parse(CommandSender sender,String command,String... arg){
+        Object result = parseArgs(sender,command,arg);
+        if(result!=null){
+            parseResult = result;
+            return true;
+        }
+        return false;
+    }
+
+    public List<Object> collect(){
+        ArrayList list = new ArrayList();
+        list.add(parseResult);
+        if(parent!=null)
+            list.addAll(parent.collect());
+        return list;
+    }
+
     public abstract int getNeedArgs();
 
-    public abstract Object parseArgs(CommandSender sender, String command, String... args);
+    protected abstract Object parseArgs(CommandSender sender,String command, String... args);
 
     public CommandNode getParent(){
         return parent;
@@ -105,6 +124,6 @@ public abstract class CommandNode implements Comparable<CommandNode>{
 
     @Override
     public int compareTo(CommandNode o) {
-        return getNeedArgs() - o.getNeedArgs();
+        return needPermission.size() - o.needPermission.size();
     }
 }

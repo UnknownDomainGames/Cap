@@ -2,13 +2,20 @@ package unknowndomain.command.exception;
 
 public class PermissionNotEnoughException extends CommandException{
 
-    public PermissionNotEnoughException(String command) {
+    private final String[] permissions;
+
+    public PermissionNotEnoughException(String command, String[] permissions) {
         super(command);
+        this.permissions = permissions;
     }
 
     @Override
     public String getMessage() {
         return "command: "+command;
+    }
+
+    public String[] getPermissions(){
+        return permissions;
     }
 
 }

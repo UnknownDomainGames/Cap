@@ -10,10 +10,10 @@ import unknowndomain.command.argument.ArgumentManager;
 import unknowndomain.command.argument.SimpleArgumentManager;
 import unknowndomain.command.completion.CompleteManager;
 import unknowndomain.command.exception.CommandException;
+import unknowndomain.command.exception.CommandWrongUseException;
 import unknowndomain.command.exception.PermissionNotEnoughException;
 import unknowndomain.permission.Permissible;
 
-import javax.management.InstanceNotFoundException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -22,7 +22,17 @@ import java.util.*;
 
 public class AnnotationCommand extends Command {
 
-    private CommandNode annotationNode = new ArgumentNode(null);
+    private CommandNode annotationNode = new ArgumentNode(null){
+        @Override
+        public int getNeedArgs() {
+            return 0;
+        }
+
+        @Override
+        public List<Object> collect() {
+            return Collections.emptyList();
+        }
+    };
 
     private AnnotationCommand(String name, String description, String helpMessage) {
         super(name, description, helpMessage);
@@ -33,30 +43,31 @@ public class AnnotationCommand extends Command {
         if (args == null || args.length == 0) {
 
             if (annotationNode.canExecuteCommand()) {
-
+                if (!hasPermission(sender.getPermissible(), annotationNode.getNeedPermission()))
+                    return new CommandResult(new PermissionNotEnoughException(this.name, annotationNode.getNeedPermission().toArray(new String[0])).fillInStackTrace());
                 return annotationNode.execute();
 
-            } else return new CommandResult(false);
+            } else return new CommandResult(new CommandWrongUseException(this.name).fillInStackTrace());
 
         } else {
-            List<ParseEntry> parseResult;
+            CommandNode parseResult;
             try {
                 parseResult = parseArgs(sender, args);
             } catch (CommandException e) {
                 return new CommandResult(e);
             }
 
-            if (parseResult.stream().map(ParseEntry::getValue).mapToInt(CommandNode::getNeedArgs).sum() != args.length) {
-                return new CommandResult(false);
+            if (sumNeedArgs(parseResult)!= args.length) {
+                return new CommandResult(new CommandWrongUseException(this.name).fillInStackTrace());
             }
 
-            ParseEntry lastEntry = parseResult.get(parseResult.size() - 1);
-
-            if (parseResult.get(parseResult.size() - 1).getValue().canExecuteCommand()) {
+            if (parseResult.canExecuteCommand()) {
                 try {
-                    if (!hasPermission(sender.getPermissible(), lastEntry.node.getNeedPermission()))
-                        return new CommandResult(new PermissionNotEnoughException(this.name));
-                    Object o = lastEntry.getValue().getMethod().invoke(lastEntry.getValue().getInstance(), parseResult.stream().map(ParseEntry::getKey).toArray());
+                    if (!hasPermission(sender.getPermissible(), parseResult.getNeedPermission()))
+                        return new CommandResult(new PermissionNotEnoughException(this.name, annotationNode.getNeedPermission().toArray(new String[0])).fillInStackTrace());
+                    List list = parseResult.collect();
+                    Collections.reverse(list);
+                    Object o = parseResult.getMethod().invoke(parseResult.getInstance(),list.toArray());
 
                     if (o instanceof CommandResult) {
                         return (CommandResult) o;
@@ -71,11 +82,36 @@ public class AnnotationCommand extends Command {
                 }
             } else {
 
-                return new CommandResult(false);
+                return new CommandResult(new CommandWrongUseException(this.name).fillInStackTrace());
 
             }
         }
-        return new CommandResult(false);
+        return new CommandResult(new CommandWrongUseException(this.name).fillInStackTrace());
+    }
+
+    private int sumNeedArgs(CommandNode node){
+        int needAges = 0;
+        CommandNode node1 = node;
+        needAges += node1.getNeedArgs();
+        while (node1.getParent()!=null){
+            node1 = node1.getParent();
+            needAges += node1.getNeedArgs();
+        }
+        return needAges;
+    }
+
+    @Override
+    public Set<String> complete(CommandSender sender, String[] args) {
+//        String[] removeLast = Arrays.copyOfRange(args, 0, args.length - 1);
+//
+//        List<ParseEntry> entries = parseArgs(sender, removeLast);
+//
+//
+//        if (entries.size() != args.length - 1)
+//            return new HashSet<>();
+//
+//
+        return super.complete(sender, args);
     }
 
     private boolean hasPermission(Permissible permissible, Collection<String> needPermission) {
@@ -86,69 +122,65 @@ public class AnnotationCommand extends Command {
         return true;
     }
 
-    private List<ParseEntry> parseArgs(CommandSender sender, String[] args) {
+    private CommandNode parseArgs(CommandSender sender, String[] args) {
         HashMap<NodeWrapper, Integer> ignore = new HashMap<>();
-
-        List<ParseEntry> result = new ArrayList<>();
-
-        List<ParseEntry> bestResult = new ArrayList<>();
 
         CommandNode node = annotationNode;
 
-        for (int index = 0; index < args.length; ) {
+        CommandNode bestResult = node;
 
-            Object o = null;
+        for (int index = 0; index < args.length; ) {
 
             int ignoreCount = 0;
 
-            for (CommandNode child : node.getChildren()) {
+            CommandNode before = node;
 
-                if (o != null)
-                    break;
+
+            for (CommandNode child : node.getChildren()) {
 
                 if (index + child.getNeedArgs() > args.length)
                     continue;
 
                 String[] needArgs = Arrays.copyOfRange(args, index, index + child.getNeedArgs());
 
-                Object parseResult = child.parseArgs(sender, this.name, needArgs);
+                boolean success = child.parse(sender, this.name, needArgs);
 
-                if (parseResult == null)
-                    continue;
+                if (success) {
+                    if (ignore.getOrDefault(new NodeWrapper(child, index), 0) > ignoreCount++)
+                        continue;
 
-                if (ignore.getOrDefault(new NodeWrapper(child, index), 0) > ignoreCount++)
-                    continue;
+                    node = child;
+                }
+                continue;
 
-                o = parseResult;
-
-                node = child;
             }
 
-            if (o == null) {
-                if (node.getParent() == null) {
-
+            if(before==node){
+                if(node.getParent()==null)
                     return bestResult;
-                }
 
-                result.remove(result.size() - 1);
-                index -= node.getNeedArgs();
+                index -=node.getNeedArgs();
                 ignore.put(new NodeWrapper(node, index), ignore.getOrDefault(node, 0) + 1);
-
                 node = node.getParent();
 
-            } else {
-                result.add(new ParseEntry(o, node));
+            }else {
                 index += node.getNeedArgs();
-
-                if (bestResult.size() < result.size()) {
-                    bestResult.clear();
-                    bestResult.addAll(result);
-                }
+                if(getParentNum(node)>=getParentNum(bestResult))
+                    bestResult = node;
             }
 
         }
 
         return bestResult;
+    }
+
+    private int getParentNum(CommandNode node){
+        int i = 0;
+        while (node.getParent()!=null){
+            i++;
+            node = node.getParent();
+        }
+        return i;
     }
 
     private class NodeWrapper {
@@ -242,12 +274,10 @@ public class AnnotationCommand extends Command {
             return commandHandler.stream().map(object -> parse(object)).collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll);
         }
 
-        public void register(){
-            for(Command command : build()){
-                if(!commandManager.hasCommand(command.name))
-                    commandManager.registerCommand(command);
-            }
-
+        public void register() {
+            build().stream()
+                    .filter(command -> !commandManager.hasCommand(command.name))
+                    .forEach(command -> commandManager.registerCommand(command));
         }
 
         private List<Command> parse(Object o) {
@@ -278,6 +308,7 @@ public class AnnotationCommand extends Command {
                     node = getChildOrCreateAndAdd(parameter, node);
                 }
 
+
                 Permission permission = method.getAnnotation(Permission.class);
                 HashSet<String> permissions = new HashSet();
                 if (permission != null)
@@ -288,6 +319,8 @@ public class AnnotationCommand extends Command {
                 node.setInstance(o);
                 node.setMethod(method);
 
+
+
                 list.add(annotationCommand);
             }
 
@@ -297,12 +330,11 @@ public class AnnotationCommand extends Command {
         private CommandNode getChildOrCreateAndAdd(Parameter type, CommandNode node) {
             Sender sender = type.getAnnotation(Sender.class);
             Required required = type.getAnnotation(Required.class);
-            Generator generator = type.getAnnotation(Generator.class);
 
             CommandNode child = null;
 
             if (sender != null)
-                child = handleSender(type.getType(), node);
+                child = handleSender(type.getType(), node, sender);
             else if (required != null) {
                 child = handleRequired(required, node);
             } else {
@@ -316,8 +348,15 @@ public class AnnotationCommand extends Command {
             return child;
         }
 
-        private SenderNode handleSender(Class<?> type, CommandNode node) {
-            CommandNode child = new SenderNode((Class<? extends CommandSender>) type);
+        private SenderNode handleSender(Class<?> type, CommandNode node, Sender sender) {
+            Class<? extends CommandSender>[] allowedSenders = sender.value();
+            CommandNode child;
+            if (allowedSenders != null && allowedSenders.length != 0) {
+                child = new SenderNode((Class<? extends CommandSender>) type);
+                return (SenderNode) foundChildOrAdd(node, child);
+            } else {
+                child = new SenderNode((Class<? extends CommandSender>) type);
+            }
             return (SenderNode) foundChildOrAdd(node, child);
         }
 
@@ -342,7 +381,16 @@ public class AnnotationCommand extends Command {
             return (ArgumentNode) foundChildOrAdd(node, parseParameter2Argument(parameter));
         }
 
-        private ArgumentNode parseParameter2Argument(Parameter parameter) {
+        private CommandNode foundChildOrAdd(CommandNode node, List<ArgumentNode> children) {
+            for (ArgumentNode argument : children) {
+                node = foundChildOrAdd(node, argument);
+            }
+            return node;
+        }
+
+        private List<ArgumentNode> parseParameter2Argument(Parameter parameter) {
+            ArrayList<ArgumentNode> argumentNodes = new ArrayList<>();
+
             Argument argument;
             ArgumentHandler argumentHandler = parameter.getAnnotation(ArgumentHandler.class);
 
@@ -369,10 +417,19 @@ public class AnnotationCommand extends Command {
 
                 if (generator != null) {
 
-                    ArgumentNode[] argumentNodes = buildArgumentNodes(noteConstructor);
+
+                    List<ArgumentNode> argumentNodeArray = buildArgumentNodes(noteConstructor);
+
+                    ArgumentNode last = argumentNodeArray.get(argumentNodeArray.size() - 1);
 
                     Constructor finalNoteConstructor = noteConstructor;
-                    return new MultiArgumentNode(objects -> {
+
+                    int args = finalNoteConstructor.getParameterCount();
+
+                    if(finalNoteConstructor.getDeclaringClass().isMemberClass())
+                        args--;
+
+                    MultiArgumentNode multiArgumentNode = new MultiArgumentNode(last.getArgument(), objects -> {
                         try {
                             if (finalNoteConstructor.getDeclaringClass().isMemberClass()) {
                                 ArrayList list = new ArrayList();
@@ -381,31 +438,29 @@ public class AnnotationCommand extends Command {
                                 return finalNoteConstructor.newInstance(list.toArray());
                             } else
                                 return finalNoteConstructor.newInstance(objects);
-                        } catch (InstantiationException e) {
-                            e.printStackTrace();
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        } catch (InvocationTargetException e) {
-                            e.printStackTrace();
+                        } catch (Exception e) {
                         }
                         return null;
-                    }, argumentNodes);
+                    }, args);
 
+                    argumentNodeArray.set(argumentNodeArray.size() - 1, multiArgumentNode);
+
+                    argumentNodes.addAll(argumentNodeArray);
                 }
 
-            }
+            }else argumentNodes.add(new ArgumentNode(argument));
 
-            if (argument == null)
+            if (argumentNodes.isEmpty())
                 if (argumentHandler != null)
                     throw new RuntimeException("argument not found: {" + parameter + "} argument:" + argumentHandler.value());
                 else
                     throw new RuntimeException("argument not found: {" + parameter + "}");
 
-            return new ArgumentNode(argument);
+            return argumentNodes;
         }
 
         private Object tryInstanceOuterClass(Class declaringClass) {
-            if(declaringClass.isMemberClass()) {
+            if (declaringClass.isMemberClass()) {
                 try {
                     return declaringClass.getConstructor(declaringClass.getDeclaringClass()).newInstance(tryInstanceOuterClass(declaringClass.getDeclaringClass()));
                 } catch (InstantiationException e) {
@@ -417,7 +472,7 @@ public class AnnotationCommand extends Command {
                 } catch (NoSuchMethodException e) {
                     e.printStackTrace();
                 }
-            }else {
+            } else {
                 try {
                     return declaringClass.getConstructor().newInstance();
                 } catch (InstantiationException e) {
@@ -454,7 +509,7 @@ public class AnnotationCommand extends Command {
             return clazz;
         }
 
-        private ArgumentNode[] buildArgumentNodes(Constructor noteConstructor) {
+        private List<ArgumentNode> buildArgumentNodes(Constructor noteConstructor) {
             ArrayList<ArgumentNode> list = new ArrayList();
 
             Class clazz = noteConstructor.getDeclaringClass();
@@ -469,10 +524,10 @@ public class AnnotationCommand extends Command {
 
             for (; i < noteConstructor.getParameters().length; i++) {
 
-                list.add(parseParameter2Argument(noteConstructor.getParameters()[i]));
+                list.addAll(parseParameter2Argument(noteConstructor.getParameters()[i]));
             }
 
-            return list.toArray(new ArgumentNode[0]);
+            return list;
         }
 
     }

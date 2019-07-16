@@ -46,14 +46,23 @@ public class ArgumentNode extends CommandNode {
                 '}';
     }
 
+    public Argument getArgument() {
+        return argument;
+    }
+
     public void setArgument(Argument argument) {
         this.argument = argument;
     }
 
     @Override
     public int compareTo(CommandNode o) {
-        if(argument.responsibleClass().equals(String.class))
+        if(argument.getName().equals("String"))
             return -1;
+        if(o instanceof ArgumentNode){
+            ArgumentNode other = (ArgumentNode) o;
+            if(other.argument.getName().equals("String")&&argument.responsibleClass().equals(String.class))
+                return 1;
+        }
         return super.compareTo(o);
     }
 

@@ -11,6 +11,11 @@ public class CommandSenderErrorException extends CommandException {
         this.commandSender = commandSender;
     }
 
+    @Override
+    public String getMessage() {
+        return "sender error";
+    }
+
     public CommandSender getCommandSender() {
         return commandSender;
     }
