@@ -2,13 +2,13 @@ package unknowndomain.command.argument;
 
 import java.util.Objects;
 
-public abstract class SingleArgument extends Argument {
+public abstract class SimpleArgument extends Argument {
 
     private String argumentName;
 
     private Class responsibleClass;
 
-    public SingleArgument(Class responsibleClass, String argumentName) {
+    public SimpleArgument(Class responsibleClass, String argumentName) {
         this.argumentName = argumentName;
         this.responsibleClass = responsibleClass;
     }
@@ -25,7 +25,7 @@ public abstract class SingleArgument extends Argument {
 
     @Override
     public String toString() {
-        return "SingleArgument{" +
+        return "SimpleArgument{" +
                 "argumentName='" + argumentName + '\'' +
                 ", responsibleClass=" + responsibleClass +
                 '}';
@@ -35,7 +35,7 @@ public abstract class SingleArgument extends Argument {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SingleArgument that = (SingleArgument) o;
+        SimpleArgument that = (SimpleArgument) o;
         return Objects.equals(argumentName, that.argumentName) &&
                 Objects.equals(responsibleClass, that.responsibleClass);
     }

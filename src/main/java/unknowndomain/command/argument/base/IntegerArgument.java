@@ -2,14 +2,12 @@ package unknowndomain.command.argument.base;
 
 
 import com.google.common.collect.Sets;
-import unknowndomain.command.CommandSender;
-import unknowndomain.command.argument.SingleArgument;
+import unknowndomain.command.argument.SimpleArgument;
 import unknowndomain.command.completion.Completer;
 
 import java.util.Optional;
-import java.util.Set;
 
-public class IntegerArgument extends SingleArgument {
+public class IntegerArgument extends SimpleArgument {
 
     public IntegerArgument() {
         super(Integer.class,"Integer");

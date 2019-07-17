@@ -12,7 +12,7 @@ import unknowndomain.command.anno.node.CommandNode;
 import unknowndomain.command.anno.node.SenderNode;
 import unknowndomain.command.argument.Argument;
 import unknowndomain.command.argument.SimpleArgumentManager;
-import unknowndomain.command.argument.SingleArgument;
+import unknowndomain.command.argument.SimpleArgument;
 import unknowndomain.command.argument.base.StringArgument;
 import unknowndomain.command.completion.Completer;
 import unknowndomain.command.exception.CommandSenderErrorException;
@@ -302,7 +302,7 @@ public class AnnotationCommandTest {
 
         SimpleArgumentManager argumentManager = new SimpleArgumentManager();
 
-        argumentManager.appendArgument(new SingleArgument(String.class,"test") {
+        argumentManager.appendArgument(new SimpleArgument(String.class,"test") {
             @Override
             public Optional parse(String arg) {
                 return Optional.of(arg);

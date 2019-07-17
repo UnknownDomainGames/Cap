@@ -1,12 +1,12 @@
 package unknowndomain.command.argument.base;
 
 import com.google.common.collect.Sets;
-import unknowndomain.command.argument.SingleArgument;
+import unknowndomain.command.argument.SimpleArgument;
 import unknowndomain.command.completion.Completer;
 
 import java.util.Optional;
 
-public class ShortArgument extends SingleArgument {
+public class ShortArgument extends SimpleArgument {
     public ShortArgument() {
         super(Short.class,"Short");
     }

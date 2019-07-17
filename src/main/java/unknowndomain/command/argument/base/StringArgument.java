@@ -1,15 +1,13 @@
 package unknowndomain.command.argument.base;
 
 import com.google.common.collect.Sets;
-import unknowndomain.command.CommandSender;
-import unknowndomain.command.argument.SingleArgument;
+import unknowndomain.command.argument.SimpleArgument;
 import unknowndomain.command.completion.Completer;
 
 import java.util.Collections;
 import java.util.Optional;
-import java.util.Set;
 
-public class StringArgument extends SingleArgument {
+public class StringArgument extends SimpleArgument {
 
     public StringArgument() {
         super(String.class, "String");
