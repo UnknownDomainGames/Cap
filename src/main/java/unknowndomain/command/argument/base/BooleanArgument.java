@@ -7,6 +7,7 @@ import unknowndomain.command.completion.Completer;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class BooleanArgument extends Argument {
     @Override
@@ -26,16 +27,11 @@ public class BooleanArgument extends Argument {
 
     @Override
     public Completer getCompleter() {
-        return new Completer() {
-            @Override
-            public String getName() {
-                return this.toString();
-            }
-
-            @Override
-            public Set<String> complete(CommandSender sender, String command, String[] args) {
-                return Sets.newHashSet("true/false");
-            }
+        return (sender, command, args) -> {
+            Set<String> completeSet = Sets.newHashSet("true", "false");
+            if (args != null && !args[args.length - 1].isEmpty())
+                return completeSet.stream().filter(completeName -> completeName.startsWith(args[args.length - 1])).collect(Collectors.toSet());
+            return completeSet;
         };
     }
 }

@@ -1,31 +1,29 @@
 package unknowndomain.command.argument.base;
 
 import com.google.common.collect.Sets;
-import unknowndomain.command.CommandSender;
 import unknowndomain.command.argument.Argument;
 import unknowndomain.command.completion.Completer;
 
 import java.util.Optional;
-import java.util.Set;
 
-public class FloatArgument extends Argument {
+public class DoubleArgument extends Argument {
     @Override
     public String getName() {
-        return "Float";
+        return "Double";
     }
 
     @Override
     public Class responsibleClass() {
-        return Float.class;
+        return Double.class;
     }
 
     @Override
     public Optional parse(String arg) {
-        return Optional.ofNullable(Float.valueOf(arg));
+        return Optional.ofNullable(Double.valueOf(arg));
     }
 
     @Override
     public Completer getCompleter() {
-        return (sender, command, args) -> Sets.newHashSet("[float]");
+        return (sender, command, args) -> Sets.newHashSet("[double]");
     }
 }

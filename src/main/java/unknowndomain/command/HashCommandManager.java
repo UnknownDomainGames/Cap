@@ -40,10 +40,10 @@ public class HashCommandManager extends CommandManager {
     @Override
     public Set<String> getCompleteList(CommandSender sender, String command, String... args) {
 
-        if (args == null || args.length == 0)
+        Command command1 = commandHashMap.get(command);
+        if ((args == null || args.length == 0)&& command1==null)
             return commandHashMap.keySet().stream().filter(commandName -> commandName.startsWith(command)).collect(Collectors.toSet());
 
-        Command command1 = commandHashMap.get(command);
         if (command1 == null)
             return new HashSet<>();
         return command1.complete(sender, args);

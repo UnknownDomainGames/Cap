@@ -2,7 +2,7 @@ package unknowndomain.command.completion;
 
 public interface CompleteManager {
 
-    void putCompleter(Completer completer);
+    void putCompleter(NamedCompleter completer);
 
     void setClassCompleter(Class clazz,Completer completer);
 

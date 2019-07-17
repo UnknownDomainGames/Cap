@@ -22,7 +22,7 @@ public class RequiredNode extends CommandNode {
 
     @Override
     public Object parseArgs(CommandSender sender, String command, String... args) {
-        if(args[0].equals(require))
+        if (args[0].equals(require))
             return require;
         return null;
     }
@@ -42,16 +42,21 @@ public class RequiredNode extends CommandNode {
 
     @Override
     public Completer getCompleter() {
-        return new Completer() {
-            @Override
-            public String getName() {
-                return this.toString();
-            }
+        return (sender, command, args) -> Sets.newHashSet(require);
+    }
 
-            @Override
-            public Set<String> complete(CommandSender sender, String command, String[] args) {
-                return Sets.newHashSet(require);
-            }
-        };
+    @Override
+    public String toString() {
+        return "RequiredNode{" +
+                "require='" + require + '\'' +
+                '}';
+    }
+
+    @Override
+    public int compareTo(CommandNode o) {
+        if (!(o instanceof RequiredNode))
+            return 1;
+        RequiredNode other = (RequiredNode) o;
+        return this.require.compareTo(other.require);
     }
 }

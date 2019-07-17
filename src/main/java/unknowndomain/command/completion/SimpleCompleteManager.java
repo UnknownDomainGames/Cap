@@ -1,30 +1,17 @@
 package unknowndomain.command.completion;
 
-import unknowndomain.command.CommandSender;
-
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Set;
 
 public class SimpleCompleteManager implements CompleteManager {
 
     private HashMap<Class, Completer> completerHashMapByClass = new HashMap<>();
     private HashMap<String, Completer> completerHashMapByName = new HashMap<>();
 
-    private static Completer noneCompleter= new Completer() {
-        @Override
-        public String getName() {
-            return this.toString();
-        }
-
-        @Override
-        public Set<String> complete(CommandSender sender, String command, String[] args) {
-            return Collections.emptySet();
-        }
-    };
+    private static Completer noneCompleter= (sender, command, args) -> Collections.emptySet();
 
     @Override
-    public void putCompleter(Completer completer) {
+    public void putCompleter(NamedCompleter completer) {
         if (completerHashMapByName.containsKey(completer.getName()))
             throw new RuntimeException("completer name already exist");
         completerHashMapByName.put(completer.getName(), completer);

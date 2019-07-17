@@ -1,5 +1,6 @@
 package main;
 
+import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Test;
 import unknowndomain.command.CommandResult;
@@ -11,6 +12,7 @@ import unknowndomain.command.anno.node.CommandNode;
 import unknowndomain.command.anno.node.SenderNode;
 import unknowndomain.command.argument.Argument;
 import unknowndomain.command.argument.SimpleArgumentManager;
+import unknowndomain.command.argument.SingleArgument;
 import unknowndomain.command.argument.base.StringArgument;
 import unknowndomain.command.completion.Completer;
 import unknowndomain.command.exception.CommandSenderErrorException;
@@ -20,7 +22,9 @@ import unknowndomain.permission.Permissible;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
 public class AnnotationCommandTest {
 
@@ -290,6 +294,95 @@ public class AnnotationCommandTest {
         public Permissible getPermissible() {
             return hashPermissible;
         }
+    }
+
+    @Test
+    public void completeTest(){
+        HashCommandManager commandManager = new HashCommandManager();
+
+        SimpleArgumentManager argumentManager = new SimpleArgumentManager();
+
+        argumentManager.appendArgument(new SingleArgument(String.class,"test") {
+            @Override
+            public Optional parse(String arg) {
+                return Optional.of(arg);
+            }
+
+            @Override
+            public Completer getCompleter() {
+                return (sender, command, args) -> {
+                    String s = args[args.length - 1];
+                    if (s.isEmpty())
+                        return Sets.newHashSet("[test]");
+                    else return Collections.emptySet();
+                };
+            }
+        });
+
+        argumentManager.setClassDefaultArgument(new StringArgument(){
+            @Override
+            public Completer getCompleter() {
+                return (sender, command, args) -> {
+                    String s = args[args.length - 1];
+                    if (s.isEmpty())
+                        return Sets.newHashSet("[test2]");
+                    else return Collections.emptySet();
+                };
+            }
+        });
+
+        AnnotationCommand
+                .getBuilder(commandManager)
+                .setArgumentManager(argumentManager)
+                .addCommandHandler(new CompleteTestClass())
+                .register();
+
+
+        Set<String> seta = commandManager.getCompleteList(sender,"a");
+
+        Assert.assertEquals(seta.toArray().length,1);
+        Assert.assertEquals(seta.toArray()[0],"acommand");
+
+        Set<String> setb = commandManager.getCompleteList(sender,"b");
+        Assert.assertEquals(setb.toArray().length,1);
+        Assert.assertEquals(setb.toArray()[0],"bcommand");
+
+        Set<String> completeList = commandManager.getCompleteList(sender,"acommand","");
+
+        String[] completeArray = completeList.toArray(new String[0]);
+
+        Assert.assertEquals(completeArray.length,2);
+        Assert.assertEquals(completeArray[0],"test");
+        Assert.assertEquals(completeArray[1],"[test2]");
+
+        Set<String> completeList2 = commandManager.getCompleteList(sender,"bcommand","");
+
+        completeArray = completeList2.toArray(new String[0]);
+
+        Assert.assertEquals(completeArray.length,1);
+        Assert.assertEquals(completeArray[0],"[test]");
+    }
+
+    public class CompleteTestClass{
+
+        @Command("acommand")
+        public void command1(String a){
+
+        }
+
+        @Command("bcommand")
+        public void command2(@ArgumentHandler("test") String a){
+
+        }
+
+        @Command("acommand")
+        public void command3(@Required("test") String a){
+
+        }
+
+
+
+
     }
 
 

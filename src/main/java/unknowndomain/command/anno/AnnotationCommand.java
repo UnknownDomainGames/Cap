@@ -22,7 +22,7 @@ import java.util.*;
 
 public class AnnotationCommand extends Command {
 
-    private CommandNode annotationNode = new ArgumentNode(null){
+    private CommandNode annotationNode = new ArgumentNode(null) {
         @Override
         public int getNeedArgs() {
             return 0;
@@ -57,7 +57,7 @@ public class AnnotationCommand extends Command {
                 return new CommandResult(e);
             }
 
-            if (sumNeedArgs(parseResult)!= args.length) {
+            if (sumNeedArgs(parseResult) != args.length) {
                 return new CommandResult(new CommandWrongUseException(this.name).fillInStackTrace());
             }
 
@@ -67,7 +67,7 @@ public class AnnotationCommand extends Command {
                         return new CommandResult(new PermissionNotEnoughException(this.name, annotationNode.getNeedPermission().toArray(new String[0])).fillInStackTrace());
                     List list = parseResult.collect();
                     Collections.reverse(list);
-                    Object o = parseResult.getMethod().invoke(parseResult.getInstance(),list.toArray());
+                    Object o = parseResult.getMethod().invoke(parseResult.getInstance(), list.toArray());
 
                     if (o instanceof CommandResult) {
                         return (CommandResult) o;
@@ -89,11 +89,11 @@ public class AnnotationCommand extends Command {
         return new CommandResult(new CommandWrongUseException(this.name).fillInStackTrace());
     }
 
-    private int sumNeedArgs(CommandNode node){
+    private int sumNeedArgs(CommandNode node) {
         int needAges = 0;
         CommandNode node1 = node;
         needAges += node1.getNeedArgs();
-        while (node1.getParent()!=null){
+        while (node1.getParent() != null) {
             node1 = node1.getParent();
             needAges += node1.getNeedArgs();
         }
@@ -102,16 +102,20 @@ public class AnnotationCommand extends Command {
 
     @Override
     public Set<String> complete(CommandSender sender, String[] args) {
-//        String[] removeLast = Arrays.copyOfRange(args, 0, args.length - 1);
-//
-//        List<ParseEntry> entries = parseArgs(sender, removeLast);
-//
-//
-//        if (entries.size() != args.length - 1)
-//            return new HashSet<>();
-//
-//
-        return super.complete(sender, args);
+        String[] removeLast = Arrays.copyOfRange(args, 0, args.length - 1);
+
+        CommandNode result;
+        if (removeLast.length == 0) {
+            result = annotationNode;
+        } else
+            result = parseArgs(sender, removeLast);
+
+        HashSet<String> set = new HashSet<>();
+
+        for (CommandNode child : result.getChildren()) {
+            set.addAll(child.getCompleter().complete(sender, this.name, args));
+        }
+        return set;
     }
 
     private boolean hasPermission(Permissible permissible, Collection<String> needPermission) {
@@ -155,17 +159,17 @@ public class AnnotationCommand extends Command {
 
             }
 
-            if(before==node){
-                if(node.getParent()==null)
+            if (before == node) {
+                if (node.getParent() == null)
                     return bestResult;
 
-                index -=node.getNeedArgs();
+                index -= node.getNeedArgs();
                 ignore.put(new NodeWrapper(node, index), ignore.getOrDefault(node, 0) + 1);
                 node = node.getParent();
 
-            }else {
+            } else {
                 index += node.getNeedArgs();
-                if(getParentNum(node)>=getParentNum(bestResult))
+                if (getParentNum(node) >= getParentNum(bestResult))
                     bestResult = node;
             }
 
@@ -174,9 +178,9 @@ public class AnnotationCommand extends Command {
         return bestResult;
     }
 
-    private int getParentNum(CommandNode node){
+    private int getParentNum(CommandNode node) {
         int i = 0;
-        while (node.getParent()!=null){
+        while (node.getParent() != null) {
             i++;
             node = node.getParent();
         }
@@ -282,7 +286,7 @@ public class AnnotationCommand extends Command {
 
         private List<Command> parse(Object o) {
 
-            ArrayList list = new ArrayList();
+            ArrayList<Command> list = new ArrayList();
 
             for (Method method : o.getClass().getMethods()) {
 
@@ -293,8 +297,15 @@ public class AnnotationCommand extends Command {
 
                 Command command = commandManager.getCommand(commandAnnotation.value());
 
+
                 if (command != null && !(command instanceof AnnotationCommand)) {
                     throw new RuntimeException("command already exist " + command.name + " and not AnnotationCommand");
+                }
+                if(command==null){
+                    for(Command parsedCommand : list){
+                        if(parsedCommand.name.equals(commandAnnotation.value()))
+                            command = parsedCommand;
+                    }
                 }
 
                 AnnotationCommand annotationCommand = (AnnotationCommand) command;
@@ -318,7 +329,6 @@ public class AnnotationCommand extends Command {
 
                 node.setInstance(o);
                 node.setMethod(method);
-
 
 
                 list.add(annotationCommand);
@@ -426,7 +436,7 @@ public class AnnotationCommand extends Command {
 
                     int args = finalNoteConstructor.getParameterCount();
 
-                    if(finalNoteConstructor.getDeclaringClass().isMemberClass())
+                    if (finalNoteConstructor.getDeclaringClass().isMemberClass())
                         args--;
 
                     MultiArgumentNode multiArgumentNode = new MultiArgumentNode(last.getArgument(), objects -> {
@@ -448,7 +458,7 @@ public class AnnotationCommand extends Command {
                     argumentNodes.addAll(argumentNodeArray);
                 }
 
-            }else argumentNodes.add(new ArgumentNode(argument));
+            } else argumentNodes.add(new ArgumentNode(argument));
 
             if (argumentNodes.isEmpty())
                 if (argumentHandler != null)

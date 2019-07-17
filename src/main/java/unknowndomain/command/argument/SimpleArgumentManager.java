@@ -8,7 +8,7 @@ import java.util.List;
 
 public class SimpleArgumentManager implements ArgumentManager{
 
-    private static List<Argument> baseArguments = Lists.newArrayList(new IntegerArgument(),new StringArgument(),new BooleanArgument(),new FloatArgument());
+    private static List<Argument> baseArguments = Lists.newArrayList(new IntegerArgument(),new StringArgument(),new BooleanArgument(),new FloatArgument(),new DoubleArgument(),new LongArgument(),new ShortArgument());
 
     private HashMap<Class, Argument> argumentByClass = new HashMap<>();
     private HashMap<String, Argument> argumentByName = new HashMap<>();
