@@ -1,13 +1,13 @@
 package main;
 
-import org.junit.Assert;
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import unknowndomain.permission.Permissible;
 import unknowndomain.permission.HashPermissible;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class HashPermissibleTest {
 
@@ -22,13 +22,13 @@ public class HashPermissibleTest {
         Thread thread = new Thread(()-> falsePermissions.forEach(permission->permissible.setPermission(permission,false)));
         thread.start();
 
-        truePermissions.forEach(permission->Assert.assertEquals(permissible.hasPermission(permission),true));
+        truePermissions.forEach(permission-> assertTrue(permissible.hasPermission(permission)));
 
         List<String> parentTestPermissions = getRandomPermissions();
         Permissible permissible2 = new HashPermissible();
         parentTestPermissions.stream().filter(s->s.indexOf('.')>0).forEach(s->permissible2.setPermission(s.substring(0,s.indexOf('.')),true));
-        parentTestPermissions.stream().filter(s->s.indexOf('.')>0).forEach(s->Assert.assertEquals(permissible2.hasPermission(s),true));
-        parentTestPermissions.stream().filter(s->s.indexOf('.')<=0).forEach(s->Assert.assertEquals(permissible2.hasPermission(s),false));
+        parentTestPermissions.stream().filter(s->s.indexOf('.')>0).forEach(s-> assertTrue(permissible2.hasPermission(s)));
+        parentTestPermissions.stream().filter(s->s.indexOf('.')<=0).forEach(s-> assertFalse(permissible2.hasPermission(s)));
     }
 
     private List<String> getRandomPermissions(){

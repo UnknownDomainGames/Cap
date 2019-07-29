@@ -1,8 +1,7 @@
 package main;
 
 import com.google.common.collect.Sets;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import unknowndomain.command.CommandResult;
 import unknowndomain.command.CommandSender;
 import unknowndomain.command.HashCommandManager;
@@ -25,6 +24,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AnnotationCommandTest {
 
@@ -57,11 +58,11 @@ public class AnnotationCommandTest {
         CommandResult result = annotationCommand.execute(new TestSender2(), new String[]{"abc"});
         CommandResult result1 = annotationCommand.execute(sender, new String[]{"abc"});
 
-        Assert.assertFalse(result.isSuccess());
-        Assert.assertTrue(result1.isSuccess());
+        assertFalse(result.isSuccess());
+        assertTrue(result1.isSuccess());
 
-        Assert.assertEquals(result1.getMessage(), sender.getSenderName() + " --- " + "abc");
-        Assert.assertEquals(result.getCause().getClass(), CommandSenderErrorException.class);
+        assertEquals(sender.getSenderName() + " --- " + "abc", result1.getMessage());
+        assertEquals(CommandSenderErrorException.class, result.getCause().getClass());
     }
 
     public CommandResult senderTest(CommandSender sender, String text) {
@@ -80,20 +81,20 @@ public class AnnotationCommandTest {
 
         CommandResult result = commandManager.executeCommand(sender, "build", "block");
 
-        Assert.assertTrue(result.isSuccess());
-        Assert.assertEquals(result.getMessage(), "block");
+        assertTrue(result.isSuccess());
+        assertEquals(result.getMessage(), "block");
 
         CommandResult result1 = commandManager.executeCommand(sender, "build2", "1");
 
-        Assert.assertTrue(result1.isSuccess());
-        Assert.assertEquals(result1.getMessage(), "12");
+        assertTrue(result1.isSuccess());
+        assertEquals(result1.getMessage(), "12");
 
         CommandResult result2 = commandManager.executeCommand(sender, "build3", "test", "1");
-        Assert.assertTrue(result2.isSuccess());
-        Assert.assertEquals(result2.getMessage(), "12");
+        assertTrue(result2.isSuccess());
+        assertEquals(result2.getMessage(), "12");
 
         CommandResult result3 = commandManager.executeCommand(sender, "build3", "tes1t", "1");
-        Assert.assertFalse(result3.isSuccess());
+        assertFalse(result3.isSuccess());
 
     }
 
@@ -110,7 +111,7 @@ public class AnnotationCommandTest {
 
     @Command("build3")
     public CommandResult buildTest(@Sender CommandSender sender, @Required("test") String a, Integer text) {
-        Assert.assertEquals(a, "test");
+        assertEquals(a, "test");
         return new CommandResult(true, text + "2");
     }
 
@@ -128,10 +129,10 @@ public class AnnotationCommandTest {
 
 
         CommandResult result = commandManager.executeCommand(sender, "multi", "1", "1", "1");
-        Assert.assertEquals(result.getMessage(), new Location(1, 1, 1).toString());
+        assertEquals(result.getMessage(), new Location(1, 1, 1).toString());
 
         CommandResult result1 = commandManager.executeCommand(sender, "multi1", "1", "1", "1", "abc");
-        Assert.assertEquals(result1.getMessage(), new Location(1, 1, 1).toString() + sender.getSenderName() + "abc");
+        assertEquals(result1.getMessage(), new Location(1, 1, 1).toString() + sender.getSenderName() + "abc");
 
     }
 
@@ -161,16 +162,16 @@ public class AnnotationCommandTest {
                 .register();
 
         CommandResult result = commandManager.executeCommand(sender, "permission");
-        Assert.assertTrue(result.isSuccess());
+        assertTrue(result.isSuccess());
 
         CommandResult result1 = commandManager.executeCommand(new TestSender2(), "permission");
-        Assert.assertFalse(result1.isSuccess());
+        assertFalse(result1.isSuccess());
 
         CommandResult result2 = commandManager.executeCommand(sender, "permission1", "");
-        Assert.assertTrue(result2.isSuccess());
+        assertTrue(result2.isSuccess());
 
         CommandResult result3 = commandManager.executeCommand(new TestSender2(), "permission1", "");
-        Assert.assertFalse(result3.isSuccess());
+        assertFalse(result3.isSuccess());
     }
 
     @Command("permission")
@@ -217,7 +218,7 @@ public class AnnotationCommandTest {
                 .register();
 
         CommandResult result = commandManager.executeCommand(sender, "argument", "test");
-        Assert.assertEquals(result.getMessage(), "test1");
+        assertEquals(result.getMessage(), "test1");
     }
 
     public class ArgumentHandlerCommandHandler {
@@ -297,12 +298,12 @@ public class AnnotationCommandTest {
     }
 
     @Test
-    public void completeTest(){
+    public void completeTest() {
         HashCommandManager commandManager = new HashCommandManager();
 
         SimpleArgumentManager argumentManager = new SimpleArgumentManager();
 
-        argumentManager.appendArgument(new SimpleArgument(String.class,"test") {
+        argumentManager.appendArgument(new SimpleArgument(String.class, "test") {
             @Override
             public Optional parse(String arg) {
                 return Optional.of(arg);
@@ -319,7 +320,7 @@ public class AnnotationCommandTest {
             }
         });
 
-        argumentManager.setClassDefaultArgument(new StringArgument(){
+        argumentManager.setClassDefaultArgument(new StringArgument() {
             @Override
             public Completer getCompleter() {
                 return (sender, command, args) -> {
@@ -338,49 +339,47 @@ public class AnnotationCommandTest {
                 .register();
 
 
-        Set<String> seta = commandManager.getCompleteList(sender,"a");
+        Set<String> seta = commandManager.getCompleteList(sender, "a");
 
-        Assert.assertEquals(seta.toArray().length,1);
-        Assert.assertEquals(seta.toArray()[0],"acommand");
+        assertEquals(seta.toArray().length, 1);
+        assertEquals(seta.toArray()[0], "acommand");
 
-        Set<String> setb = commandManager.getCompleteList(sender,"b");
-        Assert.assertEquals(setb.toArray().length,1);
-        Assert.assertEquals(setb.toArray()[0],"bcommand");
+        Set<String> setb = commandManager.getCompleteList(sender, "b");
+        assertEquals(setb.toArray().length, 1);
+        assertEquals(setb.toArray()[0], "bcommand");
 
-        Set<String> completeList = commandManager.getCompleteList(sender,"acommand","");
+        Set<String> completeList = commandManager.getCompleteList(sender, "acommand", "");
 
         String[] completeArray = completeList.toArray(new String[0]);
 
-        Assert.assertEquals(completeArray.length,2);
-        Assert.assertEquals(completeArray[0],"test");
-        Assert.assertEquals(completeArray[1],"[test2]");
+        assertEquals(completeArray.length, 2);
+        assertEquals(completeArray[0], "test");
+        assertEquals(completeArray[1], "[test2]");
 
-        Set<String> completeList2 = commandManager.getCompleteList(sender,"bcommand","");
+        Set<String> completeList2 = commandManager.getCompleteList(sender, "bcommand", "");
 
         completeArray = completeList2.toArray(new String[0]);
 
-        Assert.assertEquals(completeArray.length,1);
-        Assert.assertEquals(completeArray[0],"[test]");
+        assertEquals(completeArray.length, 1);
+        assertEquals(completeArray[0], "[test]");
     }
 
-    public class CompleteTestClass{
+    public class CompleteTestClass {
 
         @Command("acommand")
-        public void command1(String a){
+        public void command1(String a) {
 
         }
 
         @Command("bcommand")
-        public void command2(@ArgumentHandler("test") String a){
+        public void command2(@ArgumentHandler("test") String a) {
 
         }
 
         @Command("acommand")
-        public void command3(@Required("test") String a){
+        public void command3(@Required("test") String a) {
 
         }
-
-
 
 
     }
