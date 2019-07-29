@@ -13,9 +13,13 @@ public interface CommandManager {
 
     boolean hasCommand(String command);
 
-    void executeCommand(CommandSender sender, String command, String... args);
+    void execute(CommandSender sender, String rawCommand);
 
-    List<String> getCompleteList(CommandSender sender, String command, String... args);
+    void execute(CommandSender sender, String command, String... args);
+
+    List<String> complete(CommandSender sender, String rawCommand);
+
+    List<String> complete(CommandSender sender, String command, String... args);
 
     @FunctionalInterface
     interface UncaughtExceptionHandler {

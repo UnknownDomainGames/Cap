@@ -10,6 +10,7 @@ public class SimpleCommandManager implements CommandManager {
     private final Map<String, Command> commands = new HashMap<>();
 
     private UncaughtExceptionHandler uncaughtExceptionHandler = (e, sender, command, args) -> e.printStackTrace();
+    private CommandResolver resolver;
 
     @Override
     public void registerCommand(Command command) {
@@ -29,7 +30,13 @@ public class SimpleCommandManager implements CommandManager {
     }
 
     @Override
-    public void executeCommand(CommandSender sender, String command, String... args) {
+    public void execute(CommandSender sender, String rawCommand) {
+        CommandResolver.Result result = resolver.resolve(rawCommand);
+        execute(sender, result.command, result.args);
+    }
+
+    @Override
+    public void execute(CommandSender sender, String command, String... args) {
         Command commandInstance = commands.get(command);
         if (commandInstance == null)
             throw new CommandNotFoundException(command);
@@ -49,7 +56,13 @@ public class SimpleCommandManager implements CommandManager {
     }
 
     @Override
-    public List<String> getCompleteList(CommandSender sender, String command, String... args) {
+    public List<String> complete(CommandSender sender, String rawCommand) {
+        CommandResolver.Result result = resolver.resolve(rawCommand);
+        return complete(sender, result.command, result.args);
+    }
+
+    @Override
+    public List<String> complete(CommandSender sender, String command, String... args) {
         Command commandInstance = commands.get(command);
         if ((args == null || args.length == 0) && commandInstance == null)
             return commands.keySet().stream().filter(commandName -> commandName.startsWith(command)).collect(Collectors.toList());
@@ -67,5 +80,9 @@ public class SimpleCommandManager implements CommandManager {
 
     public void setUncaughtExceptionHandler(UncaughtExceptionHandler uncaughtExceptionHandler) {
         this.uncaughtExceptionHandler = uncaughtExceptionHandler;
+    }
+
+    public void setResolver(CommandResolver resolver) {
+        this.resolver = resolver;
     }
 }
