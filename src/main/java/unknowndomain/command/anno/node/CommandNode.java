@@ -1,6 +1,5 @@
 package unknowndomain.command.anno.node;
 
-import unknowndomain.command.CommandResult;
 import unknowndomain.command.CommandSender;
 import unknowndomain.command.completion.Completer;
 import unknowndomain.command.exception.CommandException;
@@ -9,7 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
-public abstract class CommandNode implements Comparable<CommandNode>{
+public abstract class CommandNode implements Comparable<CommandNode> {
 
     private CommandNode parent;
 
@@ -23,48 +22,49 @@ public abstract class CommandNode implements Comparable<CommandNode>{
 
     private Completer completer;
 
-    public CommandNode() {}
+    public CommandNode() {
+    }
 
     protected Object parseResult;
 
-    public boolean parse(CommandSender sender,String command,String... arg){
-        Object result = parseArgs(sender,command,arg);
-        if(result!=null){
+    public boolean parse(CommandSender sender, String command, String... arg) {
+        Object result = parseArgs(sender, command, arg);
+        if (result != null) {
             parseResult = result;
             return true;
         }
         return false;
     }
 
-    public List<Object> collect(){
+    public List<Object> collect() {
         ArrayList list = new ArrayList();
         list.add(parseResult);
-        if(parent!=null)
+        if (parent != null)
             list.addAll(parent.collect());
         return list;
     }
 
     public abstract int getNeedArgs();
 
-    protected abstract Object parseArgs(CommandSender sender,String command, String... args);
+    protected abstract Object parseArgs(CommandSender sender, String command, String... args);
 
-    public CommandNode getParent(){
+    public CommandNode getParent() {
         return parent;
     }
 
-    public Collection<CommandNode> getChildren(){
+    public Collection<CommandNode> getChildren() {
         return children;
     }
 
-    public void addChild(CommandNode commandNode){
+    public void addChild(CommandNode commandNode) {
         commandNode.setParent(this);
         this.children.add(commandNode);
     }
 
     public abstract boolean equals(Object obj);
 
-    public boolean canExecuteCommand(){
-        return getMethod()!=null;
+    public boolean canExecuteCommand() {
+        return getMethod() != null;
     }
 
     protected void setParent(CommandNode parent) {
@@ -95,23 +95,15 @@ public abstract class CommandNode implements Comparable<CommandNode>{
         this.needPermission = needPermission;
     }
 
-    public CommandResult execute(Object... args){
+    public void execute(Object... args) {
         try {
-            Object result = method.invoke(instance,args);
-            if(result instanceof CommandResult)
-                return (CommandResult) result;
-            else if(result instanceof Boolean){
-                return new CommandResult((Boolean) result);
-            }else return new CommandResult(true);
-
+            method.invoke(instance, args);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
             e.printStackTrace();
-        }catch (CommandException e){
-            return new CommandResult(e);
+        } catch (CommandException e) {
         }
-        return new CommandResult(false,"unknown reason");
     }
 
     public Completer getCompleter() {

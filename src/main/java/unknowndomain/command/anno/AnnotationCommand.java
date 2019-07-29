@@ -2,14 +2,13 @@ package unknowndomain.command.anno;
 
 import unknowndomain.command.Command;
 import unknowndomain.command.CommandManager;
-import unknowndomain.command.CommandResult;
 import unknowndomain.command.CommandSender;
 import unknowndomain.command.anno.node.*;
 import unknowndomain.command.argument.Argument;
 import unknowndomain.command.argument.ArgumentManager;
 import unknowndomain.command.argument.SimpleArgumentManager;
 import unknowndomain.command.completion.CompleteManager;
-import unknowndomain.command.exception.CommandException;
+import unknowndomain.command.exception.CommandNotFoundException;
 import unknowndomain.command.exception.CommandWrongUseException;
 import unknowndomain.command.exception.PermissionNotEnoughException;
 import unknowndomain.permission.Permissible;
@@ -38,53 +37,41 @@ public class AnnotationCommand extends Command {
         super(name, description, helpMessage);
     }
 
-    public CommandResult execute(CommandSender sender, String[] args) {
+    public void execute(CommandSender sender, String[] args) {
 
         if (args == null || args.length == 0) {
 
             if (annotationNode.canExecuteCommand()) {
-                if (!hasPermission(sender.getPermissible(), annotationNode.getNeedPermission()))
-                    return CommandResult.failure(new PermissionNotEnoughException(this.name, annotationNode.getNeedPermission().toArray(new String[0])).fillInStackTrace());
-                return annotationNode.execute();
+                if (!hasPermission(sender, annotationNode.getNeedPermission()))
+                    throw new PermissionNotEnoughException(getName(), annotationNode.getNeedPermission().toArray(new String[0]));
+                annotationNode.execute();
 
-            } else return CommandResult.failure(new CommandWrongUseException(this.name).fillInStackTrace());
+            } else throw new CommandWrongUseException(getName());
 
         } else {
-            CommandNode parseResult;
-            try {
-                parseResult = parseArgs(sender, args);
-            } catch (CommandException e) {
-                return CommandResult.failure(e);
-            }
+            CommandNode parseResult = parseArgs(sender, args);
 
             if (sumNeedArgs(parseResult) != args.length) {
-                return CommandResult.failure(new CommandWrongUseException(this.name).fillInStackTrace());
+                throw new CommandWrongUseException(getName());
             }
 
             if (parseResult.canExecuteCommand()) {
                 try {
-                    if (!hasPermission(sender.getPermissible(), parseResult.getNeedPermission()))
-                        return CommandResult.failure(new PermissionNotEnoughException(this.name, annotationNode.getNeedPermission().toArray(new String[0])).fillInStackTrace());
+                    if (!hasPermission(sender, parseResult.getNeedPermission()))
+                        throw new PermissionNotEnoughException(getName(), annotationNode.getNeedPermission().toArray(new String[0]));
                     List list = parseResult.collect();
                     Collections.reverse(list);
-                    Object o = parseResult.getMethod().invoke(parseResult.getInstance(), list.toArray());
-
-                    if (o instanceof CommandResult) {
-                        return (CommandResult) o;
-                    } else return CommandResult.success();
-
+                    parseResult.getMethod().invoke(parseResult.getInstance(), list.toArray());
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 } catch (InvocationTargetException e) {
                     e.printStackTrace();
                 }
             } else {
-
-                return CommandResult.failure(new CommandWrongUseException(this.name).fillInStackTrace());
-
+                throw new CommandWrongUseException(getName());
             }
         }
-        return CommandResult.failure(new CommandWrongUseException(this.name).fillInStackTrace());
+        throw new CommandWrongUseException(getName());
     }
 
     private int sumNeedArgs(CommandNode node) {
@@ -111,9 +98,14 @@ public class AnnotationCommand extends Command {
         List<String> list = new ArrayList<>();
 
         for (CommandNode child : result.getChildren()) {
-            list.addAll(child.getCompleter().complete(sender, this.name, args));
+            list.addAll(child.getCompleter().complete(sender, getName(), args));
         }
         return list;
+    }
+
+    @Override
+    public boolean handleUncaughtException(Exception e, CommandSender sender, String[] args) {
+        return false;
     }
 
     private boolean hasPermission(Permissible permissible, Collection<String> needPermission) {
@@ -145,7 +137,7 @@ public class AnnotationCommand extends Command {
 
                 String[] needArgs = Arrays.copyOfRange(args, index, index + child.getNeedArgs());
 
-                boolean success = child.parse(sender, this.name, needArgs);
+                boolean success = child.parse(sender, getName(), needArgs);
 
                 if (success) {
                     if (ignore.getOrDefault(new NodeWrapper(child, index), 0) > ignoreCount++)
@@ -278,7 +270,7 @@ public class AnnotationCommand extends Command {
 
         public void register() {
             build().stream()
-                    .filter(command -> !commandManager.hasCommand(command.name))
+                    .filter(command -> !commandManager.hasCommand(command.getName()))
                     .forEach(command -> commandManager.registerCommand(command));
         }
 
@@ -293,15 +285,15 @@ public class AnnotationCommand extends Command {
                 if (commandAnnotation == null)
                     continue;
 
-                Command command = commandManager.getCommand(commandAnnotation.value());
+                Command command = commandManager.getCommand(commandAnnotation.value()).orElseThrow(() -> new CommandNotFoundException(commandAnnotation.value()));
 
 
                 if (command != null && !(command instanceof AnnotationCommand)) {
-                    throw new RuntimeException("command already exist " + command.name + " and not AnnotationCommand");
+                    throw new RuntimeException("command already exist " + command.getName() + " and not AnnotationCommand");
                 }
                 if (command == null) {
                     for (Command parsedCommand : list) {
-                        if (parsedCommand.name.equals(commandAnnotation.value()))
+                        if (parsedCommand.getName().equals(commandAnnotation.value()))
                             command = parsedCommand;
                     }
                 }

@@ -2,12 +2,9 @@ package unknowndomain.command;
 
 import unknowndomain.permission.Permissible;
 
-public interface CommandSender {
+public interface CommandSender extends Permissible {
 
     void sendMessage(String message);
 
     String getSenderName();
-
-    Permissible getPermissible();
-
 }

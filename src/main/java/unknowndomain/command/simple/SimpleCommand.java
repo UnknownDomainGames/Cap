@@ -1,7 +1,6 @@
 package unknowndomain.command.simple;
 
 import unknowndomain.command.Command;
-import unknowndomain.command.CommandResult;
 import unknowndomain.command.CommandSender;
 
 import java.util.Collections;
@@ -11,6 +10,7 @@ public class SimpleCommand extends Command {
 
     private CommandExecutor executor;
     private CommandCompleter completer;
+    private CommandUncaughtExceptionHandler uncaughtExceptionHandler;
 
     public SimpleCommand(String name) {
         super(name);
@@ -22,10 +22,26 @@ public class SimpleCommand extends Command {
     }
 
     @Override
-    public CommandResult execute(CommandSender executor, String[] args) {
-        if (this.executor == null)
-            return new CommandResult(false, "no executor in " + this.name);
-        return this.executor.execute(executor, this, args);
+    public void execute(CommandSender sender, String[] args) throws Exception {
+        if (sender != null) {
+            executor.execute(sender, this, args);
+        }
+    }
+
+    @Override
+    public List<String> complete(CommandSender sender, String[] args) {
+        if (completer == null) {
+            return Collections.emptyList();
+        }
+
+        return completer.complete(sender, this, args);
+    }
+
+    @Override
+    public boolean handleUncaughtException(Exception e, CommandSender sender, String[] args) {
+        if (uncaughtExceptionHandler == null)
+            return false;
+        return uncaughtExceptionHandler.handleUncaughtException(e, sender, this, args);
     }
 
     public void setExecutor(CommandExecutor executor) {
@@ -36,12 +52,7 @@ public class SimpleCommand extends Command {
         this.completer = completer;
     }
 
-    @Override
-    public List<String> complete(CommandSender sender, String[] args) {
-        if(completer == null) {
-            return Collections.emptyList();
-        }
-
-        return completer.complete(sender, this, args);
+    public void setUncaughtExceptionHandler(CommandUncaughtExceptionHandler uncaughtExceptionHandler) {
+        this.uncaughtExceptionHandler = uncaughtExceptionHandler;
     }
 }

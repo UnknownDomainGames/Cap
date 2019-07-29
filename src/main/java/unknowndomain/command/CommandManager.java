@@ -1,19 +1,24 @@
 package unknowndomain.command;
 
-import java.util.Set;
+import java.util.List;
+import java.util.Optional;
 
-public abstract class CommandManager {
+public interface CommandManager {
 
-    public abstract void registerCommand(Command command);
+    void registerCommand(Command command);
 
-    public abstract CommandResult executeCommand(CommandSender sender, String command, String... args);
+    void unregisterCommand(String command);
 
-    public abstract Command getCommand(String command);
+    Optional<Command> getCommand(String command);
 
-    public abstract boolean hasCommand(String command);
+    boolean hasCommand(String command);
 
-    public abstract Set<String> getCompleteList(CommandSender sender, String command, String... args);
+    void executeCommand(CommandSender sender, String command, String... args);
 
-    public abstract void unregisterCommand(String command);
+    List<String> getCompleteList(CommandSender sender, String command, String... args);
 
+    @FunctionalInterface
+    interface UncaughtExceptionHandler {
+        void handle(Exception e, CommandSender sender, Command command, String[] args);
+    }
 }

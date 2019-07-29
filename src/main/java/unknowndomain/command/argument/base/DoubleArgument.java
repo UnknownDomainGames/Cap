@@ -1,9 +1,11 @@
 package unknowndomain.command.argument.base;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import unknowndomain.command.argument.Argument;
 import unknowndomain.command.completion.Completer;
 
+import java.util.List;
 import java.util.Optional;
 
 public class DoubleArgument extends Argument {
@@ -24,6 +26,6 @@ public class DoubleArgument extends Argument {
 
     @Override
     public Completer getCompleter() {
-        return (sender, command, args) -> Sets.newHashSet("[double]");
+        return (sender, command, args) -> Lists.newArrayList("[double]");
     }
 }

@@ -4,7 +4,7 @@ import java.util.*;
 
 public abstract class Command {
 
-    public final String name;
+    private final String name;
     private String description;
     private String helpMessage;
 
@@ -22,9 +22,15 @@ public abstract class Command {
         this.helpMessage = helpMessage;
     }
 
-    public abstract CommandResult execute(CommandSender sender, String[] args);
+    public abstract void execute(CommandSender sender, String[] args) throws Exception;
 
     public abstract List<String> complete(CommandSender sender, String[] args);
+
+    public abstract boolean handleUncaughtException(Exception e, CommandSender sender, String[] args);
+
+    public String getName() {
+        return name;
+    }
 
     public String getDescription() {
         return description;

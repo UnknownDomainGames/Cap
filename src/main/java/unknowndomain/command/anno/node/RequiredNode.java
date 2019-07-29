@@ -1,5 +1,6 @@
 package unknowndomain.command.anno.node;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import unknowndomain.command.CommandSender;
 import unknowndomain.command.completion.Completer;
@@ -42,7 +43,7 @@ public class RequiredNode extends CommandNode {
 
     @Override
     public Completer getCompleter() {
-        return (sender, command, args) -> Sets.newHashSet(require);
+        return (sender, command, args) -> Lists.newArrayList(require);
     }
 
     @Override
