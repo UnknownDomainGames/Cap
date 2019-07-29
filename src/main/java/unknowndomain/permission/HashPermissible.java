@@ -1,16 +1,16 @@
 package unknowndomain.permission;
 
-import unknowndomain.permission.Permissible;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class HashPermissible implements Permissible {
 
-    private HashMap<String, Boolean> permissionMap = new HashMap<>();
+    private final Map<String, Boolean> permissionMap = new HashMap<>();
 
-    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
+    private final ReadWriteLock lock = new ReentrantReadWriteLock(true);
 
     @Override
     public boolean hasPermission(String permission) {
@@ -20,11 +20,11 @@ public class HashPermissible implements Permissible {
             lock.readLock().lock();
             if (permissionMap.containsKey(permission))
                 return permissionMap.get(permission);
-            while(true){
+            while (true) {
                 int lastDot = permission.lastIndexOf('.');
-                if(lastDot<=0)
+                if (lastDot <= 0)
                     break;
-                permission = permission.substring(0,lastDot);
+                permission = permission.substring(0, lastDot);
                 if (permissionMap.containsKey(permission))
                     return permissionMap.get(permission);
             }
@@ -36,7 +36,7 @@ public class HashPermissible implements Permissible {
 
     @Override
     public void setPermission(String permission, boolean bool) {
-        if(permission==null)
+        if (permission == null)
             return;
         lock.writeLock().lock();
         permissionMap.put(permission, bool);
@@ -49,10 +49,8 @@ public class HashPermissible implements Permissible {
         lock.writeLock().unlock();
     }
 
-    public Map<String,Boolean> getPermissionMap(){
+    public Map<String, Boolean> getBackingMap() {
         return Collections.unmodifiableMap(permissionMap);
     }
-
-
 
 }

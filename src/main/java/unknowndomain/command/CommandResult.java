@@ -1,28 +1,31 @@
 package unknowndomain.command;
 
-public class CommandResult {
+import javax.annotation.Nullable;
+
+public final class CommandResult {
 
     private final boolean success;
     private final String message;
     private final Throwable cause;
 
-    public CommandResult(boolean success) {
-        this(success, (String) null);
+    public static CommandResult success() {
+        return new CommandResult(true, null, null);
     }
 
-    public CommandResult(boolean success, String message) {
-        this(success, message, null);
+    public static CommandResult failure(String message) {
+        return new CommandResult(false, message, null);
     }
 
-    public CommandResult(Throwable cause) {
-        this(false,cause);
+    @Deprecated
+    public static CommandResult failure(Throwable cause) {
+        return new CommandResult(false, null, cause);
     }
 
-    public CommandResult(boolean success, Throwable cause) {
-        this(success, null, cause);
+    public static CommandResult failure(String message, Throwable cause) {
+        return new CommandResult(false, message, cause);
     }
 
-    public CommandResult(boolean success, String message, Throwable cause) {
+    private CommandResult(boolean success, String message, Throwable cause) {
         this.success = success;
         this.message = message;
         this.cause = cause;
@@ -32,10 +35,12 @@ public class CommandResult {
         return success;
     }
 
+    @Nullable
     public String getMessage() {
         return message;
     }
 
+    @Nullable
     public Throwable getCause() {
         return cause;
     }

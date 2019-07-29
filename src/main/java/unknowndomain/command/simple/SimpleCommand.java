@@ -5,13 +5,12 @@ import unknowndomain.command.CommandResult;
 import unknowndomain.command.CommandSender;
 
 import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
+import java.util.List;
 
 public class SimpleCommand extends Command {
 
     private CommandExecutor executor;
-    private Optional<CommandCompleter> completer;
+    private CommandCompleter completer;
 
     public SimpleCommand(String name) {
         super(name);
@@ -34,11 +33,15 @@ public class SimpleCommand extends Command {
     }
 
     public void setCompleter(CommandCompleter completer) {
-        this.completer = Optional.ofNullable(completer);
+        this.completer = completer;
     }
 
     @Override
-    public Set<String> complete(CommandSender sender, String[] args) {
-        return completer.orElse((sender1, string, args1) -> Collections.emptySet()).complete(sender, this.name, args);
+    public List<String> complete(CommandSender sender, String[] args) {
+        if(completer == null) {
+            return Collections.emptyList();
+        }
+
+        return completer.complete(sender, this, args);
     }
 }

@@ -8,7 +8,7 @@ public class SimpleCompleteManager implements CompleteManager {
     private HashMap<Class, Completer> completerHashMapByClass = new HashMap<>();
     private HashMap<String, Completer> completerHashMapByName = new HashMap<>();
 
-    private static Completer noneCompleter= (sender, command, args) -> Collections.emptySet();
+    private static Completer noneCompleter = (sender, command, args) -> Collections.emptyList();
 
     @Override
     public void putCompleter(NamedCompleter completer) {
@@ -29,7 +29,7 @@ public class SimpleCompleteManager implements CompleteManager {
 
     @Override
     public Completer getCompleter(Class clazz) {
-        return completerHashMapByClass.getOrDefault(clazz,noneCompleter);
+        return completerHashMapByClass.getOrDefault(clazz, noneCompleter);
     }
 
 

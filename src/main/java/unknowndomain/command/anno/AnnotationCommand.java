@@ -44,36 +44,34 @@ public class AnnotationCommand extends Command {
 
             if (annotationNode.canExecuteCommand()) {
                 if (!hasPermission(sender.getPermissible(), annotationNode.getNeedPermission()))
-                    return new CommandResult(new PermissionNotEnoughException(this.name, annotationNode.getNeedPermission().toArray(new String[0])).fillInStackTrace());
+                    return CommandResult.failure(new PermissionNotEnoughException(this.name, annotationNode.getNeedPermission().toArray(new String[0])).fillInStackTrace());
                 return annotationNode.execute();
 
-            } else return new CommandResult(new CommandWrongUseException(this.name).fillInStackTrace());
+            } else return CommandResult.failure(new CommandWrongUseException(this.name).fillInStackTrace());
 
         } else {
             CommandNode parseResult;
             try {
                 parseResult = parseArgs(sender, args);
             } catch (CommandException e) {
-                return new CommandResult(e);
+                return CommandResult.failure(e);
             }
 
             if (sumNeedArgs(parseResult) != args.length) {
-                return new CommandResult(new CommandWrongUseException(this.name).fillInStackTrace());
+                return CommandResult.failure(new CommandWrongUseException(this.name).fillInStackTrace());
             }
 
             if (parseResult.canExecuteCommand()) {
                 try {
                     if (!hasPermission(sender.getPermissible(), parseResult.getNeedPermission()))
-                        return new CommandResult(new PermissionNotEnoughException(this.name, annotationNode.getNeedPermission().toArray(new String[0])).fillInStackTrace());
+                        return CommandResult.failure(new PermissionNotEnoughException(this.name, annotationNode.getNeedPermission().toArray(new String[0])).fillInStackTrace());
                     List list = parseResult.collect();
                     Collections.reverse(list);
                     Object o = parseResult.getMethod().invoke(parseResult.getInstance(), list.toArray());
 
                     if (o instanceof CommandResult) {
                         return (CommandResult) o;
-                    } else if (o instanceof Boolean) {
-                        return new CommandResult((Boolean) o);
-                    } else return new CommandResult(true);
+                    } else return CommandResult.success();
 
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
@@ -82,11 +80,11 @@ public class AnnotationCommand extends Command {
                 }
             } else {
 
-                return new CommandResult(new CommandWrongUseException(this.name).fillInStackTrace());
+                return CommandResult.failure(new CommandWrongUseException(this.name).fillInStackTrace());
 
             }
         }
-        return new CommandResult(new CommandWrongUseException(this.name).fillInStackTrace());
+        return CommandResult.failure(new CommandWrongUseException(this.name).fillInStackTrace());
     }
 
     private int sumNeedArgs(CommandNode node) {
@@ -101,7 +99,7 @@ public class AnnotationCommand extends Command {
     }
 
     @Override
-    public Set<String> complete(CommandSender sender, String[] args) {
+    public List<String> complete(CommandSender sender, String[] args) {
         String[] removeLast = Arrays.copyOfRange(args, 0, args.length - 1);
 
         CommandNode result;
@@ -110,12 +108,12 @@ public class AnnotationCommand extends Command {
         } else
             result = parseArgs(sender, removeLast);
 
-        HashSet<String> set = new HashSet<>();
+        List<String> list = new ArrayList<>();
 
         for (CommandNode child : result.getChildren()) {
-            set.addAll(child.getCompleter().complete(sender, this.name, args));
+            list.addAll(child.getCompleter().complete(sender, this.name, args));
         }
-        return set;
+        return list;
     }
 
     private boolean hasPermission(Permissible permissible, Collection<String> needPermission) {
@@ -301,9 +299,9 @@ public class AnnotationCommand extends Command {
                 if (command != null && !(command instanceof AnnotationCommand)) {
                     throw new RuntimeException("command already exist " + command.name + " and not AnnotationCommand");
                 }
-                if(command==null){
-                    for(Command parsedCommand : list){
-                        if(parsedCommand.name.equals(commandAnnotation.value()))
+                if (command == null) {
+                    for (Command parsedCommand : list) {
+                        if (parsedCommand.name.equals(commandAnnotation.value()))
                             command = parsedCommand;
                     }
                 }

@@ -1,7 +1,5 @@
 package unknowndomain.command.exception;
 
-import java.util.Arrays;
-
 public class CommandNotFoundException extends CommandException {
 
     public CommandNotFoundException(String command) {
@@ -10,7 +8,7 @@ public class CommandNotFoundException extends CommandException {
 
     @Override
     public String getMessage() {
-        return "command not found: "+command;
+        return "Command not found: "+command;
     }
 
 }

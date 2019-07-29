@@ -9,11 +9,11 @@ public abstract class Command {
     private String helpMessage;
 
     public Command(String name) {
-        this(name,"/"+name);
+        this(name, "/" + name);
     }
 
     public Command(String name, String description) {
-        this(name,description,"");
+        this(name, description, "");
     }
 
     public Command(String name, String description, String helpMessage) {
@@ -23,6 +23,8 @@ public abstract class Command {
     }
 
     public abstract CommandResult execute(CommandSender sender, String[] args);
+
+    public abstract List<String> complete(CommandSender sender, String[] args);
 
     public String getDescription() {
         return description;
@@ -40,11 +42,7 @@ public abstract class Command {
         this.helpMessage = helpMessage;
     }
 
-    public Set<String> complete(CommandSender sender, String[] args){
-        return new HashSet<>();
-    }
-
-    public String getParameterDescription(CommandSender sender,String[] args){
+    public String getParameterDescription(CommandSender sender, String[] args) {
         return "";
     }
 

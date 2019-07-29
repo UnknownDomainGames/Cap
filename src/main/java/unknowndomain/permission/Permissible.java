@@ -7,5 +7,4 @@ public interface Permissible {
     void setPermission(String permission, boolean bool);
 
     void removePermission(String permission);
-
 }
