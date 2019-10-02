@@ -202,33 +202,6 @@ public class AnnotationCommand extends Command {
         }
     }
 
-    private class ParseEntry implements Map.Entry {
-
-        private Object parseResult;
-
-        private CommandNode node;
-
-        public ParseEntry(Object parseResult, CommandNode node) {
-            this.parseResult = parseResult;
-            this.node = node;
-        }
-
-        @Override
-        public Object getKey() {
-            return parseResult;
-        }
-
-        @Override
-        public CommandNode getValue() {
-            return node;
-        }
-
-        @Override
-        public Object setValue(Object value) {
-            return null;
-        }
-    }
-
     public static AnnotationCommandBuilder getBuilder(CommandManager commandManager) {
         return new AnnotationCommandBuilder(commandManager);
     }
