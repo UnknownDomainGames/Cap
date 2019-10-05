@@ -5,7 +5,7 @@ plugins {
 group 'com.github.unknowndomaingame'
 version '1.0.0'
 
-sourceCompatibility = targetCompatibility = 1.8
+sourceCompatibility = targetCompatibility = 11
 
 repositories {
     jcenter()
