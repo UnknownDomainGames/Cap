@@ -45,7 +45,7 @@ public class AnnotationCommand extends Command {
                 if (!hasPermission(sender, annotationNode.getNeedPermission()))
                     throw new PermissionNotEnoughException(getName(), annotationNode.getNeedPermission().toArray(new String[0]));
                 annotationNode.execute();
-
+                return;
             } else throw new CommandWrongUseException(getName());
 
         } else {
@@ -62,6 +62,7 @@ public class AnnotationCommand extends Command {
                     List list = parseResult.collect();
                     Collections.reverse(list);
                     parseResult.getMethod().invoke(parseResult.getInstance(), list.toArray());
+                    return;
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 } catch (InvocationTargetException e) {
@@ -120,6 +121,13 @@ public class AnnotationCommand extends Command {
         HashMap<NodeWrapper, Integer> ignore = new HashMap<>();
 
         CommandNode node = annotationNode;
+
+        if(args==null||args.length==0){
+            for(CommandNode child : node.getChildren()){
+                if(child.canExecuteCommand())
+                    return child;
+            }
+        }
 
         CommandNode bestResult = node;
 
@@ -258,7 +266,7 @@ public class AnnotationCommand extends Command {
                 if (commandAnnotation == null)
                     continue;
 
-                Command command = commandManager.getCommand(commandAnnotation.value()).orElseThrow(() -> new CommandNotFoundException(commandAnnotation.value()));
+                Command command = commandManager.getCommand(commandAnnotation.value()).orElse(null);
 
 
                 if (command != null && !(command instanceof AnnotationCommand)) {

@@ -1,6 +1,8 @@
 plugins {
     id 'java'
 }
+apply plugin: 'maven'
+
 
 group 'com.github.unknowndomaingame'
 version '1.0.0'

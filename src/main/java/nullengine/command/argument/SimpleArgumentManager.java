@@ -14,7 +14,7 @@ public class SimpleArgumentManager implements ArgumentManager {
     private HashMap<String, Argument> argumentByName = new HashMap<>();
 
     public SimpleArgumentManager() {
-        baseArguments.stream().forEach(this::appendArgument);
+        baseArguments.stream().forEach(this::appendArgumentAndSetDefaultIfNotExist);
     }
 
     @Override
