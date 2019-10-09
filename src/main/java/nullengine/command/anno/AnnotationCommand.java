@@ -133,7 +133,7 @@ public class AnnotationCommand extends Command {
 
         if(args==null||args.length==0){
             for(CommandNode child : node.getChildren()){
-                if(child.canExecuteCommand())
+                if(child.parse(sender,this.getName(),args))
                     return child;
             }
         }
