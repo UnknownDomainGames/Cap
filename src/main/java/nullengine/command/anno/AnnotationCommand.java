@@ -46,7 +46,16 @@ public class AnnotationCommand extends Command {
                     throw new PermissionNotEnoughException(getName(), annotationNode.getNeedPermission().toArray(new String[0]));
                 annotationNode.execute();
                 return;
-            } else throw new CommandWrongUseException(getName());
+            } else{
+                CommandNode commandNode = parseArgs(sender,args);
+                if(commandNode!=null&&commandNode.canExecuteCommand()){
+                    List<Object> list = commandNode.collect();
+                    Collections.reverse(list);
+                    commandNode.execute(list.toArray());
+                    return;
+                }
+                throw new CommandWrongUseException(getName());
+            }
 
         } else {
             CommandNode parseResult = parseArgs(sender, args);
