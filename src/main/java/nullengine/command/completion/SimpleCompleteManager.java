@@ -1,5 +1,6 @@
 package nullengine.command.completion;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -8,7 +9,7 @@ public class SimpleCompleteManager implements CompleteManager {
     private HashMap<Class, Completer> completerHashMapByClass = new HashMap<>();
     private HashMap<String, Completer> completerHashMapByName = new HashMap<>();
 
-    private static Completer noneCompleter = (sender, command, args) -> Collections.emptyList();
+    private static Completer noneCompleter = (sender, command, args) -> new Completer.CompleteResult();
 
     @Override
     public void putCompleter(NamedCompleter completer) {

@@ -2,6 +2,7 @@ package nullengine.command.simple;
 
 import nullengine.command.Command;
 import nullengine.command.CommandSender;
+import nullengine.command.completion.Completer;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,9 +30,9 @@ public class SimpleCommand extends Command {
     }
 
     @Override
-    public List<String> complete(CommandSender sender, String[] args) {
+    public Completer.CompleteResult complete(CommandSender sender, String[] args) {
         if (completer == null) {
-            return Collections.emptyList();
+            return Completer.CompleteResult.EMPTY;
         }
 
         return completer.complete(sender, this, args);

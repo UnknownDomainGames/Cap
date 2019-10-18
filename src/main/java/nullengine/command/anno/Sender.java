@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  *
  * Indicates that a parameter with annotations which is extends CommandSender.
  */
-@Target(ElementType.PARAMETER)
+@Target({ElementType.PARAMETER,ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Sender {
 

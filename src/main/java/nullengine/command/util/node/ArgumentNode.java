@@ -1,4 +1,4 @@
-package nullengine.command.anno.node;
+package nullengine.command.util.node;
 
 import nullengine.command.CommandSender;
 import nullengine.command.argument.Argument;
@@ -10,10 +10,9 @@ public class ArgumentNode extends CommandNode {
 
     private Argument argument;
 
-    public ArgumentNode() {}
-
     public ArgumentNode(Argument argument) {
         this.argument = argument;
+        setTip(argument.getName());
     }
 
     @Override

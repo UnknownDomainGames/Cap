@@ -1,6 +1,7 @@
-package nullengine.command.anno.node;
+package nullengine.command.util.node;
 
 import nullengine.command.CommandSender;
+import nullengine.command.completion.Completer;
 import nullengine.command.exception.CommandSenderErrorException;
 
 import java.util.Objects;
@@ -47,5 +48,9 @@ public class SenderNode extends CommandNode {
         return "SenderNode{" +
                 "allowedSender=" + allowedSenders +
                 '}';
+    }
+
+    public boolean hasTip(){
+        return false;
     }
 }

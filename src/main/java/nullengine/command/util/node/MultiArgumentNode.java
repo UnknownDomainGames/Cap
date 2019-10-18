@@ -1,4 +1,4 @@
-package nullengine.command.anno.node;
+package nullengine.command.util.node;
 
 import nullengine.command.argument.Argument;
 

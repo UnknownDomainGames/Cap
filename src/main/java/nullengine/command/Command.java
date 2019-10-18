@@ -1,5 +1,7 @@
 package nullengine.command;
 
+import nullengine.command.completion.Completer;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -25,7 +27,7 @@ public abstract class Command {
 
     public abstract void execute(CommandSender sender, String[] args) throws Exception;
 
-    public abstract List<String> complete(CommandSender sender, String[] args);
+    public abstract Completer.CompleteResult complete(CommandSender sender, String[] args);
 
     public abstract boolean handleUncaughtException(Exception e, CommandSender sender, String[] args);
 

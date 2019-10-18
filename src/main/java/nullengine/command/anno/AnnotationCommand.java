@@ -3,14 +3,13 @@ package nullengine.command.anno;
 import nullengine.command.Command;
 import nullengine.command.CommandManager;
 import nullengine.command.CommandSender;
-import nullengine.command.anno.node.*;
 import nullengine.command.argument.Argument;
 import nullengine.command.argument.ArgumentManager;
 import nullengine.command.argument.SimpleArgumentManager;
 import nullengine.command.completion.CompleteManager;
-import nullengine.command.exception.CommandNotFoundException;
 import nullengine.command.exception.CommandWrongUseException;
 import nullengine.command.exception.PermissionNotEnoughException;
+import nullengine.command.util.node.*;
 import nullengine.permission.Permissible;
 
 import java.lang.reflect.Constructor;
@@ -19,19 +18,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
 
-public class AnnotationCommand extends Command {
+import static nullengine.command.util.ClassUtil.packing;
 
-    private CommandNode annotationNode = new ArgumentNode(null) {
-        @Override
-        public int getNeedArgs() {
-            return 0;
-        }
+public class AnnotationCommand extends Command implements Nodeable{
 
-        @Override
-        public List<Object> collect() {
-            return Collections.emptyList();
-        }
-    };
+    private CommandNode annotationNode = new EmptyArgumentNode();
 
     private AnnotationCommand(String name, String description, String helpMessage) {
         super(name, description, helpMessage);
@@ -44,14 +35,14 @@ public class AnnotationCommand extends Command {
             if (annotationNode.canExecuteCommand()) {
                 if (!hasPermission(sender, annotationNode.getNeedPermission()))
                     throw new PermissionNotEnoughException(getName(), annotationNode.getNeedPermission().toArray(new String[0]));
-                annotationNode.execute();
+                annotationNode.getExecutor().accept(Collections.EMPTY_LIST);
                 return;
             } else{
                 CommandNode commandNode = parseArgs(sender,args);
                 if(commandNode!=null&&commandNode.canExecuteCommand()){
                     List<Object> list = commandNode.collect();
                     Collections.reverse(list);
-                    commandNode.execute(list.toArray());
+                    commandNode.getExecutor().accept(list);
                     return;
                 }
                 throw new CommandWrongUseException(getName());
@@ -65,23 +56,16 @@ public class AnnotationCommand extends Command {
             }
 
             if (parseResult.canExecuteCommand()) {
-                try {
-                    if (!hasPermission(sender, parseResult.getNeedPermission()))
-                        throw new PermissionNotEnoughException(getName(), annotationNode.getNeedPermission().toArray(new String[0]));
-                    List list = parseResult.collect();
-                    Collections.reverse(list);
-                    parseResult.getMethod().invoke(parseResult.getInstance(), list.toArray());
-                    return;
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                }
+                if (!hasPermission(sender, parseResult.getNeedPermission()))
+                    throw new PermissionNotEnoughException(getName(), annotationNode.getNeedPermission().toArray(new String[0]));
+                List list = parseResult.collect();
+                Collections.reverse(list);
+                parseResult.getExecutor().accept(list);
+                return;
             } else {
                 throw new CommandWrongUseException(getName());
             }
         }
-        throw new CommandWrongUseException(getName());
     }
 
     private int sumNeedArgs(CommandNode node) {
@@ -96,7 +80,7 @@ public class AnnotationCommand extends Command {
     }
 
     @Override
-    public List<String> complete(CommandSender sender, String[] args) {
+    public nullengine.command.completion.Completer.CompleteResult complete(CommandSender sender, String[] args) {
         String[] removeLast = Arrays.copyOfRange(args, 0, args.length - 1);
 
         CommandNode result;
@@ -108,8 +92,11 @@ public class AnnotationCommand extends Command {
         List<String> list = new ArrayList<>();
 
         for (CommandNode child : result.getChildren()) {
-            list.addAll(child.getCompleter().complete(sender, getName(), args));
+            list.addAll(child.getCompleter().complete(sender, getName(), args).getComplete());
         }
+
+
+
         return list;
     }
 
@@ -192,6 +179,11 @@ public class AnnotationCommand extends Command {
             node = node.getParent();
         }
         return i;
+    }
+
+    @Override
+    public CommandNode getNode() {
+        return annotationNode;
     }
 
     private class NodeWrapper {
@@ -308,7 +300,15 @@ public class AnnotationCommand extends Command {
                 node.setNeedPermission(permissions);
 
                 node.setInstance(o);
-                node.setMethod(method);
+                node.setExecutor((objects -> {
+                    try {
+                        method.invoke(o,objects.toArray());
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
+                }));
 
 
                 list.add(annotationCommand);
@@ -476,27 +476,6 @@ public class AnnotationCommand extends Command {
                 }
             }
             throw new RuntimeException("no constructor to instance");
-        }
-
-        private Class packing(Class clazz) {
-
-            switch (clazz.getName()) {
-                case "int":
-                    return Integer.class;
-                case "float":
-                    return Float.class;
-                case "boolean":
-                    return Boolean.class;
-                case "double":
-                    return Double.class;
-                case "char":
-                    return Character.class;
-                case "long":
-                    return Long.class;
-                case "short":
-                    return Short.class;
-            }
-            return clazz;
         }
 
         private List<ArgumentNode> buildArgumentNodes(Constructor noteConstructor) {

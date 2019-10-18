@@ -1,4 +1,4 @@
-package nullengine.command.anno.node;
+package nullengine.command.util.node;
 
 import com.google.common.collect.Lists;
 import nullengine.command.CommandSender;
@@ -41,7 +41,7 @@ public class RequiredNode extends CommandNode {
 
     @Override
     public Completer getCompleter() {
-        return (sender, command, args) -> Lists.newArrayList(require);
+        return (sender, command, args) -> new Completer.CompleteResult(Lists.newArrayList(require));
     }
 
     @Override

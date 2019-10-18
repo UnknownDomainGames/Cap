@@ -1,18 +1,16 @@
-package nullengine.command.anno.node;
+package nullengine.command.util.node;
 
 import nullengine.command.CommandSender;
 import nullengine.command.completion.Completer;
-import nullengine.command.exception.CommandException;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Consumer;
 
 public abstract class CommandNode implements Comparable<CommandNode> {
 
     private CommandNode parent;
 
-    private Method method;
+    private Consumer<List<Object>> executor;
 
     private Object instance;
 
@@ -21,6 +19,8 @@ public abstract class CommandNode implements Comparable<CommandNode> {
     private Set<String> needPermission = new HashSet();
 
     private Completer completer;
+
+    private String tip;
 
     public CommandNode() {
     }
@@ -61,26 +61,31 @@ public abstract class CommandNode implements Comparable<CommandNode> {
         this.children.add(commandNode);
     }
 
+    public void removeChild(CommandNode commandNode){
+        this.children.remove(commandNode);
+        commandNode.setParent(null);
+    }
+
     public abstract boolean equals(Object obj);
 
     public boolean canExecuteCommand() {
-        return getMethod() != null;
+        return getExecutor() != null;
     }
 
     protected void setParent(CommandNode parent) {
         this.parent = parent;
     }
 
-    public void setMethod(Method method) {
-        this.method = method;
+    public void setExecutor(Consumer<List<Object>> executor) {
+        this.executor = executor;
     }
 
     public void setInstance(Object instance) {
         this.instance = instance;
     }
 
-    public Method getMethod() {
-        return method;
+    public Consumer<List<Object>> getExecutor() {
+        return executor;
     }
 
     public Object getInstance() {
@@ -95,23 +100,24 @@ public abstract class CommandNode implements Comparable<CommandNode> {
         this.needPermission = needPermission;
     }
 
-    public void execute(Object... args) {
-        try {
-            method.invoke(instance, args);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (CommandException e) {
-        }
-    }
-
     public Completer getCompleter() {
         return completer;
     }
 
     public void setCompleter(Completer completer) {
         this.completer = completer;
+    }
+
+    public String getTip() {
+        return tip;
+    }
+
+    public void setTip(String tip) {
+        this.tip = tip;
+    }
+
+    public boolean hasTip(){
+        return true;
     }
 
     @Override
