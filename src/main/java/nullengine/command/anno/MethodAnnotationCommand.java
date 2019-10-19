@@ -3,28 +3,28 @@ package nullengine.command.anno;
 import nullengine.command.Command;
 import nullengine.command.CommandManager;
 import nullengine.command.CommandSender;
-import nullengine.command.argument.Argument;
 import nullengine.command.argument.ArgumentManager;
 import nullengine.command.argument.SimpleArgumentManager;
 import nullengine.command.completion.CompleteManager;
+import nullengine.command.completion.Completer;
+import nullengine.command.completion.SimpleCompleteManager;
 import nullengine.command.exception.CommandWrongUseException;
 import nullengine.command.exception.PermissionNotEnoughException;
+import nullengine.command.util.CommandNodeUtil;
 import nullengine.command.util.node.*;
 import nullengine.permission.Permissible;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
+import java.util.stream.Collectors;
 
-import static nullengine.command.util.ClassUtil.packing;
-
-public class AnnotationCommand extends Command implements Nodeable{
+public class MethodAnnotationCommand extends Command implements Nodeable{
 
     private CommandNode annotationNode = new EmptyArgumentNode();
 
-    private AnnotationCommand(String name, String description, String helpMessage) {
+    private MethodAnnotationCommand(String name, String description, String helpMessage) {
         super(name, description, helpMessage);
     }
 
@@ -45,14 +45,14 @@ public class AnnotationCommand extends Command implements Nodeable{
                     commandNode.getExecutor().accept(list);
                     return;
                 }
-                throw new CommandWrongUseException(getName());
+                throw new CommandWrongUseException(getName(),args);
             }
 
         } else {
             CommandNode parseResult = parseArgs(sender, args);
 
             if (sumNeedArgs(parseResult) != args.length) {
-                throw new CommandWrongUseException(getName());
+                throw new CommandWrongUseException(getName(),args);
             }
 
             if (parseResult.canExecuteCommand()) {
@@ -63,7 +63,7 @@ public class AnnotationCommand extends Command implements Nodeable{
                 parseResult.getExecutor().accept(list);
                 return;
             } else {
-                throw new CommandWrongUseException(getName());
+                throw new CommandWrongUseException(getName(),args);
             }
         }
     }
@@ -95,9 +95,11 @@ public class AnnotationCommand extends Command implements Nodeable{
             list.addAll(child.getCompleter().complete(sender, getName(), args).getComplete());
         }
 
+        List<CommandNode> nodes = CommandNodeUtil.getShortestPath(result);
 
+        List<String> tips = nodes.stream().map(node->node.getTip()==null?"":node.getTip()).collect(Collectors.toList());
 
-        return list;
+        return new Completer.CompleteResult(list,tips);
     }
 
     @Override
@@ -219,13 +221,15 @@ public class AnnotationCommand extends Command implements Nodeable{
 
         private static ArgumentManager staticArgumentManage = new SimpleArgumentManager();
 
+        private static CompleteManager staticCompleteManager = new SimpleCompleteManager();
+
         private Set<Object> commandHandler = new HashSet<>();
 
         private ArgumentManager argumentManager = staticArgumentManage;
 
         private CommandManager commandManager;
 
-        private CompleteManager completeManager;
+        private CompleteManager completeManager = staticCompleteManager;
 
         private AnnotationCommandBuilder(CommandManager commandManager) {
             this.commandManager = commandManager;
@@ -260,6 +264,8 @@ public class AnnotationCommand extends Command implements Nodeable{
 
             ArrayList<Command> list = new ArrayList();
 
+            CommandNodeUtil.AnnotationUtil annotationUtil = CommandNodeUtil.getAnnotationUtil(argumentManager,completeManager);
+
             for (Method method : o.getClass().getMethods()) {
 
                 nullengine.command.anno.Command commandAnnotation = method.getAnnotation(nullengine.command.anno.Command.class);
@@ -270,8 +276,8 @@ public class AnnotationCommand extends Command implements Nodeable{
                 Command command = commandManager.getCommand(commandAnnotation.value()).orElse(null);
 
 
-                if (command != null && !(command instanceof AnnotationCommand)) {
-                    throw new RuntimeException("command already exist " + command.getName() + " and not AnnotationCommand");
+                if (command != null && !(command instanceof Nodeable)) {
+                    throw new RuntimeException("command already exist " + command.getName() + " and not Nodeable");
                 }
                 if (command == null) {
                     for (Command parsedCommand : list) {
@@ -280,26 +286,19 @@ public class AnnotationCommand extends Command implements Nodeable{
                     }
                 }
 
-                AnnotationCommand annotationCommand = (AnnotationCommand) command;
+                Nodeable annotationCommand = (Nodeable) command;
 
                 if (annotationCommand == null)
-                    annotationCommand = new AnnotationCommand(commandAnnotation.value(), commandAnnotation.desc(), commandAnnotation.helpMessage());
+                    annotationCommand = new MethodAnnotationCommand(commandAnnotation.value(), commandAnnotation.desc(), commandAnnotation.helpMessage());
 
-                CommandNode node = annotationCommand.annotationNode;
+                CommandNode node = annotationCommand.getNode();
 
                 for (Parameter parameter : method.getParameters()) {
-                    node = getChildOrCreateAndAdd(parameter, node);
+                    CommandNode child = annotationUtil.parseParameter(parameter);
+                    CommandNodeUtil.addChildren(node,child);
+                    node = child;
                 }
 
-
-                Permission permission = method.getAnnotation(Permission.class);
-                HashSet<String> permissions = new HashSet();
-                if (permission != null)
-                    permissions.addAll(Arrays.asList(permission.value()));
-
-                node.setNeedPermission(permissions);
-
-                node.setInstance(o);
                 node.setExecutor((objects -> {
                     try {
                         method.invoke(o,objects.toArray());
@@ -311,189 +310,7 @@ public class AnnotationCommand extends Command implements Nodeable{
                 }));
 
 
-                list.add(annotationCommand);
-            }
-
-            return list;
-        }
-
-        private CommandNode getChildOrCreateAndAdd(Parameter type, CommandNode node) {
-            Sender sender = type.getAnnotation(Sender.class);
-            Required required = type.getAnnotation(Required.class);
-
-            CommandNode child = null;
-
-            if (sender != null)
-                child = handleSender(type.getType(), node, sender);
-            else if (required != null) {
-                child = handleRequired(required, node);
-            } else {
-                child = handleArgument(type, node);
-            }
-
-            Completer completer = type.getAnnotation(Completer.class);
-            if (completer != null)
-                child.setCompleter(completeManager.getCompleter(completer.value()));
-
-            return child;
-        }
-
-        private SenderNode handleSender(Class<?> type, CommandNode node, Sender sender) {
-            Class<? extends CommandSender>[] allowedSenders = sender.value();
-            CommandNode child;
-            if (allowedSenders != null && allowedSenders.length != 0) {
-                child = new SenderNode((Class<? extends CommandSender>) type);
-                return (SenderNode) foundChildOrAdd(node, child);
-            } else {
-                child = new SenderNode((Class<? extends CommandSender>) type);
-            }
-            return (SenderNode) foundChildOrAdd(node, child);
-        }
-
-        private CommandNode foundChildOrAdd(CommandNode node, CommandNode child) {
-
-            for (CommandNode loopChild : node.getChildren()) {
-                if (loopChild.equals(child))
-                    return loopChild;
-            }
-
-            node.addChild(child);
-
-            return child;
-        }
-
-        private RequiredNode handleRequired(Required required, CommandNode node) {
-            CommandNode child = new RequiredNode(required.value());
-            return (RequiredNode) foundChildOrAdd(node, child);
-        }
-
-        private ArgumentNode handleArgument(Parameter parameter, CommandNode node) {
-            return (ArgumentNode) foundChildOrAdd(node, parseParameter2Argument(parameter));
-        }
-
-        private CommandNode foundChildOrAdd(CommandNode node, List<ArgumentNode> children) {
-            for (ArgumentNode argument : children) {
-                node = foundChildOrAdd(node, argument);
-            }
-            return node;
-        }
-
-        private List<ArgumentNode> parseParameter2Argument(Parameter parameter) {
-            ArrayList<ArgumentNode> argumentNodes = new ArrayList<>();
-
-            Argument argument;
-            ArgumentHandler argumentHandler = parameter.getAnnotation(ArgumentHandler.class);
-
-            Class type = packing(parameter.getType());
-
-            if (argumentHandler != null)
-                argument = argumentManager.getArgument(argumentHandler.value());
-            else argument = argumentManager.getArgument(type);
-
-            if (argument == null) {
-                Generator generator = null;
-                Constructor noteConstructor = null;
-
-                Class clazz = type;
-
-                for (Constructor constructor : clazz.getConstructors()) {
-
-                    if (generator != null)
-                        break;
-
-                    generator = (Generator) constructor.getAnnotation(Generator.class);
-                    noteConstructor = constructor;
-                }
-
-                if (generator != null) {
-
-
-                    List<ArgumentNode> argumentNodeArray = buildArgumentNodes(noteConstructor);
-
-                    ArgumentNode last = argumentNodeArray.get(argumentNodeArray.size() - 1);
-
-                    Constructor finalNoteConstructor = noteConstructor;
-
-                    int args = finalNoteConstructor.getParameterCount();
-
-                    if (finalNoteConstructor.getDeclaringClass().isMemberClass())
-                        args--;
-
-                    MultiArgumentNode multiArgumentNode = new MultiArgumentNode(last.getArgument(), objects -> {
-                        try {
-                            if (finalNoteConstructor.getDeclaringClass().isMemberClass()) {
-                                ArrayList list = new ArrayList();
-                                list.add(tryInstanceOuterClass(finalNoteConstructor.getDeclaringClass().getDeclaringClass()));
-                                list.addAll(Arrays.asList(objects));
-                                return finalNoteConstructor.newInstance(list.toArray());
-                            } else
-                                return finalNoteConstructor.newInstance(objects);
-                        } catch (Exception e) {
-                        }
-                        return null;
-                    }, args);
-
-                    argumentNodeArray.set(argumentNodeArray.size() - 1, multiArgumentNode);
-
-                    argumentNodes.addAll(argumentNodeArray);
-                }
-
-            } else argumentNodes.add(new ArgumentNode(argument));
-
-            if (argumentNodes.isEmpty())
-                if (argumentHandler != null)
-                    throw new RuntimeException("argument not found: {" + parameter + "} argument:" + argumentHandler.value());
-                else
-                    throw new RuntimeException("argument not found: {" + parameter + "}");
-
-            return argumentNodes;
-        }
-
-        private Object tryInstanceOuterClass(Class declaringClass) {
-            if (declaringClass.isMemberClass()) {
-                try {
-                    return declaringClass.getConstructor(declaringClass.getDeclaringClass()).newInstance(tryInstanceOuterClass(declaringClass.getDeclaringClass()));
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                try {
-                    return declaringClass.getConstructor().newInstance();
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                }
-            }
-            throw new RuntimeException("no constructor to instance");
-        }
-
-        private List<ArgumentNode> buildArgumentNodes(Constructor noteConstructor) {
-            ArrayList<ArgumentNode> list = new ArrayList();
-
-            Class clazz = noteConstructor.getDeclaringClass();
-
-            boolean isMember = clazz.isMemberClass();
-
-            int i = 0;
-
-            //the first field in constructor of member class is who holds this member class
-            if (isMember)
-                i++;
-
-            for (; i < noteConstructor.getParameters().length; i++) {
-
-                list.addAll(parseParameter2Argument(noteConstructor.getParameters()[i]));
+                list.add((Command) annotationCommand);
             }
 
             return list;

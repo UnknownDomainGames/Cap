@@ -22,6 +22,6 @@ public class LongArgument extends SimpleArgument {
 
     @Override
     public Completer getCompleter() {
-        return (sender, command, args) -> Lists.newArrayList("[num]");
+        return (sender, command, args) -> Completer.CompleteResult.completeResult(Lists.newArrayList("[num]"));
     }
 }

@@ -1,4 +1,4 @@
-package nullengine.command.inner.anno;
+package nullengine.command.anno;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

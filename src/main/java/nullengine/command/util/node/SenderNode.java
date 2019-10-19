@@ -4,6 +4,7 @@ import nullengine.command.CommandSender;
 import nullengine.command.completion.Completer;
 import nullengine.command.exception.CommandSenderErrorException;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 public class SenderNode extends CommandNode {
@@ -40,13 +41,13 @@ public class SenderNode extends CommandNode {
 
     @Override
     public int hashCode() {
-        return Objects.hash(allowedSenders);
+        return Objects.hash((Object) allowedSenders);
     }
 
     @Override
     public String toString() {
         return "SenderNode{" +
-                "allowedSender=" + allowedSenders +
+                "allowedSender=" + Arrays.toString(allowedSenders) +
                 '}';
     }
 

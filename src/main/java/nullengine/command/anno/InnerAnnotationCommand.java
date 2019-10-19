@@ -1,19 +1,14 @@
-package nullengine.command.inner;
+package nullengine.command.anno;
 
 import nullengine.command.Command;
 import nullengine.command.CommandManager;
 import nullengine.command.CommandSender;
-import nullengine.command.anno.Generator;
-import nullengine.command.anno.Required;
-import nullengine.command.anno.Sender;
 import nullengine.command.argument.ArgumentManager;
 import nullengine.command.argument.SimpleArgumentManager;
 import nullengine.command.completion.Completer;
-import nullengine.command.inner.anno.Provide;
 import nullengine.command.util.ClassUtil;
 import nullengine.command.util.node.*;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -22,11 +17,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class InnerCommand extends Command implements Nodeable{
+public class InnerAnnotationCommand extends Command implements Nodeable{
 
     private CommandNode commandNode;
 
-    public InnerCommand(String name, CommandNode commandNode) {
+    public InnerAnnotationCommand(String name, CommandNode commandNode) {
         super(name);
         this.commandNode = commandNode;
     }
@@ -57,7 +52,7 @@ public class InnerCommand extends Command implements Nodeable{
 
         private ArgumentManager argumentManager = new SimpleArgumentManager();
 
-        private List<InnerCommand> commands = new ArrayList<>();
+        private List<InnerAnnotationCommand> commands = new ArrayList<>();
 
         public Builder(CommandManager commandManager) {
             this.commandManager = commandManager;
@@ -78,7 +73,7 @@ public class InnerCommand extends Command implements Nodeable{
 
             CommandNode node = new EmptyArgumentNode();
 
-            commands.add(new InnerCommand(commandName, node));
+            commands.add(new InnerAnnotationCommand(commandName, node));
 
             // key:field name
             HashMap<String, ProvideWrapper> provideMap = new HashMap<>();
@@ -186,13 +181,13 @@ public class InnerCommand extends Command implements Nodeable{
 
         private CommandNode constructGenerator(Parameter[] parameters){
 
-            for(int i = 0;i<parameters.length;i++){
-                Parameter parameter = parameters[i];
-                var completer = parameter.getAnnotation(nullengine.command.anno.Completer.class);
-                CommandNode commandNode;
-                if(i==parameters.length-1)
-                    commandNode = new MultiArgumentNode()
-            }
+//            for(int i = 0;i<parameters.length;i++){
+//                Parameter parameter = parameters[i];
+//                var completer = parameter.getAnnotation(nullengine.command.anno.Completer.class);
+//                CommandNode commandNode;
+//                if(i==parameters.length-1)
+//                    commandNode = new MultiArgumentNode()
+//            }
 
             return null;
         }

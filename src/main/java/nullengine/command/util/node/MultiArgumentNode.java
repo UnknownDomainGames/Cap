@@ -26,7 +26,7 @@ public class MultiArgumentNode extends ArgumentNode {
 
         list.add(instance.instance);
 
-        if(instance.parent!=null)
+        if (instance.parent != null)
             list.addAll(instance.parent.collect());
 
         return list;
@@ -35,8 +35,7 @@ public class MultiArgumentNode extends ArgumentNode {
     private MultiInstance getMultiArgInstance() {
         ArrayList<Object> args = new ArrayList<>();
         CommandNode parent = this;
-
-        for (int i = 0; i < this.argsNum; i++) {
+        for (int i = 0; i < this.argsNum+getNeedArgs(); i++) {
             if (parent.parseResult == null)
                 i--;
             else {
@@ -46,10 +45,10 @@ public class MultiArgumentNode extends ArgumentNode {
             }
         }
         Collections.reverse(args);
-        return new MultiInstance(parent,instanceFunction.apply(args.toArray(new Object[0])));
+        return new MultiInstance(parent, instanceFunction.apply(args.toArray(new Object[0])));
     }
 
-    private class MultiInstance{
+    private class MultiInstance {
         public final CommandNode parent;
         public final Object instance;
 

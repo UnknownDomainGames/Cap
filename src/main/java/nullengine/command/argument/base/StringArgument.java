@@ -23,8 +23,8 @@ public class StringArgument extends SimpleArgument {
         return (sender, command, args) -> {
             String s = args[args.length - 1];
             if (s.isEmpty())
-                return Lists.newArrayList("[text]");
-            else return Collections.emptyList();
+                return Completer.CompleteResult.completeResult(Lists.newArrayList("[text]"));
+            else return Completer.CompleteResult.EMPTY;
         };
     }
 }

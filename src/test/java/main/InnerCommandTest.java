@@ -5,8 +5,8 @@ import nullengine.command.CommandSender;
 import nullengine.command.SimpleCommandManager;
 import nullengine.command.anno.ArgumentHandler;
 import nullengine.command.anno.Sender;
-import nullengine.command.inner.anno.Complete;
-import nullengine.command.inner.InnerCommand;
+import nullengine.command.anno.Complete;
+import nullengine.command.anno.InnerAnnotationCommand;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ public class InnerCommandTest {
 
         SimpleCommandManager commandManager = new SimpleCommandManager();
 
-        InnerCommand.getBuilder(commandManager)
+        InnerAnnotationCommand.getBuilder(commandManager)
                 .caseCommand("say", new Runnable() {
 
                     @Sender

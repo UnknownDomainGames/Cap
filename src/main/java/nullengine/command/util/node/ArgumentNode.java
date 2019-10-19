@@ -12,7 +12,8 @@ public class ArgumentNode extends CommandNode {
 
     public ArgumentNode(Argument argument) {
         this.argument = argument;
-        setTip(argument.getName());
+        if (argument != null)
+            setTip(argument.getName());
     }
 
     @Override
@@ -55,11 +56,11 @@ public class ArgumentNode extends CommandNode {
 
     @Override
     public int compareTo(CommandNode o) {
-        if(argument.getName().equals("String"))
+        if (argument.getName().equals("String"))
             return -1;
-        if(o instanceof ArgumentNode){
+        if (o instanceof ArgumentNode) {
             ArgumentNode other = (ArgumentNode) o;
-            if(other.argument.getName().equals("String")&&argument.responsibleClass().equals(String.class))
+            if (other.argument.getName().equals("String") && argument.responsibleClass().equals(String.class))
                 return 1;
         }
         return super.compareTo(o);
@@ -67,7 +68,7 @@ public class ArgumentNode extends CommandNode {
 
     @Override
     public Completer getCompleter() {
-        if(super.getCompleter()!=null)
+        if (super.getCompleter() != null)
             return super.getCompleter();
         return argument.getCompleter();
     }

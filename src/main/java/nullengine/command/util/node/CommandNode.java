@@ -12,8 +12,6 @@ public abstract class CommandNode implements Comparable<CommandNode> {
 
     private Consumer<List<Object>> executor;
 
-    private Object instance;
-
     private TreeSet<CommandNode> children = new TreeSet<>();
 
     private Set<String> needPermission = new HashSet();
@@ -80,16 +78,8 @@ public abstract class CommandNode implements Comparable<CommandNode> {
         this.executor = executor;
     }
 
-    public void setInstance(Object instance) {
-        this.instance = instance;
-    }
-
     public Consumer<List<Object>> getExecutor() {
         return executor;
-    }
-
-    public Object getInstance() {
-        return instance;
     }
 
     public Set<String> getNeedPermission() {

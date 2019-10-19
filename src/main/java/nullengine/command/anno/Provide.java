@@ -1,4 +1,4 @@
-package nullengine.command.inner.anno;
+package nullengine.command.anno;
 
 public @interface Provide {
 

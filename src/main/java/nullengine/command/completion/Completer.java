@@ -26,17 +26,21 @@ public interface Completer {
             this.completeList = completeList;
         }
 
-        public CompleteResult(List<String> tips, List<String> completeList) {
+        public CompleteResult(List<String> completeList,List<String> tips) {
             this.tips = tips;
             this.completeList = completeList;
         }
 
         public Collection<String> getComplete(){
-            return this.tips;
+            return this.completeList;
         }
 
         public Collection<String> getTips(){
-            return completeList;
+            return tips;
+        }
+
+        public static CompleteResult completeResult(List<String> completeList){
+            return new CompleteResult(completeList);
         }
 
     }

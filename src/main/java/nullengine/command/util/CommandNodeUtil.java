@@ -4,20 +4,19 @@ import nullengine.command.anno.*;
 import nullengine.command.argument.Argument;
 import nullengine.command.argument.ArgumentManager;
 import nullengine.command.completion.CompleteManager;
-import nullengine.command.inner.anno.Complete;
+import nullengine.command.anno.Complete;
 import nullengine.command.util.node.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.*;
 
 public class CommandNodeUtil {
 
 
-    protected static AnnotationUtil getAnnotationUtil(ArgumentManager argumentManager, CompleteManager completeManager) {
+    public static AnnotationUtil getAnnotationUtil(ArgumentManager argumentManager, CompleteManager completeManager) {
         return new AnnotationUtil(argumentManager, completeManager);
     }
 
@@ -28,23 +27,66 @@ public class CommandNodeUtil {
      * @param node
      * @return
      */
-    public static int getNeedArgs(CommandNode node){
-        int i =0;
-        while(true){
-            if(node.getParent()==null)
+    public static int getNeedArgs(CommandNode node) {
+        int i = 0;
+        while (true) {
+            if (node.getParent() == null)
                 return i;
-            i+=node.getNeedArgs();
-            if(node instanceof MultiArgumentNode){
-                node = getParentIn(node,node.getNeedArgs());
-            }else node = node.getParent();
+            i += node.getNeedArgs();
+            node = node.getParent();
         }
     }
 
-    public static CommandNode getParentIn(CommandNode child,int step){
-        for(int i =0;i<step;i++){
+
+
+    /**
+     * 将children的最顶端加入到node的子类中
+     *
+     * @param node
+     * @param children
+     */
+    public static void addChildren(CommandNode node,CommandNode children){
+        node.addChild(getTopParent(children));
+    }
+
+    private static CommandNode getTopParent(CommandNode child) {
+        while (true){
+            if(child.getParent()==null)
+                return child;
             child = child.getParent();
         }
-        return child;
+    }
+
+    /**
+     * 返回从当前node到最近结束的node的路径.
+     * 结束指没有child
+     * 不包含传入的node
+     *
+     * @param node
+     * @return
+     */
+    public static List<CommandNode> getShortestPath(CommandNode node) {
+        CommandNode node1 = breadthFirstSearch(node);
+        List<CommandNode> path = new LinkedList<>();
+        path.add(node1);
+        while (true) {
+            if (node1.getParent() == node)
+                return path;
+            path.add(0, node1.getParent());
+            node1 = node1.getParent();
+        }
+    }
+
+    private static CommandNode breadthFirstSearch(CommandNode commandNode) {
+        List<CommandNode> arrayList = new LinkedList<>();
+        arrayList.add(commandNode);
+        while (!arrayList.isEmpty()) {
+            CommandNode node = arrayList.remove(0);
+            if (node.canExecuteCommand())
+                return node;
+            arrayList.addAll(node.getChildren());
+        }
+        return null;
     }
 
     public static class AnnotationUtil extends CommandNodeUtil {
@@ -57,6 +99,12 @@ public class CommandNodeUtil {
             this.completeManager = completeManager;
         }
 
+        /**
+         * 有可能返回一个带父Node的Node
+         *
+         * @param parameter
+         * @return
+         */
         public CommandNode parseParameter(Parameter parameter) {
 
             Annotation[] annotations = parameter.getAnnotations();
@@ -69,19 +117,19 @@ public class CommandNodeUtil {
 
         public CommandNode foundMainNode(Class clazz, Annotation[] annotations) {
             for (Annotation annotation : annotations) {
-                if (annotation.getClass() == Sender.class) {
+                if (annotation.annotationType() == Sender.class) {
                     Sender sender = (Sender) annotation;
                     Class[] senderClass = sender.value();
                     if (senderClass == null || senderClass.length == 0)
-                        return handleSender(sender.annotationType());
+                        return handleSender(clazz);
                     else return handleSender(senderClass);
-                } else if (annotation.getClass() == Required.class) {
+                } else if (annotation.annotationType() == Required.class) {
                     return handleRequired(((Required) annotation).value());
-                } else if (annotation.getClass() == ArgumentHandler.class) {
+                } else if (annotation.annotationType() == ArgumentHandler.class) {
                     return handleArgumentName(((ArgumentHandler) annotation).value());
                 }
             }
-            return handleArgument(clazz);
+            return handleArgument(ClassUtil.packing(clazz));
         }
 
         public CommandNode handleSender(Class... classes) {
@@ -103,7 +151,7 @@ public class CommandNodeUtil {
             Argument argument = argumentManager.getArgument(clazz);
             if (argument == null) {
                 CommandNode node = handleGenerator(clazz);
-                if(node==null)
+                if (node == null)
                     throw new RuntimeException("这个类没有注册进Argument或没有标记Generator");
                 return node;
             } else {
@@ -116,33 +164,35 @@ public class CommandNodeUtil {
         public CommandNode handleGenerator(Class clazz) {
             Constructor[] constructors = clazz.getConstructors();
 
-            for(Constructor constructor : constructors){
+            for (Constructor constructor : constructors) {
                 Generator generator = (Generator) constructor.getAnnotation(Generator.class);
-                if(generator!=null){
+                if (generator != null) {
                     Parameter[] parameters = constructor.getParameters();
-                    if(parameters==null||parameters.length==0)
+                    if (parameters == null || parameters.length == 0)
                         throw new RuntimeException("不知道要不要支持没有形参的构建方法");
                     ArgumentNode node = (ArgumentNode) parseParameter(parameters[0]);
-                    for(int i =1;i<parameters.length;i++){
+                    for (int i = 1; i < parameters.length; i++) {
                         ArgumentNode child = (ArgumentNode) parseParameter(parameters[i]);
-                        node.addChild(child);
+                        addChildren(node,child);
                         node = child;
                     }
-                    MultiArgumentNode multiArgumentNode = new MultiArgumentNode(node.getArgument(),objects -> {
+                    MultiArgumentNode multiArgumentNode = new MultiArgumentNode(node.getArgument(), objects -> {
                         try {
+                            System.out.println(Arrays.toString(objects));
                             return constructor.newInstance(objects);
-                        } catch (InstantiationException|IllegalAccessException|InvocationTargetException e) {
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                             e.printStackTrace();
                         }
                         return null;
-                    },CommandNodeUtil.getNeedArgs(node));
+                    }, CommandNodeUtil.getNeedArgs(node));
 
-                    if(node.getParent()==null)
+                    if (node.getParent() == null)
                         return multiArgumentNode;
-                    else{
+                    else {
                         CommandNode parent = node.getParent();
                         parent.removeChild(node);
                         parent.addChild(multiArgumentNode);
+
                         return multiArgumentNode;
                     }
                 }
@@ -151,20 +201,21 @@ public class CommandNodeUtil {
             return null;
         }
 
+
         public void setCustomAnnotation(CommandNode node, Annotation[] annotations) {
             for (Annotation annotation : annotations) {
 
-                if (annotation.getClass() == Completer.class) {
+                if (annotation.annotationType() == Completer.class) {
                     Complete complete = (Complete) annotation;
                     node.setCompleter(completeManager.getCompleter(complete.value()));
                 }
 
-                if (annotation.getClass() == Permission.class) {
+                if (annotation.annotationType() == Permission.class) {
                     Permission permission = (Permission) annotation;
                     node.setNeedPermission(new HashSet<>(Arrays.asList(permission.value())));
                 }
 
-                if (annotation.getClass() == Tip.class) {
+                if (annotation.annotationType() == Tip.class) {
                     Tip tip = (Tip) annotation;
                     node.setTip(tip.value());
                 }

@@ -24,6 +24,6 @@ public class DoubleArgument extends Argument {
 
     @Override
     public Completer getCompleter() {
-        return (sender, command, args) -> Lists.newArrayList("[double]");
+        return (sender, command, args) -> Completer.CompleteResult.completeResult(Lists.newArrayList("[double]"));
     }
 }

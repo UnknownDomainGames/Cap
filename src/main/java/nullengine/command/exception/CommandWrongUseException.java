@@ -6,8 +6,9 @@ public class CommandWrongUseException extends CommandException {
 
     private String[] args;
 
-    public CommandWrongUseException(String command) {
+    public CommandWrongUseException(String command,String[] args) {
         super(command);
+        this.args = args;
     }
 
     @Override
