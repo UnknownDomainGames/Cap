@@ -11,12 +11,38 @@ public class SimpleCommandManager implements CommandManager {
     private final Map<String, Command> commands = new HashMap<>();
 
     private UncaughtExceptionHandler uncaughtExceptionHandler = (e, sender, command, args) -> e.printStackTrace();
-    private CommandResolver resolver = raw->{
-        String[] args = raw.split(" ");
-        if(args==null||args.length==0)
-            throw new RuntimeException("错误的命令: "+raw);
-        String commandName = args[0];
-        return new CommandResolver.Result(commandName,Arrays.copyOfRange(args,1,args.length));
+    private CommandResolver resolver = raw -> {
+        List<String> args = new ArrayList<>();
+        boolean quotes = false;
+        boolean escape = false;
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < raw.length(); i++) {
+            char c = raw.charAt(i);
+
+            if ((c == ' ' || c == '　') && !quotes) {
+                args.add(sb.toString());
+                sb = new StringBuilder();
+            } else if (c == '"') {
+                if (escape)
+                    sb.append(c);
+                else
+                    quotes = !quotes;
+            }else if(c == '\\'){
+                if(escape){
+                    escape = false;
+                    sb.append(c);
+                }else{
+                    escape = true;
+                }
+            }else{
+                sb.append(c);
+                escape = false;
+            }
+        }
+        args.add(sb.toString());
+        String[] argsArray = args.toArray(new String[0]);
+        return new CommandResolver.Result(argsArray[0], Arrays.copyOfRange(argsArray, 1, argsArray.length));
     };
 
     @Override
