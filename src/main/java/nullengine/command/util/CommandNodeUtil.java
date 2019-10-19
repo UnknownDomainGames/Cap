@@ -178,7 +178,6 @@ public class CommandNodeUtil {
                     }
                     MultiArgumentNode multiArgumentNode = new MultiArgumentNode(node.getArgument(), objects -> {
                         try {
-                            System.out.println(Arrays.toString(objects));
                             return constructor.newInstance(objects);
                         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                             e.printStackTrace();
