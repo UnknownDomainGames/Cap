@@ -169,31 +169,6 @@ public class MethodAnnotationCommand extends Command implements Nodeable {
         return annotationNode;
     }
 
-    private class NodeWrapper {
-
-        private CommandNode node;
-        private int deep;
-
-        public NodeWrapper(CommandNode node, int deep) {
-            this.node = node;
-            this.deep = deep;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            NodeWrapper that = (NodeWrapper) o;
-            return deep == that.deep &&
-                    Objects.equals(node, that.node);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(node, deep);
-        }
-    }
-
     public static AnnotationCommandBuilder getBuilder(CommandManager commandManager) {
         return new AnnotationCommandBuilder(commandManager);
     }
