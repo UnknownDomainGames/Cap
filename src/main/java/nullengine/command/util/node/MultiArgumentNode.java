@@ -1,19 +1,22 @@
 package nullengine.command.util.node;
 
+import nullengine.command.CommandSender;
 import nullengine.command.argument.Argument;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
-public class MultiArgumentNode extends ArgumentNode {
+public class MultiArgumentNode extends CommandNode {
 
+    private CommandNode commandNode;
     private Function<Object[], Object> instanceFunction;
     private int argsNum;
 
-    public MultiArgumentNode(Argument argument, Function<Object[], Object> instanceFunction, int argsNum) {
-        super(argument);
+    public MultiArgumentNode(CommandNode commandNode, Function<Object[], Object> instanceFunction, int argsNum) {
+        this.commandNode = commandNode;
         this.instanceFunction = instanceFunction;
         this.argsNum = argsNum;
     }
@@ -48,6 +51,32 @@ public class MultiArgumentNode extends ArgumentNode {
         return new MultiInstance(parent, instanceFunction.apply(args.toArray(new Object[0])));
     }
 
+
+    @Override
+    public int getNeedArgs() {
+        return commandNode.getNeedArgs();
+    }
+
+    @Override
+    protected Object parseArgs(CommandSender sender, String command, String... args) {
+        return commandNode.parseArgs(sender,command,args);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MultiArgumentNode that = (MultiArgumentNode) o;
+        return argsNum == that.argsNum &&
+                Objects.equals(commandNode, that.commandNode) &&
+                Objects.equals(instanceFunction, that.instanceFunction);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(commandNode, instanceFunction, argsNum);
+    }
+
     private class MultiInstance {
         public final CommandNode parent;
         public final Object instance;
@@ -61,8 +90,9 @@ public class MultiArgumentNode extends ArgumentNode {
     @Override
     public String toString() {
         return "MultiArgumentNode{" +
-                "argsNum=" + argsNum +
-                "argument=" + getArgument() +
+                "commandNode=" + commandNode +
+                ", instanceFunction=" + instanceFunction +
+                ", argsNum=" + argsNum +
                 '}';
     }
 }

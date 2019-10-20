@@ -1,5 +1,6 @@
 package nullengine.command.anno;
 
+import com.google.common.collect.Lists;
 import nullengine.command.Command;
 import nullengine.command.CommandManager;
 import nullengine.command.CommandSender;
@@ -20,16 +21,31 @@ import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MethodAnnotationCommand extends Command implements Nodeable{
+public class MethodAnnotationCommand extends Command implements Nodeable {
 
     private CommandNode annotationNode = new EmptyArgumentNode();
+
+    private List<CommandNode> canExecuteNodes = new ArrayList<>();
 
     private MethodAnnotationCommand(String name, String description, String helpMessage) {
         super(name, description, helpMessage);
     }
 
-    public void execute(CommandSender sender, String[] args) {
+    private void flush() {
+        canExecuteNodes.clear();
 
+        List<CommandNode> nodes = new LinkedList<>();
+        nodes.add(annotationNode);
+
+        while (!nodes.isEmpty()) {
+            CommandNode node = nodes.remove(0);
+            if (node.canExecuteCommand())
+                canExecuteNodes.add(node);
+            nodes.addAll(node.getChildren());
+        }
+    }
+
+    public void execute(CommandSender sender, String[] args) {
         if (args == null || args.length == 0) {
 
             if (annotationNode.canExecuteCommand()) {
@@ -37,24 +53,23 @@ public class MethodAnnotationCommand extends Command implements Nodeable{
                     throw new PermissionNotEnoughException(getName(), annotationNode.getNeedPermission().toArray(new String[0]));
                 annotationNode.getExecutor().accept(Collections.EMPTY_LIST);
                 return;
-            } else{
-                CommandNode commandNode = parseArgs(sender,args);
-                if(commandNode!=null&&commandNode.canExecuteCommand()){
+            } else {
+                CommandNode commandNode = parseArgs(sender, args);
+                if (commandNode != null && commandNode.canExecuteCommand()) {
                     List<Object> list = commandNode.collect();
                     Collections.reverse(list);
                     commandNode.getExecutor().accept(list);
                     return;
                 }
-                throw new CommandWrongUseException(getName(),args);
+                throw new CommandWrongUseException(getName(), args);
             }
 
         } else {
             CommandNode parseResult = parseArgs(sender, args);
 
-            if (sumNeedArgs(parseResult) != args.length) {
-                throw new CommandWrongUseException(getName(),args);
+            if (CommandNodeUtil.getTotalNeedArgs(parseResult) != args.length) {
+                throw new CommandWrongUseException(getName(), args);
             }
-
             if (parseResult.canExecuteCommand()) {
                 if (!hasPermission(sender, parseResult.getNeedPermission()))
                     throw new PermissionNotEnoughException(getName(), annotationNode.getNeedPermission().toArray(new String[0]));
@@ -63,20 +78,9 @@ public class MethodAnnotationCommand extends Command implements Nodeable{
                 parseResult.getExecutor().accept(list);
                 return;
             } else {
-                throw new CommandWrongUseException(getName(),args);
+                throw new CommandWrongUseException(getName(), args);
             }
         }
-    }
-
-    private int sumNeedArgs(CommandNode node) {
-        int needAges = 0;
-        CommandNode node1 = node;
-        needAges += node1.getNeedArgs();
-        while (node1.getParent() != null) {
-            node1 = node1.getParent();
-            needAges += node1.getNeedArgs();
-        }
-        return needAges;
     }
 
     @Override
@@ -97,9 +101,9 @@ public class MethodAnnotationCommand extends Command implements Nodeable{
 
         List<CommandNode> nodes = CommandNodeUtil.getShortestPath(result);
 
-        List<String> tips = nodes.stream().map(node->node.getTip()==null?"":node.getTip()).collect(Collectors.toList());
+        List<String> tips = nodes.stream().map(node -> node.getTip() == null ? "" : node.getTip()).collect(Collectors.toList());
 
-        return new Completer.CompleteResult(list,tips);
+        return new Completer.CompleteResult(list, tips);
     }
 
     @Override
@@ -116,65 +120,42 @@ public class MethodAnnotationCommand extends Command implements Nodeable{
     }
 
     private CommandNode parseArgs(CommandSender sender, String[] args) {
-        HashMap<NodeWrapper, Integer> ignore = new HashMap<>();
 
-        CommandNode node = annotationNode;
+        ArrayList<CommandNode> filterExecuteNodes = new ArrayList<>();
 
-        if(args==null||args.length==0){
-            for(CommandNode child : node.getChildren()){
-                if(child.parse(sender,this.getName(),args))
-                    return child;
-            }
+        for (CommandNode executeNode : canExecuteNodes) {
+            if (CommandNodeUtil.getTotalNeedArgs(executeNode) >= args.length)
+                filterExecuteNodes.add(executeNode);
         }
 
-        CommandNode bestResult = node;
+        CommandNode bestResult = null;
 
-        for (int index = 0; index < args.length; ) {
+        for (CommandNode executeNode : filterExecuteNodes) {
+            List<CommandNode> nodeList = CommandNodeUtil.getLinkedFromParent2Child(executeNode);
+            int i = 0;
+            for (CommandNode node : nodeList) {
+                if(i+node.getNeedArgs()>args.length)
+                    break;
+                boolean success = node.parse(sender,this.getName(),Arrays.copyOfRange(args,i,i+node.getNeedArgs()));
+                if(success){
 
-            int ignoreCount = 0;
+                    if(getParentNum(node)>=getParentNum(bestResult)){
+                        bestResult = node;
+                    }
+                    i+=node.getNeedArgs();
 
-            CommandNode before = node;
-
-
-            for (CommandNode child : node.getChildren()) {
-
-                if (index + child.getNeedArgs() > args.length)
-                    continue;
-
-                String[] needArgs = Arrays.copyOfRange(args, index, index + child.getNeedArgs());
-
-                boolean success = child.parse(sender, getName(), needArgs);
-
-                if (success) {
-                    if (ignore.getOrDefault(new NodeWrapper(child, index), 0) > ignoreCount++)
-                        continue;
-
-                    node = child;
+                }else{
+                    break;
                 }
-                continue;
-
             }
-
-            if (before == node) {
-                if (node.getParent() == null)
-                    return bestResult;
-
-                index -= node.getNeedArgs();
-                ignore.put(new NodeWrapper(node, index), ignore.getOrDefault(node, 0) + 1);
-                node = node.getParent();
-
-            } else {
-                index += node.getNeedArgs();
-                if (getParentNum(node) >= getParentNum(bestResult))
-                    bestResult = node;
-            }
-
         }
 
         return bestResult;
     }
 
     private int getParentNum(CommandNode node) {
+        if (node == null)
+            return 0;
         int i = 0;
         while (node.getParent() != null) {
             i++;
@@ -264,7 +245,7 @@ public class MethodAnnotationCommand extends Command implements Nodeable{
 
             ArrayList<Command> list = new ArrayList();
 
-            CommandNodeUtil.AnnotationUtil annotationUtil = CommandNodeUtil.getAnnotationUtil(argumentManager,completeManager);
+            CommandNodeUtil.AnnotationUtil annotationUtil = CommandNodeUtil.getAnnotationUtil(argumentManager, completeManager);
 
             for (Method method : o.getClass().getMethods()) {
 
@@ -286,31 +267,39 @@ public class MethodAnnotationCommand extends Command implements Nodeable{
                     }
                 }
 
-                Nodeable annotationCommand = (Nodeable) command;
+                Nodeable nodeable = (Nodeable) command;
 
-                if (annotationCommand == null)
-                    annotationCommand = new MethodAnnotationCommand(commandAnnotation.value(), commandAnnotation.desc(), commandAnnotation.helpMessage());
+                if (nodeable == null)
+                    nodeable = new MethodAnnotationCommand(commandAnnotation.value(), commandAnnotation.desc(), commandAnnotation.helpMessage());
 
-                CommandNode node = annotationCommand.getNode();
+                List<CommandNode> node = Lists.newArrayList(nodeable.getNode());
 
                 for (Parameter parameter : method.getParameters()) {
-                    CommandNode child = annotationUtil.parseParameter(parameter);
-                    CommandNodeUtil.addChildren(node,child);
-                    node = child;
+                    List<CommandNode> children = annotationUtil.parseParameter(parameter);
+                    for (CommandNode parent : node)
+                        for (CommandNode child : children)
+                            CommandNodeUtil.addChildren(parent, child);
+                    node = children;
                 }
 
-                node.setExecutor((objects -> {
+                node.forEach(commandNode -> commandNode.setExecutor((objects -> {
                     try {
-                        method.invoke(o,objects.toArray());
+                        method.invoke(o, objects.toArray());
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
                     } catch (InvocationTargetException e) {
                         e.printStackTrace();
                     }
-                }));
+                })));
 
+                Permission permission = method.getAnnotation(Permission.class);
+                if (permission != null) {
+                    node.forEach(commandNode -> commandNode.setNeedPermission(new HashSet<>(Arrays.asList(permission.value()))));
+                }
 
-                list.add((Command) annotationCommand);
+                if (nodeable instanceof MethodAnnotationCommand)
+                    ((MethodAnnotationCommand) nodeable).flush();
+                list.add((Command) nodeable);
             }
 
             return list;

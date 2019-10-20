@@ -50,7 +50,6 @@ public class SenderNode extends CommandNode {
                 "allowedSender=" + Arrays.toString(allowedSenders) +
                 '}';
     }
-
     public boolean hasTip(){
         return false;
     }

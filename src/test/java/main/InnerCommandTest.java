@@ -3,10 +3,7 @@ package main;
 import com.google.common.collect.Lists;
 import nullengine.command.CommandSender;
 import nullengine.command.SimpleCommandManager;
-import nullengine.command.anno.ArgumentHandler;
-import nullengine.command.anno.Sender;
-import nullengine.command.anno.Complete;
-import nullengine.command.anno.InnerAnnotationCommand;
+import nullengine.command.anno.*;
 
 import java.util.List;
 
@@ -29,7 +26,7 @@ public class InnerCommandTest {
                         sender.sendMessage(message);
                     }
 
-                    @ArgumentHandler("message")
+                    @Provide("message")
                     public String parse(String originalArgument){
                         return "<prefix>"+originalArgument;
                     }

@@ -1,5 +1,6 @@
 package nullengine.command.util;
 
+import com.google.common.collect.Lists;
 import nullengine.command.anno.*;
 import nullengine.command.argument.Argument;
 import nullengine.command.argument.ArgumentManager;
@@ -8,9 +9,7 @@ import nullengine.command.anno.Complete;
 import nullengine.command.util.node.*;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.util.*;
 
 public class CommandNodeUtil {
@@ -27,7 +26,7 @@ public class CommandNodeUtil {
      * @param node
      * @return
      */
-    public static int getNeedArgs(CommandNode node) {
+    public static int getTotalNeedArgs(CommandNode node) {
         int i = 0;
         while (true) {
             if (node.getParent() == null)
@@ -38,25 +37,36 @@ public class CommandNodeUtil {
     }
 
 
-
     /**
      * 将children的最顶端加入到node的子类中
      *
      * @param node
      * @param children
      */
-    public static void addChildren(CommandNode node,CommandNode children){
+    public static void addChildren(CommandNode node, CommandNode children) {
         node.addChild(getTopParent(children));
     }
 
     private static CommandNode getTopParent(CommandNode child) {
-        while (true){
-            if(child.getParent()==null)
+        while (true) {
+            if (child.getParent() == null)
                 return child;
             child = child.getParent();
         }
     }
 
+    public static List<CommandNode> getLinkedFromParent2Child(CommandNode child){
+        ArrayList<CommandNode> list = new ArrayList<>();
+        list.add(child);
+        while (true){
+            if(child.getParent()==null){
+                Collections.reverse(list);
+                return list;
+            }
+            list.add(child.getParent());
+            child = child.getParent();
+        }
+    }
     /**
      * 返回从当前node到最近结束的node的路径.
      * 结束指没有child
@@ -105,17 +115,17 @@ public class CommandNodeUtil {
          * @param parameter
          * @return
          */
-        public CommandNode parseParameter(Parameter parameter) {
+        public List<CommandNode> parseParameter(Parameter parameter) {
 
             Annotation[] annotations = parameter.getAnnotations();
 
-            CommandNode node = foundMainNode(parameter.getType(), annotations);
+            List<CommandNode> node = foundMainNode(parameter.getType(), annotations);
             setCustomAnnotation(node, annotations);
 
             return node;
         }
 
-        public CommandNode foundMainNode(Class clazz, Annotation[] annotations) {
+        public List<CommandNode> foundMainNode(Class clazz, Annotation[] annotations) {
             for (Annotation annotation : annotations) {
                 if (annotation.annotationType() == Sender.class) {
                     Sender sender = (Sender) annotation;
@@ -132,91 +142,93 @@ public class CommandNodeUtil {
             return handleArgument(ClassUtil.packing(clazz));
         }
 
-        public CommandNode handleSender(Class... classes) {
-            return new SenderNode(classes);
+        public List<CommandNode> handleSender(Class... classes) {
+            return Lists.newArrayList(new SenderNode(classes));
         }
 
-        public CommandNode handleRequired(String required) {
-            return new RequiredNode(required);
+        public List<CommandNode> handleRequired(String required) {
+            return Lists.newArrayList(new RequiredNode(required));
         }
 
-        public CommandNode handleArgumentName(String argumentName) {
+        public List<CommandNode> handleArgumentName(String argumentName) {
             Argument argument = argumentManager.getArgument(argumentName);
             CommandNode node = new ArgumentNode(argument);
             node.setCompleter(completeManager.getCompleter(argument.responsibleClass()));
-            return node;
+            return Lists.newArrayList(node);
         }
 
-        public CommandNode handleArgument(Class clazz) {
+        public List<CommandNode> handleArgument(Class clazz) {
             Argument argument = argumentManager.getArgument(clazz);
             if (argument == null) {
-                CommandNode node = handleGenerator(clazz);
-                if (node == null)
+                List<CommandNode> node = handleGenerator(clazz);
+                if (node == null || node.isEmpty())
                     throw new RuntimeException("这个类没有注册进Argument或没有标记Generator");
                 return node;
             } else {
                 CommandNode node = new ArgumentNode(argument);
                 node.setCompleter(completeManager.getCompleter(clazz));
-                return node;
+                return Lists.newArrayList(node);
             }
         }
 
-        public CommandNode handleGenerator(Class clazz) {
+        public List<CommandNode> handleGenerator(Class clazz) {
             Constructor[] constructors = clazz.getConstructors();
+
+            ArrayList<CommandNode> list = new ArrayList<>();
 
             for (Constructor constructor : constructors) {
                 Generator generator = (Generator) constructor.getAnnotation(Generator.class);
                 if (generator != null) {
                     Parameter[] parameters = constructor.getParameters();
                     if (parameters == null || parameters.length == 0)
-                        throw new RuntimeException("不知道要不要支持没有形参的构建方法");
-                    ArgumentNode node = (ArgumentNode) parseParameter(parameters[0]);
+                        throw new RuntimeException("不知道要不要支持没有形参的构造方法");
+                    List<CommandNode> nodes = parseParameter(parameters[0]);
                     for (int i = 1; i < parameters.length; i++) {
-                        ArgumentNode child = (ArgumentNode) parseParameter(parameters[i]);
-                        addChildren(node,child);
-                        node = child;
-                    }
-                    MultiArgumentNode multiArgumentNode = new MultiArgumentNode(node.getArgument(), objects -> {
-                        try {
-                            return constructor.newInstance(objects);
-                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                            e.printStackTrace();
+                        List<CommandNode> children = parseParameter(parameters[i]);
+
+                        for (CommandNode parent : nodes) {
+                            for (CommandNode child : children) {
+                                addChildren(parent, child);
+                            }
                         }
-                        return null;
-                    }, CommandNodeUtil.getNeedArgs(node));
-
-                    if (node.getParent() == null)
-                        return multiArgumentNode;
-                    else {
-                        CommandNode parent = node.getParent();
-                        parent.removeChild(node);
-                        parent.addChild(multiArgumentNode);
-
-                        return multiArgumentNode;
+                        nodes = children;
                     }
+                    for (int i = 0; i < nodes.size(); i++) {
+                        CommandNode node = nodes.get(i);
+                        MultiArgumentNode multiArgumentNode = new MultiArgumentNode(node, objects -> {
+                            try {
+                                return constructor.newInstance(objects);
+                            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                                e.printStackTrace();
+                            }
+                            return null;
+                        }, CommandNodeUtil.getTotalNeedArgs(node));
+                        if (node.getParent() != null) {
+                            CommandNode parent = node.getParent();
+                            parent.removeChild(node);
+                            parent.addChild(multiArgumentNode);
+                        }
+                        nodes.set(i, multiArgumentNode);
+                    }
+                    list.addAll(nodes);
                 }
             }
 
-            return null;
+            return list;
         }
 
 
-        public void setCustomAnnotation(CommandNode node, Annotation[] annotations) {
+        public void setCustomAnnotation(List<CommandNode> nodes, Annotation[] annotations) {
             for (Annotation annotation : annotations) {
 
                 if (annotation.annotationType() == Completer.class) {
                     Complete complete = (Complete) annotation;
-                    node.setCompleter(completeManager.getCompleter(complete.value()));
-                }
-
-                if (annotation.annotationType() == Permission.class) {
-                    Permission permission = (Permission) annotation;
-                    node.setNeedPermission(new HashSet<>(Arrays.asList(permission.value())));
+                    nodes.stream().forEach(node -> node.setCompleter(completeManager.getCompleter(complete.value())));
                 }
 
                 if (annotation.annotationType() == Tip.class) {
                     Tip tip = (Tip) annotation;
-                    node.setTip(tip.value());
+                    nodes.stream().forEach(node -> node.setTip(tip.value()));
                 }
             }
         }
@@ -225,9 +237,30 @@ public class CommandNodeUtil {
     }
 
     public static class InnerUtil extends AnnotationUtil {
-        private InnerUtil(ArgumentManager argumentManager, CompleteManager completeManager) {
+
+        private HashMap<String, Method> providerMap = new HashMap<>();
+
+        private InnerUtil(ArgumentManager argumentManager, CompleteManager completeManager, Object instance) {
             super(argumentManager, completeManager);
+            handleInnerCommand(instance);
         }
+
+        private void handleInnerCommand(Object instance) {
+            Method[] methods = instance.getClass().getMethods();
+
+            for (Method method : methods) {
+
+                Provide provide = method.getAnnotation(Provide.class);
+
+
+            }
+        }
+
+        public CommandNode parseField(Field field) {
+
+            return null;
+        }
+
     }
 
 }

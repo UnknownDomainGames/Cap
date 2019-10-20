@@ -56,6 +56,9 @@ public class ArgumentNode extends CommandNode {
 
     @Override
     public int compareTo(CommandNode o) {
+
+
+
         if (argument.getName().equals("String"))
             return -1;
         if (o instanceof ArgumentNode) {
