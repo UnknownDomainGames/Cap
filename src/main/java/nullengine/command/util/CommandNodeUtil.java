@@ -1,24 +1,38 @@
 package nullengine.command.util;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import nullengine.command.anno.*;
 import nullengine.command.argument.Argument;
 import nullengine.command.argument.ArgumentManager;
 import nullengine.command.completion.CompleteManager;
-import nullengine.command.anno.Complete;
 import nullengine.command.util.node.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.function.Function;
 
 public class CommandNodeUtil {
 
+    private Object instance;
 
-    public static AnnotationUtil getAnnotationUtil(ArgumentManager argumentManager, CompleteManager completeManager) {
-        return new AnnotationUtil(argumentManager, completeManager);
+    public static AnnotationUtil getAnnotationUtil(Object instance, ArgumentManager argumentManager, CompleteManager completeManager) {
+        return new AnnotationUtil(instance, argumentManager, completeManager);
     }
 
+    public static InnerUtil getInnerUtil(Object instance, ArgumentManager argumentManager, CompleteManager completeManager) {
+        return new InnerUtil(instance, argumentManager, completeManager);
+    }
+
+    public CommandNodeUtil(Object instance) {
+        this.instance = instance;
+    }
+
+    public Object getInstance() {
+        return instance;
+    }
 
     /**
      * 统计包括node及其所有父node所需的args.
@@ -55,11 +69,11 @@ public class CommandNodeUtil {
         }
     }
 
-    public static List<CommandNode> getLinkedFromParent2Child(CommandNode child){
+    public static List<CommandNode> getLinkedFromParent2Child(CommandNode child) {
         ArrayList<CommandNode> list = new ArrayList<>();
         list.add(child);
-        while (true){
-            if(child.getParent()==null){
+        while (true) {
+            if (child.getParent() == null) {
                 Collections.reverse(list);
                 return list;
             }
@@ -67,6 +81,7 @@ public class CommandNodeUtil {
             child = child.getParent();
         }
     }
+
     /**
      * 返回从当前node到最近结束的node的路径.
      * 结束指没有child
@@ -104,7 +119,8 @@ public class CommandNodeUtil {
         private ArgumentManager argumentManager;
         private CompleteManager completeManager;
 
-        private AnnotationUtil(ArgumentManager argumentManager, CompleteManager completeManager) {
+        public AnnotationUtil(Object instance, ArgumentManager argumentManager, CompleteManager completeManager) {
+            super(instance);
             this.argumentManager = argumentManager;
             this.completeManager = completeManager;
         }
@@ -182,34 +198,14 @@ public class CommandNodeUtil {
                     Parameter[] parameters = constructor.getParameters();
                     if (parameters == null || parameters.length == 0)
                         throw new RuntimeException("不知道要不要支持没有形参的构造方法");
-                    List<CommandNode> nodes = parseParameter(parameters[0]);
-                    for (int i = 1; i < parameters.length; i++) {
-                        List<CommandNode> children = parseParameter(parameters[i]);
-
-                        for (CommandNode parent : nodes) {
-                            for (CommandNode child : children) {
-                                addChildren(parent, child);
-                            }
+                    List<CommandNode> nodes = constructMultiArgument(parameters, objects -> {
+                        try {
+                            return constructor.newInstance(objects);
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                            e.printStackTrace();
                         }
-                        nodes = children;
-                    }
-                    for (int i = 0; i < nodes.size(); i++) {
-                        CommandNode node = nodes.get(i);
-                        MultiArgumentNode multiArgumentNode = new MultiArgumentNode(node, objects -> {
-                            try {
-                                return constructor.newInstance(objects);
-                            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                                e.printStackTrace();
-                            }
-                            return null;
-                        }, CommandNodeUtil.getTotalNeedArgs(node));
-                        if (node.getParent() != null) {
-                            CommandNode parent = node.getParent();
-                            parent.removeChild(node);
-                            parent.addChild(multiArgumentNode);
-                        }
-                        nodes.set(i, multiArgumentNode);
-                    }
+                        return null;
+                    });
                     list.addAll(nodes);
                 }
             }
@@ -217,12 +213,36 @@ public class CommandNodeUtil {
             return list;
         }
 
+        public List<CommandNode> constructMultiArgument(Parameter[] parameters, Function<Object[], Object> constructFunction) {
+            List<CommandNode> nodes = parseParameter(parameters[0]);
+            for (int i = 1; i < parameters.length; i++) {
+                List<CommandNode> children = parseParameter(parameters[i]);
+
+                for (CommandNode parent : nodes) {
+                    for (CommandNode child : children) {
+                        addChildren(parent, child);
+                    }
+                }
+                nodes = children;
+            }
+            for (int i = 0; i < nodes.size(); i++) {
+                CommandNode node = nodes.get(i);
+                MultiArgumentNode multiArgumentNode = new MultiArgumentNode(node, constructFunction, CommandNodeUtil.getTotalNeedArgs(node));
+                if (node.getParent() != null) {
+                    CommandNode parent = node.getParent();
+                    parent.removeChild(node);
+                    parent.addChild(multiArgumentNode);
+                }
+                nodes.set(i, multiArgumentNode);
+            }
+            return nodes;
+        }
 
         public void setCustomAnnotation(List<CommandNode> nodes, Annotation[] annotations) {
             for (Annotation annotation : annotations) {
 
                 if (annotation.annotationType() == Completer.class) {
-                    Complete complete = (Complete) annotation;
+                    Completer complete = (Completer) annotation;
                     nodes.stream().forEach(node -> node.setCompleter(completeManager.getCompleter(complete.value())));
                 }
 
@@ -238,10 +258,10 @@ public class CommandNodeUtil {
 
     public static class InnerUtil extends AnnotationUtil {
 
-        private HashMap<String, Method> providerMap = new HashMap<>();
+        private Multimap<String, ProvideWrapper> providerMap = HashMultimap.create();
 
-        private InnerUtil(ArgumentManager argumentManager, CompleteManager completeManager, Object instance) {
-            super(argumentManager, completeManager);
+        public InnerUtil(Object instance, ArgumentManager argumentManager, CompleteManager completeManager) {
+            super(instance, argumentManager, completeManager);
             handleInnerCommand(instance);
         }
 
@@ -249,16 +269,75 @@ public class CommandNodeUtil {
             Method[] methods = instance.getClass().getMethods();
 
             for (Method method : methods) {
-
                 Provide provide = method.getAnnotation(Provide.class);
-
-
+                if (provide != null)
+                    providerMap.put(provide.value(), new ProvideWrapper(provide, method));
             }
         }
 
-        public CommandNode parseField(Field field) {
+        public List<CommandNode> parseField(Field field) {
 
-            return null;
+            Annotation[] annotations = field.getAnnotations();
+            List<CommandNode> nodeList = new ArrayList<>();
+            if (providerMap.containsKey(field.getName())) {
+                Collection<ProvideWrapper> wrapper = providerMap.get(field.getName());
+                if (checkProvider(field, wrapper))
+                    throw new RuntimeException("provider 方法错误 其返回的对象不是目标Field的类或它的子类");
+                ProvideWrapper replaceProvide = wrapper.stream().filter(provideWrapper -> provideWrapper.provide.replace()).findAny().orElse(null);
+                if (replaceProvide != null) {
+                    nodeList = constructMultiArgument(replaceProvide.method.getParameters(), objects -> {
+                        try {
+                            return replaceProvide.method.invoke(getInstance(), objects);
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        } catch (InvocationTargetException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    });
+                    setCustomAnnotation(nodeList, annotations);
+                    return nodeList;
+                }
+                for (ProvideWrapper provideWrapper : wrapper) {
+                    nodeList.addAll(constructMultiArgument(provideWrapper.method.getParameters(), objects -> {
+                        try {
+                            return replaceProvide.method.invoke(getInstance(), objects);
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        } catch (InvocationTargetException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }));
+                }
+            }
+
+            nodeList.addAll(foundMainNode(field.getType(), annotations));
+
+            setCustomAnnotation(nodeList, annotations);
+
+            return nodeList;
+        }
+
+        private boolean checkProvider(Field field, Collection<ProvideWrapper> wrapper) {
+            Class fieldClass = field.getType();
+            for (ProvideWrapper provideWrapper : wrapper) {
+                if (!fieldClass.isAssignableFrom(provideWrapper.method.getReturnType())) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private class ProvideWrapper {
+
+            public final Provide provide;
+            public final Method method;
+
+            public ProvideWrapper(Provide provide, Method method) {
+                this.provide = provide;
+                this.method = method;
+            }
         }
 
     }

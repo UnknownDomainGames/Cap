@@ -8,6 +8,4 @@ import static java.lang.annotation.ElementType.METHOD;
 
 @Target({METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Complete {
-    String value();
-}
+public @interface Complete {}

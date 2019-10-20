@@ -3,7 +3,6 @@ plugins {
 }
 apply plugin: 'maven'
 
-
 group 'com.github.unknowndomaingame'
 version '1.0.0'
 
@@ -17,6 +16,11 @@ repositories {
     jcenter()
     mavenCentral()
 }
+
+test {
+    useJUnitPlatform()
+}
+
 
 dependencies {
     compile 'com.google.guava:guava:27.1-jre'
