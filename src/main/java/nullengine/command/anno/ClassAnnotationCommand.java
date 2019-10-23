@@ -10,7 +10,6 @@ import nullengine.command.completion.Completer;
 import nullengine.command.completion.SimpleCompleteManager;
 import nullengine.command.util.CommandNodeUtil;
 import nullengine.command.util.node.CommandNode;
-import nullengine.command.util.node.EmptyArgumentNode;
 import nullengine.command.util.node.Nodeable;
 
 import java.lang.reflect.Field;
@@ -21,13 +20,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
-public class InnerAnnotationCommand extends NodeAnnotationCommand {
+public class ClassAnnotationCommand extends NodeAnnotationCommand {
 
     private BiFunction<CommandSender, String[], List<String>> completeOverrideFunction;
 
-    public InnerAnnotationCommand(String name, String description, String helpMessage) {
+    public ClassAnnotationCommand(String name, String description, String helpMessage) {
         super(name, description, helpMessage);
     }
 
@@ -71,7 +69,7 @@ public class InnerAnnotationCommand extends NodeAnnotationCommand {
             Command command = commandManager.getCommand(commandName).orElse(null);
 
             if (command == null)
-                command = new InnerAnnotationCommand(commandName,desc,helpMessage);
+                command = new ClassAnnotationCommand(commandName,desc,helpMessage);
 
             if (!(command instanceof Nodeable))
                 throw new RuntimeException("命令: " + commandName + " 已注册，且不支持");
@@ -123,10 +121,10 @@ public class InnerAnnotationCommand extends NodeAnnotationCommand {
                 node.setExecutor(executeConsumer);
             }
 
-            if (command instanceof InnerAnnotationCommand)
+            if (command instanceof ClassAnnotationCommand)
                 for (Method method : clazz.getMethods()) {
                     if (method.getAnnotation(Complete.class) != null && List.class.isAssignableFrom(method.getReturnType())) {
-                        InnerAnnotationCommand innerAnnotationCommand = (InnerAnnotationCommand) command;
+                        ClassAnnotationCommand innerAnnotationCommand = (ClassAnnotationCommand) command;
                         innerAnnotationCommand.completeOverrideFunction = ((sender, strings) -> {
                             try {
                                 return (List<String>) method.invoke(commandHandler, sender, strings);
