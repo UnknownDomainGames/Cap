@@ -1,5 +1,6 @@
 package nullengine.command.simple;
 
+import nullengine.command.ArgumentCheckResult;
 import nullengine.command.Command;
 import nullengine.command.CommandSender;
 import nullengine.command.completion.Completer;
@@ -12,6 +13,7 @@ public class SimpleCommand extends Command {
     private CommandExecutor executor;
     private CommandCompleter completer;
     private CommandUncaughtExceptionHandler uncaughtExceptionHandler;
+    private CommandArgumentChecker argumentChecker;
 
     public SimpleCommand(String name) {
         super(name);
@@ -45,6 +47,13 @@ public class SimpleCommand extends Command {
         return uncaughtExceptionHandler.handleUncaughtException(e, sender, this, args);
     }
 
+    @Override
+    public ArgumentCheckResult checkArguments(CommandSender sender, String[] args) {
+        if(argumentChecker!=null)
+            return argumentChecker.checkArguments(sender,args);
+        return ArgumentCheckResult.Right();
+    }
+
     public void setExecutor(CommandExecutor executor) {
         this.executor = executor;
     }
@@ -55,5 +64,9 @@ public class SimpleCommand extends Command {
 
     public void setUncaughtExceptionHandler(CommandUncaughtExceptionHandler uncaughtExceptionHandler) {
         this.uncaughtExceptionHandler = uncaughtExceptionHandler;
+    }
+
+    public void setArgumentChecker(CommandArgumentChecker argumentChecker) {
+        this.argumentChecker = argumentChecker;
     }
 }

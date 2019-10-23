@@ -23,7 +23,9 @@ public class ArgumentNode extends CommandNode {
 
     @Override
     public Object parseArgs(CommandSender sender, String command, String... args) {
-        return argument.parse(args[0]).get();
+        if(args[0].isEmpty())
+            return null;
+        return argument.parse(args[0]).orElse(null);
     }
 
     @Override
@@ -56,9 +58,6 @@ public class ArgumentNode extends CommandNode {
 
     @Override
     public int compareTo(CommandNode o) {
-
-
-
         if (argument.getName().equals("String"))
             return -1;
         if (o instanceof ArgumentNode) {

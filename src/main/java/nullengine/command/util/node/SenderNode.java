@@ -4,6 +4,7 @@ import nullengine.command.CommandSender;
 import nullengine.command.completion.Completer;
 import nullengine.command.exception.CommandSenderErrorException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -52,5 +53,13 @@ public class SenderNode extends CommandNode {
     }
     public boolean hasTip(){
         return false;
+    }
+
+    @Override
+    public Completer getCompleter() {
+        return (sender, command, args) -> new Completer.CompleteResult(getChildren()
+                .stream()
+                .map(node -> node.getCompleter().complete(sender,command,args).getComplete())
+                .collect(ArrayList::new,ArrayList::addAll,ArrayList::addAll));
     }
 }

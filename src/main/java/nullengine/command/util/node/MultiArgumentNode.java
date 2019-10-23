@@ -38,7 +38,7 @@ public class MultiArgumentNode extends CommandNode {
     private MultiInstance getMultiArgInstance() {
         ArrayList<Object> args = new ArrayList<>();
         CommandNode parent = this;
-        for (int i = 0; i < this.argsNum+getNeedArgs(); i++) {
+        for (int i = 0; i < this.argsNum + getNeedArgs(); i++) {
             if (parent.parseResult == null)
                 i--;
             else {
@@ -59,7 +59,7 @@ public class MultiArgumentNode extends CommandNode {
 
     @Override
     protected Object parseArgs(CommandSender sender, String command, String... args) {
-        return commandNode.parseArgs(sender,command,args);
+        return commandNode.parseArgs(sender, command, args);
     }
 
     @Override
@@ -94,5 +94,20 @@ public class MultiArgumentNode extends CommandNode {
                 ", instanceFunction=" + instanceFunction +
                 ", argsNum=" + argsNum +
                 '}';
+    }
+
+    @Override
+    public String getTip() {
+        return commandNode.getTip();
+    }
+
+    @Override
+    public void setTip(String tip) {
+        commandNode.setTip(tip);
+    }
+
+    @Override
+    public boolean hasTip() {
+        return commandNode.hasTip();
     }
 }

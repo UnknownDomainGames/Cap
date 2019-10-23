@@ -1,12 +1,13 @@
 package nullengine.command.util.node;
 
+import nullengine.command.Command;
 import nullengine.command.CommandSender;
 import nullengine.command.completion.Completer;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-public abstract class CommandNode implements Comparable<CommandNode> {
+public abstract class CommandNode implements Comparable<CommandNode>,Cloneable {
 
     private CommandNode parent;
 
@@ -107,7 +108,17 @@ public abstract class CommandNode implements Comparable<CommandNode> {
     }
 
     public boolean hasTip(){
-        return true;
+        return tip !=null;
+    }
+
+    @Override
+    public CommandNode clone() throws CloneNotSupportedException {
+        CommandNode node = (CommandNode) super.clone();
+        node.children = new TreeSet<>();
+        for(CommandNode child : children){
+            node.addChild(child.clone());
+        }
+        return node;
     }
 
     @Override

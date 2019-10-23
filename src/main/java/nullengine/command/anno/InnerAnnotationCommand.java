@@ -88,10 +88,17 @@ public class InnerAnnotationCommand extends NodeAnnotationCommand {
                 if (field.getAnnotation(Ignore.class) != null)
                     continue;
                 List<CommandNode> fieldNodes = innerUtil.parseField(field);
+                ArrayList<CommandNode> branches = new ArrayList<>();
                 for (CommandNode node : nodeList)
                     for (CommandNode child : fieldNodes)
-                        CommandNodeUtil.addChildren(node, child);
-                nodeList = fieldNodes;
+                        try {
+                            CommandNode topCloneChild = CommandNodeUtil.getTopParent(child).clone();
+                            node.addChild(topCloneChild);
+                            branches.addAll(CommandNodeUtil.getAllBottomBranches(topCloneChild));
+                        } catch (CloneNotSupportedException e) {
+                            e.printStackTrace();
+                        }
+                nodeList = branches;
             }
 
             Consumer<List<Object>> executeConsumer = objects -> {

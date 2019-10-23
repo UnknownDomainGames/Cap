@@ -1,14 +1,37 @@
 package nullengine.command.util.node;
 
 import nullengine.command.CommandSender;
+import nullengine.command.argument.Argument;
+import nullengine.command.completion.Completer;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class EmptyArgumentNode extends ArgumentNode {
 
     public EmptyArgumentNode() {
-        super(null);
+        super(new Argument() {
+            @Override
+            public String getName() {
+                return "Empty";
+            }
+
+            @Override
+            public Class responsibleClass() {
+                return this.getClass();
+            }
+
+            @Override
+            public Optional parse(String arg) {
+                return Optional.empty();
+            }
+
+            @Override
+            public Completer getCompleter() {
+                return null;
+            }
+        });
     }
 
     @Override
@@ -25,4 +48,8 @@ public class EmptyArgumentNode extends ArgumentNode {
         return Collections.emptyList();
     }
 
+    @Override
+    public boolean hasTip() {
+        return false;
+    }
 }

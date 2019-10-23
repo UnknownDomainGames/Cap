@@ -19,9 +19,20 @@ public class BooleanArgument extends Argument {
         return Boolean.class;
     }
 
+    /**
+     * arg must be 'true' or 'false'.
+     * do not use Boolean.valueOf or Boolean.parseBoolean,cause:
+     * if arg is normal string it will return false.
+     * @param arg
+     * @return
+     */
     @Override
     public Optional parse(String arg) {
-        return Optional.ofNullable(Boolean.valueOf(arg));
+        if(arg.equals("true"))
+            return Optional.of(true);
+        else if(arg.equals("false"))
+            return Optional.of(false);
+        return Optional.empty();
     }
 
     @Override

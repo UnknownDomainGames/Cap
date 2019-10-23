@@ -104,10 +104,18 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
 
                 for (Parameter parameter : method.getParameters()) {
                     List<CommandNode> children = annotationUtil.parseParameter(parameter);
+                    ArrayList<CommandNode> branches = new ArrayList<>();
                     for (CommandNode parent : node)
-                        for (CommandNode child : children)
-                            CommandNodeUtil.addChildren(parent, child);
-                    node = children;
+                        for (CommandNode child : children){
+                            try {
+                                CommandNode topCloneChild = CommandNodeUtil.getTopParent(child).clone();
+                                parent.addChild(topCloneChild);
+                                branches.addAll(CommandNodeUtil.getAllBottomBranches(topCloneChild));
+                            } catch (CloneNotSupportedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    node = branches;
                 }
 
                 node.forEach(commandNode -> commandNode.setExecutor((objects -> {

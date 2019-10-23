@@ -50,18 +50,7 @@ public class CommandNodeUtil {
         }
     }
 
-
-    /**
-     * 将children的最顶端加入到node的子类中
-     *
-     * @param node
-     * @param children
-     */
-    public static void addChildren(CommandNode node, CommandNode children) {
-        node.addChild(getTopParent(children));
-    }
-
-    private static CommandNode getTopParent(CommandNode child) {
+    public static CommandNode getTopParent(CommandNode child) {
         while (true) {
             if (child.getParent() == null)
                 return child;
@@ -81,6 +70,21 @@ public class CommandNodeUtil {
             child = child.getParent();
         }
     }
+
+    public static Collection<? extends CommandNode> getAllBottomBranches(CommandNode clone) {
+        ArrayList<CommandNode> list = new ArrayList<>();
+        List<CommandNode> arrayList = new LinkedList<>();
+        arrayList.add(clone);
+        while (!arrayList.isEmpty()) {
+            CommandNode node = arrayList.remove(0);
+            if (node.getChildren().isEmpty())
+                list.add(node);
+            else
+                arrayList.addAll(node.getChildren());
+        }
+        return list;
+    }
+
 
     /**
      * 返回从当前node到最近结束的node的路径.
@@ -125,12 +129,6 @@ public class CommandNodeUtil {
             this.completeManager = completeManager;
         }
 
-        /**
-         * 有可能返回一个带父Node的Node
-         *
-         * @param parameter
-         * @return
-         */
         public List<CommandNode> parseParameter(Parameter parameter) {
 
             Annotation[] annotations = parameter.getAnnotations();
@@ -217,13 +215,19 @@ public class CommandNodeUtil {
             List<CommandNode> nodes = parseParameter(parameters[0]);
             for (int i = 1; i < parameters.length; i++) {
                 List<CommandNode> children = parseParameter(parameters[i]);
-
+                List<CommandNode> cloneChildren = new ArrayList<>();
                 for (CommandNode parent : nodes) {
                     for (CommandNode child : children) {
-                        addChildren(parent, child);
+                        try {
+                            CommandNode clone = CommandNodeUtil.getTopParent(child).clone();
+                            cloneChildren.addAll(getAllBottomBranches(clone));
+                            parent.addChild(clone);
+                        } catch (CloneNotSupportedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-                nodes = children;
+                nodes = cloneChildren;
             }
             for (int i = 0; i < nodes.size(); i++) {
                 CommandNode node = nodes.get(i);
@@ -237,6 +241,7 @@ public class CommandNodeUtil {
             }
             return nodes;
         }
+
 
         public void setCustomAnnotation(List<CommandNode> nodes, Annotation[] annotations) {
             for (Annotation annotation : annotations) {

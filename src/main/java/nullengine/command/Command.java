@@ -29,6 +29,8 @@ public abstract class Command {
 
     public abstract Completer.CompleteResult complete(CommandSender sender, String[] args);
 
+    public abstract ArgumentCheckResult checkArguments(CommandSender sender,String[] args);
+
     public abstract boolean handleUncaughtException(Exception e, CommandSender sender, String[] args);
 
     public String getName() {
@@ -69,4 +71,5 @@ public abstract class Command {
     public int hashCode() {
         return Objects.hash(name, description, helpMessage);
     }
+
 }
