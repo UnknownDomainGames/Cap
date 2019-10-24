@@ -5,5 +5,5 @@ import nullengine.command.CommandSender;
 
 @FunctionalInterface
 public interface CommandExecutor {
-    void execute(CommandSender executor, Command command, String[] args) throws Exception;
+    void execute(CommandSender sender, Command command, String[] args) throws Exception;
 }
