@@ -135,7 +135,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     }
 
     @Override
-    public CompleteResult complete(CommandSender sender, String[] args) {
+    public List<String> complete(CommandSender sender, String[] args) {
 
         String[] removeLast = args;
         if (args != null && args.length > 0)
@@ -157,10 +157,28 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 list.addAll(child.getCompleter().complete(sender, getName(), args));
         }
 
+
+
+
+        return list;
+    }
+
+    @Override
+    public List<String> getTips(CommandSender sender, String[] args) {
+        String[] removeLast = args;
+        if (args != null && args.length > 0)
+            Arrays.copyOfRange(args, 0, args.length - 1);
+        CommandNode result;
+        if (removeLast.length == 0) {
+            result = node;
+        } else
+            result = parseArgs(sender, removeLast);
+
+        if (result instanceof SenderNode && result.getParent() != null)
+            result = result.getParent();
         List<CommandNode> nodes = CommandNodeUtil.getShortestPath(result);
         List<String> tips = nodes.stream().map(node -> node.hasTip() ? node.getTip() : "").collect(Collectors.toList());
-
-        return new CompleteResult(list, tips);
+        return tips;
     }
 
     @Override

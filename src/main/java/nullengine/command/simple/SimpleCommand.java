@@ -15,6 +15,7 @@ public class SimpleCommand extends Command {
     private CommandCompleter completer;
     private CommandUncaughtExceptionHandler uncaughtExceptionHandler;
     private CommandArgumentChecker argumentChecker;
+    private CommandTips tips;
 
     public SimpleCommand(String name) {
         super(name);
@@ -33,12 +34,19 @@ public class SimpleCommand extends Command {
     }
 
     @Override
-    public CompleteResult complete(CommandSender sender, String[] args) {
+    public List<String> complete(CommandSender sender, String[] args) {
         if (completer == null) {
-            return CompleteResult.EMPTY;
+            return Collections.EMPTY_LIST;
         }
 
         return completer.complete(sender, this, args);
+    }
+
+    @Override
+    public List<String> getTips(CommandSender sender, String[] args) {
+        if(tips==null)
+            return Collections.EMPTY_LIST;
+        return tips.getTips(sender,args);
     }
 
     @Override

@@ -20,9 +20,13 @@ public interface CommandManager {
 
     void execute(CommandSender sender, String command, String... args);
 
-    CompleteResult complete(CommandSender sender, String rawCommand);
+    List<String> complete(CommandSender sender, String rawCommand);
 
-    CompleteResult complete(CommandSender sender, String command, String... args);
+    List<String> complete(CommandSender sender, String command, String... args);
+
+    List<String> getTips(CommandSender sender,String rawCommand);
+
+    List<String> getTips(CommandSender sender,String command,String... args);
 
     @FunctionalInterface
     interface UncaughtExceptionHandler {

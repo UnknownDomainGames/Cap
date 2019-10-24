@@ -9,5 +9,5 @@ import java.util.List;
 
 @FunctionalInterface
 public interface CommandCompleter {
-    CompleteResult complete(CommandSender sender, Command command, String[] args);
+    List<String> complete(CommandSender sender, Command command, String[] args);
 }
