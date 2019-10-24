@@ -41,7 +41,7 @@ public class RequiredNode extends CommandNode {
 
     @Override
     public Completer getCompleter() {
-        return (sender, command, args) -> new Completer.CompleteResult(Lists.newArrayList(require));
+        return (sender, command, args) -> Lists.newArrayList(require);
     }
 
     @Override

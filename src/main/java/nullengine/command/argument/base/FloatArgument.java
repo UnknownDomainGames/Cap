@@ -24,6 +24,6 @@ public class FloatArgument extends Argument {
 
     @Override
     public Completer getCompleter() {
-        return (sender, command, args) -> Completer.CompleteResult.completeResult(Lists.newArrayList("[float]"));
+        return (sender, command, args) -> Lists.newArrayList("[float]");
     }
 }

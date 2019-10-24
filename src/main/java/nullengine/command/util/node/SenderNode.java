@@ -57,9 +57,9 @@ public class SenderNode extends CommandNode {
 
     @Override
     public Completer getCompleter() {
-        return (sender, command, args) -> new Completer.CompleteResult(getChildren()
+        return (sender, command, args) -> getChildren()
                 .stream()
-                .map(node -> node.getCompleter().complete(sender,command,args).getComplete())
-                .collect(ArrayList::new,ArrayList::addAll,ArrayList::addAll));
+                .map(node -> node.getCompleter().complete(sender,command,args))
+                .collect(ArrayList::new,ArrayList::addAll,ArrayList::addAll);
     }
 }

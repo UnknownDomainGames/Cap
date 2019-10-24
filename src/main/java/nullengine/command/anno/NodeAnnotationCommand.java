@@ -3,6 +3,7 @@ package nullengine.command.anno;
 import nullengine.command.ArgumentCheckResult;
 import nullengine.command.Command;
 import nullengine.command.CommandSender;
+import nullengine.command.completion.CompleteResult;
 import nullengine.command.completion.Completer;
 import nullengine.command.exception.CommandWrongUseException;
 import nullengine.command.exception.PermissionNotEnoughException;
@@ -134,7 +135,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     }
 
     @Override
-    public Completer.CompleteResult complete(CommandSender sender, String[] args) {
+    public CompleteResult complete(CommandSender sender, String[] args) {
 
         String[] removeLast = args;
         if (args != null && args.length > 0)
@@ -153,13 +154,13 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
         for (CommandNode child : result.getChildren()) {
             if (child.getCompleter() != null)
-                list.addAll(child.getCompleter().complete(sender, getName(), args).getComplete());
+                list.addAll(child.getCompleter().complete(sender, getName(), args));
         }
 
         List<CommandNode> nodes = CommandNodeUtil.getShortestPath(result);
         List<String> tips = nodes.stream().map(node -> node.hasTip() ? node.getTip() : "").collect(Collectors.toList());
 
-        return new Completer.CompleteResult(list, tips);
+        return new CompleteResult(list, tips);
     }
 
     @Override

@@ -6,6 +6,7 @@ import nullengine.command.CommandSender;
 import nullengine.command.argument.ArgumentManager;
 import nullengine.command.argument.SimpleArgumentManager;
 import nullengine.command.completion.CompleteManager;
+import nullengine.command.completion.CompleteResult;
 import nullengine.command.completion.Completer;
 import nullengine.command.completion.SimpleCompleteManager;
 import nullengine.command.util.CommandNodeUtil;
@@ -30,7 +31,7 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
     }
 
     @Override
-    public Completer.CompleteResult complete(CommandSender sender, String[] args) {
+    public CompleteResult complete(CommandSender sender, String[] args) {
         if (completeOverrideFunction != null) {
 
         }

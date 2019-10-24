@@ -1,5 +1,6 @@
 package nullengine.command;
 
+import nullengine.command.completion.CompleteResult;
 import nullengine.command.completion.Completer;
 
 import java.util.List;
@@ -19,9 +20,9 @@ public interface CommandManager {
 
     void execute(CommandSender sender, String command, String... args);
 
-    Completer.CompleteResult complete(CommandSender sender, String rawCommand);
+    CompleteResult complete(CommandSender sender, String rawCommand);
 
-    Completer.CompleteResult complete(CommandSender sender, String command, String... args);
+    CompleteResult complete(CommandSender sender, String command, String... args);
 
     @FunctionalInterface
     interface UncaughtExceptionHandler {

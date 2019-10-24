@@ -3,6 +3,7 @@ package nullengine.command.simple;
 import nullengine.command.ArgumentCheckResult;
 import nullengine.command.Command;
 import nullengine.command.CommandSender;
+import nullengine.command.completion.CompleteResult;
 import nullengine.command.completion.Completer;
 
 import java.util.Collections;
@@ -32,9 +33,9 @@ public class SimpleCommand extends Command {
     }
 
     @Override
-    public Completer.CompleteResult complete(CommandSender sender, String[] args) {
+    public CompleteResult complete(CommandSender sender, String[] args) {
         if (completer == null) {
-            return Completer.CompleteResult.EMPTY;
+            return CompleteResult.EMPTY;
         }
 
         return completer.complete(sender, this, args);

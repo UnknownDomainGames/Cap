@@ -1,5 +1,6 @@
 package nullengine.command;
 
+import nullengine.command.completion.CompleteResult;
 import nullengine.command.completion.Completer;
 import nullengine.command.exception.CommandNotFoundException;
 
@@ -88,19 +89,19 @@ public class SimpleCommandManager implements CommandManager {
     }
 
     @Override
-    public Completer.CompleteResult complete(CommandSender sender, String rawCommand) {
+    public CompleteResult complete(CommandSender sender, String rawCommand) {
         CommandResolver.Result result = resolver.resolve(rawCommand);
         return complete(sender, result.command, result.args);
     }
 
     @Override
-    public Completer.CompleteResult complete(CommandSender sender, String command, String... args) {
+    public CompleteResult complete(CommandSender sender, String command, String... args) {
         Command commandInstance = commands.get(command);
         if ((args == null || args.length == 0) && commandInstance == null)
-            return new Completer.CompleteResult(commands.keySet().stream().filter(commandName -> commandName.startsWith(command)).collect(Collectors.toList()));
+            return new CompleteResult(commands.keySet().stream().filter(commandName -> commandName.startsWith(command)).collect(Collectors.toList()));
 
         if (commandInstance == null)
-            return Completer.CompleteResult.EMPTY;
+            return CompleteResult.EMPTY;
 
         return commandInstance.complete(sender, args);
     }

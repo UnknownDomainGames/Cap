@@ -2,6 +2,7 @@ package nullengine.command.argument.base;
 
 import com.google.common.collect.Lists;
 import nullengine.command.argument.SimpleArgument;
+import nullengine.command.completion.CompleteResult;
 import nullengine.command.completion.Completer;
 
 import java.util.Collections;
@@ -23,8 +24,8 @@ public class StringArgument extends SimpleArgument {
         return (sender, command, args) -> {
             String s = args[args.length - 1];
             if (s.isEmpty())
-                return Completer.CompleteResult.completeResult(Lists.newArrayList("[text]"));
-            else return Completer.CompleteResult.EMPTY;
+                return Lists.newArrayList("[text]");
+            else return Collections.EMPTY_LIST;
         };
     }
 }

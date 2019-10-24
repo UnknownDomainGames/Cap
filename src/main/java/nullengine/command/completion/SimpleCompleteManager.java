@@ -1,7 +1,5 @@
 package nullengine.command.completion;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 
 public class SimpleCompleteManager implements CompleteManager {
