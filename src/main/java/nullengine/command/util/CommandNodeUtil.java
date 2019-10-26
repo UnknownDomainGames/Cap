@@ -13,6 +13,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public class CommandNodeUtil {
 
@@ -43,7 +45,7 @@ public class CommandNodeUtil {
     public static int getTotalNeedArgs(CommandNode node) {
         int i = 0;
         while (true) {
-            if(node==null)
+            if (node == null)
                 return i;
             if (node.getParent() == null)
                 return i;
@@ -122,8 +124,8 @@ public class CommandNodeUtil {
 
     public static class AnnotationUtil extends CommandNodeUtil {
 
-        private ArgumentManager argumentManager;
-        private SuggesterManager suggesterManager;
+        protected ArgumentManager argumentManager;
+        protected SuggesterManager suggesterManager;
 
         public AnnotationUtil(Object instance, ArgumentManager argumentManager, SuggesterManager suggesterManager) {
             super(instance);
@@ -178,7 +180,7 @@ public class CommandNodeUtil {
             if (argument == null) {
                 List<CommandNode> node = handleGenerator(clazz);
                 if (node == null || node.isEmpty())
-                    throw new RuntimeException(clazz+"  这个类没有注册进Argument或没有标记Generator");
+                    throw new RuntimeException(clazz + "  这个类没有注册进Argument或没有标记Generator");
                 return node;
             } else {
                 CommandNode node = new ArgumentNode(argument);
@@ -266,6 +268,8 @@ public class CommandNodeUtil {
     public static class ClassUtil extends AnnotationUtil {
 
         private Multimap<String, ProvideWrapper> providerMap = HashMultimap.create();
+        private boolean provided;
+        private boolean replaced;
 
         public ClassUtil(Object instance, ArgumentManager argumentManager, SuggesterManager suggesterManager) {
             super(instance, argumentManager, suggesterManager);
@@ -290,35 +294,38 @@ public class CommandNodeUtil {
                 Collection<ProvideWrapper> wrapper = providerMap.get(field.getName());
                 if (!checkProvider(field, wrapper))
                     throw new RuntimeException("provider 方法错误 其返回的对象不是目标Field的类或它的子类");
-                ProvideWrapper replaceProvide = wrapper.stream().filter(provideWrapper -> provideWrapper.provide.replace()).findAny().orElse(null);
-                if (replaceProvide != null) {
-                    nodeList = constructMultiArgument(replaceProvide.method.getParameters(), objects -> {
-                        try {
-                            replaceProvide.method.setAccessible(true);
-                            return replaceProvide.method.invoke(getInstance(), objects);
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        } catch (InvocationTargetException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    });
-                    setCustomAnnotation(nodeList, annotations);
-                    return nodeList;
-                }
-                for (ProvideWrapper provideWrapper : wrapper) {
-                    nodeList.addAll(constructMultiArgument(provideWrapper.method.getParameters(), objects -> {
-                        try {
-                            replaceProvide.method.setAccessible(true);
-                            return replaceProvide.method.invoke(getInstance(), objects);
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        } catch (InvocationTargetException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    }));
-                }
+                List<ProvideWrapper> replaceProvide = wrapper.stream().filter(provideWrapper -> provideWrapper.provide.replace()).collect(Collectors.toList());
+                if (!replaceProvide.isEmpty()) {
+                    for (ProvideWrapper provideWrapper : replaceProvide) {
+                        nodeList = constructMultiArgument(provideWrapper.method.getParameters(), objects -> {
+                            try {
+                                provideWrapper.method.setAccessible(true);
+                                return provideWrapper.method.invoke(getInstance(), objects);
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                            } catch (InvocationTargetException e) {
+                                e.printStackTrace();
+                            }
+                            return null;
+                        });
+                        setCustomAnnotation(nodeList, annotations);
+                        return nodeList;
+                    }
+                } else
+                    for (ProvideWrapper provideWrapper : wrapper) {
+                        provided = true;
+                        nodeList.addAll(constructMultiArgument(provideWrapper.method.getParameters(), objects -> {
+                            try {
+                                provideWrapper.method.setAccessible(true);
+                                return provideWrapper.method.invoke(getInstance(), objects);
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                            } catch (InvocationTargetException e) {
+                                e.printStackTrace();
+                            }
+                            return null;
+                        }));
+                    }
             }
 
             nodeList.addAll(foundMainNode(field.getType(), annotations));
@@ -326,6 +333,25 @@ public class CommandNodeUtil {
             setCustomAnnotation(nodeList, annotations);
 
             return nodeList;
+        }
+
+        @Override
+        public List<CommandNode> handleArgument(Class clazz) {
+            if(replaced)
+                return Collections.EMPTY_LIST;
+            Argument argument = argumentManager.getArgument(clazz);
+            if (argument == null) {
+                List<CommandNode> node = handleGenerator(clazz);
+                if (node == null || node.isEmpty())
+                    if (!provided)
+                        throw new RuntimeException(clazz + "  这个类没有注册进Argument或没有标记Generator");
+                    else return Collections.EMPTY_LIST;
+                return node;
+            } else {
+                CommandNode node = new ArgumentNode(argument);
+                node.setSuggester(suggesterManager.getSuggester(clazz));
+                return Lists.newArrayList(node);
+            }
         }
 
         private boolean checkProvider(Field field, Collection<ProvideWrapper> wrapper) {

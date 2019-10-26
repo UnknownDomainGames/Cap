@@ -99,7 +99,8 @@ public class ClassNodeCommandTest {
                     public void run() {
                         sender.sendMessage(sender.getSenderName()+location+random.nextInt()+text);
                     }
-                    @Provide(value = "random",replace = true)
+
+                    @Provide(value = "random")
                     public Random random(int seed){
                         return new Random(seed);
                     }
