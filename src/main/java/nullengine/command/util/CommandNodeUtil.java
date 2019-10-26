@@ -178,7 +178,7 @@ public class CommandNodeUtil {
             if (argument == null) {
                 List<CommandNode> node = handleGenerator(clazz);
                 if (node == null || node.isEmpty())
-                    throw new RuntimeException("这个类没有注册进Argument或没有标记Generator");
+                    throw new RuntimeException(clazz+"  这个类没有注册进Argument或没有标记Generator");
                 return node;
             } else {
                 CommandNode node = new ArgumentNode(argument);
@@ -288,12 +288,13 @@ public class CommandNodeUtil {
             List<CommandNode> nodeList = new ArrayList<>();
             if (providerMap.containsKey(field.getName())) {
                 Collection<ProvideWrapper> wrapper = providerMap.get(field.getName());
-                if (checkProvider(field, wrapper))
+                if (!checkProvider(field, wrapper))
                     throw new RuntimeException("provider 方法错误 其返回的对象不是目标Field的类或它的子类");
                 ProvideWrapper replaceProvide = wrapper.stream().filter(provideWrapper -> provideWrapper.provide.replace()).findAny().orElse(null);
                 if (replaceProvide != null) {
                     nodeList = constructMultiArgument(replaceProvide.method.getParameters(), objects -> {
                         try {
+                            replaceProvide.method.setAccessible(true);
                             return replaceProvide.method.invoke(getInstance(), objects);
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
@@ -308,6 +309,7 @@ public class CommandNodeUtil {
                 for (ProvideWrapper provideWrapper : wrapper) {
                     nodeList.addAll(constructMultiArgument(provideWrapper.method.getParameters(), objects -> {
                         try {
+                            replaceProvide.method.setAccessible(true);
                             return replaceProvide.method.invoke(getInstance(), objects);
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();

@@ -105,6 +105,7 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
                         Field field = fields[i + ignored];
                         if (field.getAnnotation(Ignore.class) != null) {
                             ignored++;
+                            i--;
                             continue;
                         }
                         try {
