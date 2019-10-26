@@ -30,13 +30,14 @@ public class RequiredNode extends CommandNode {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         RequiredNode that = (RequiredNode) o;
         return Objects.equals(require, that.require);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(require);
+        return Objects.hash(super.hashCode(), require);
     }
 
     @Override

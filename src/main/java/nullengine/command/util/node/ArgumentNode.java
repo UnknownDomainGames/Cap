@@ -32,13 +32,14 @@ public class ArgumentNode extends CommandNode {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         ArgumentNode that = (ArgumentNode) o;
         return Objects.equals(argument, that.argument);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(argument);
+        return Objects.hash(super.hashCode(), argument);
     }
 
     @Override

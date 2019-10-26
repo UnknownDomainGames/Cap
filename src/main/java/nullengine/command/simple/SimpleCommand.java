@@ -10,7 +10,7 @@ import java.util.List;
 public class SimpleCommand extends Command {
 
     private CommandExecutor executor;
-    private CommandCompleter completer;
+    private CommandSuggester completer;
     private CommandUncaughtExceptionHandler uncaughtExceptionHandler;
     private CommandArgumentChecker argumentChecker;
     private CommandTips tips;
@@ -37,7 +37,7 @@ public class SimpleCommand extends Command {
             return Collections.EMPTY_LIST;
         }
 
-        return completer.complete(sender, this, args);
+        return completer.suggest(sender, this, args);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class SimpleCommand extends Command {
         this.executor = executor;
     }
 
-    public void setCompleter(CommandCompleter completer) {
+    public void setCompleter(CommandSuggester completer) {
         this.completer = completer;
     }
 

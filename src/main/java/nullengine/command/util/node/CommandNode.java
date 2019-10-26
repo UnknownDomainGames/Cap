@@ -20,10 +20,10 @@ public abstract class CommandNode implements Comparable<CommandNode>,Cloneable {
 
     private String tip;
 
+    protected Object parseResult;
+
     public CommandNode() {
     }
-
-    protected Object parseResult;
 
     public boolean parse(CommandSender sender, String command, String... arg) {
         Object result = parseArgs(sender, command, arg);
@@ -64,7 +64,20 @@ public abstract class CommandNode implements Comparable<CommandNode>,Cloneable {
         commandNode.setParent(null);
     }
 
-    public abstract boolean equals(Object obj);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CommandNode node = (CommandNode) o;
+        return Objects.equals(needPermission, node.needPermission) &&
+                Objects.equals(suggester, node.suggester) &&
+                Objects.equals(tip, node.tip);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(needPermission, suggester, tip);
+    }
 
     public boolean canExecuteCommand() {
         return getExecutor() != null;

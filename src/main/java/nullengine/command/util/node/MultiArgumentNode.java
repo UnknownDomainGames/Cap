@@ -66,6 +66,7 @@ public class MultiArgumentNode extends CommandNode {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         MultiArgumentNode that = (MultiArgumentNode) o;
         return argsNum == that.argsNum &&
                 Objects.equals(commandNode, that.commandNode) &&
@@ -74,7 +75,7 @@ public class MultiArgumentNode extends CommandNode {
 
     @Override
     public int hashCode() {
-        return Objects.hash(commandNode, instanceFunction, argsNum);
+        return Objects.hash(super.hashCode(), commandNode, instanceFunction, argsNum);
     }
 
     private class MultiInstance {

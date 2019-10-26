@@ -142,18 +142,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
     @Override
     public List<String> suggest(CommandSender sender, String[] args) {
-        String[] removeLast = args;
-        if (args != null && args.length > 0)
-            removeLast = Arrays.copyOfRange(args, 0, args.length - 1);
-
-        CommandNode result;
-        if (removeLast.length == 0) {
-            result = node;
-        } else
-            result = parseArgs(sender, removeLast);
-
-        if (result instanceof SenderNode && result.getParent() != null)
-            result = result.getParent();
+        CommandNode result = suggestParse(sender,args);
 
         List<String> list = new ArrayList<>();
 
@@ -164,11 +153,11 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         return list;
     }
 
-    @Override
-    public List<String> getTips(CommandSender sender, String[] args) {
+    protected CommandNode suggestParse(CommandSender sender,String[] args){
         String[] removeLast = args;
         if (args != null && args.length > 0)
             removeLast = Arrays.copyOfRange(args, 0, args.length - 1);
+
         CommandNode result;
         if (removeLast.length == 0) {
             result = node;
@@ -177,11 +166,19 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
         if (result instanceof SenderNode && result.getParent() != null)
             result = result.getParent();
-        List<CommandNode> nodes = CommandNodeUtil.getShortestPath(result);
+        return result;
+    }
 
+    @Override
+    public List<String> getTips(CommandSender sender, String[] args) {
+        CommandNode result = suggestParse(sender,args);
+
+        List<CommandNode> nodes = CommandNodeUtil.getShortestPath(result);
         List<String> tips = nodes.stream().map(node -> node.hasTip() ? node.getTip() : "").collect(Collectors.toList());
         return tips;
     }
+
+
 
     @Override
     public ArgumentCheckResult checkArguments(CommandSender sender, String[] args) {

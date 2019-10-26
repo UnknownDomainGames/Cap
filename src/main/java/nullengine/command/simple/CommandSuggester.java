@@ -6,6 +6,6 @@ import nullengine.command.CommandSender;
 import java.util.List;
 
 @FunctionalInterface
-public interface CommandCompleter {
-    List<String> complete(CommandSender sender, Command command, String[] args);
+public interface CommandSuggester {
+    List<String> suggest(CommandSender sender, Command command, String[] args);
 }

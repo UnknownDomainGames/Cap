@@ -39,13 +39,16 @@ public class SenderNode extends CommandNode {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         SenderNode that = (SenderNode) o;
-        return Objects.equals(allowedSenders, that.allowedSenders);
+        return Arrays.equals(allowedSenders, that.allowedSenders);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash((Object) allowedSenders);
+        int result = super.hashCode();
+        result = 31 * result + Arrays.hashCode(allowedSenders);
+        return result;
     }
 
     @Override
