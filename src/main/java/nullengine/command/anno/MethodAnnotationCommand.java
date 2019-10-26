@@ -4,9 +4,7 @@ import com.google.common.collect.Lists;
 import nullengine.command.Command;
 import nullengine.command.CommandManager;
 import nullengine.command.argument.ArgumentManager;
-import nullengine.command.argument.SimpleArgumentManager;
 import nullengine.command.suggestion.SuggesterManager;
-import nullengine.command.suggestion.SimpleSuggesterManager;
 import nullengine.command.util.CommandNodeUtil;
 import nullengine.command.util.node.CommandNode;
 import nullengine.command.util.node.Nodeable;
@@ -27,10 +25,6 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
     }
 
     public static class AnnotationCommandBuilder {
-
-        private static ArgumentManager staticArgumentManage = new SimpleArgumentManager();
-
-        private static SuggesterManager staticSuggesterManager = new SimpleSuggesterManager();
 
         private Set<Object> commandHandler = new HashSet<>();
 

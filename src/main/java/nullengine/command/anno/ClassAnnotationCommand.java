@@ -4,9 +4,7 @@ import nullengine.command.Command;
 import nullengine.command.CommandManager;
 import nullengine.command.CommandSender;
 import nullengine.command.argument.ArgumentManager;
-import nullengine.command.argument.SimpleArgumentManager;
 import nullengine.command.suggestion.SuggesterManager;
-import nullengine.command.suggestion.SimpleSuggesterManager;
 import nullengine.command.util.CommandNodeUtil;
 import nullengine.command.util.node.CommandNode;
 import nullengine.command.util.node.Nodeable;
@@ -41,11 +39,11 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
 
         private CommandManager commandManager;
 
-        private ArgumentManager argumentManager = new SimpleArgumentManager();
+        private ArgumentManager argumentManager = staticArgumentManage;
 
-        private SuggesterManager suggesterManager = new SimpleSuggesterManager();
+        private SuggesterManager suggesterManager = staticSuggesterManager;
 
-        private List<Command> commands = new ArrayList<>();
+        private List<CommandHandlerWrapper> commandHandlerList = new ArrayList<>();
 
         public Builder(CommandManager commandManager) {
             this.commandManager = commandManager;
@@ -61,85 +59,7 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
         }
 
         public Builder caseCommand(String commandName,String desc,String helpMessage,Runnable commandHandler){
-            CommandNodeUtil.ClassUtil innerUtil = CommandNodeUtil.getInnerUtil(commandHandler, argumentManager, suggesterManager);
-
-            List<CommandNode> nodeList = new ArrayList<>();
-
-            Command command = commandManager.getCommand(commandName).orElse(null);
-
-            if (command == null)
-                command = new ClassAnnotationCommand(commandName,desc,helpMessage);
-
-            if (!(command instanceof Nodeable))
-                throw new RuntimeException("命令: " + commandName + " 已注册，且不支持");
-
-            Nodeable nodeable = (Nodeable) command;
-
-            nodeList.add(nodeable.getNode());
-
-            Class clazz = commandHandler.getClass();
-
-            Field[] fields = clazz.getFields();
-
-            for (Field field : fields) {
-                if (field.getAnnotation(Ignore.class) != null)
-                    continue;
-                List<CommandNode> fieldNodes = innerUtil.parseField(field);
-                ArrayList<CommandNode> branches = new ArrayList<>();
-                for (CommandNode node : nodeList)
-                    for (CommandNode child : fieldNodes)
-                        try {
-                            CommandNode topCloneChild = CommandNodeUtil.getTopParent(child).clone();
-                            node.addChild(topCloneChild);
-                            branches.addAll(CommandNodeUtil.getAllBottomBranches(topCloneChild));
-                        } catch (CloneNotSupportedException e) {
-                            e.printStackTrace();
-                        }
-                nodeList = branches;
-            }
-
-            Consumer<List<Object>> executeConsumer = objects -> {
-                int ignored = 0;
-                for(int i =0;i<objects.size();i++){
-                    Field field = fields[i+ignored];
-                    if(field.getAnnotation(Ignore.class)!=null){
-                        ignored++;
-                        continue;
-                    }
-                    try {
-                        field.setAccessible(true);
-                        field.set(commandHandler,objects.get(i));
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                }
-                commandHandler.run();
-            };
-
-            for(CommandNode node : nodeList){
-                node.setExecutor(executeConsumer);
-            }
-
-            if (command instanceof ClassAnnotationCommand)
-                for (Method method : clazz.getMethods()) {
-                    if (method.getAnnotation(Suggest.class) != null && List.class.isAssignableFrom(method.getReturnType())) {
-                        ClassAnnotationCommand innerAnnotationCommand = (ClassAnnotationCommand) command;
-                        innerAnnotationCommand.completeOverrideFunction = ((sender, strings) -> {
-                            try {
-                                return (List<String>) method.invoke(commandHandler, sender, strings);
-                            } catch (IllegalAccessException e) {
-                                e.printStackTrace();
-                            } catch (InvocationTargetException e) {
-                                e.printStackTrace();
-                            }
-                            return Collections.EMPTY_LIST;
-                        });
-                    }
-                }
-
-            if (nodeable instanceof NodeAnnotationCommand)
-                ((NodeAnnotationCommand) nodeable).flush();
-            commands.add(command);
+            commandHandlerList.add(new CommandHandlerWrapper(commandName,desc,helpMessage,commandHandler));
             return this;
         }
 
@@ -151,11 +71,115 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
            return caseCommand(commandName,"",commandHandler);
         }
 
+        private List<Command> build(){
+            List<Command> commands = new ArrayList<>();
+            for(CommandHandlerWrapper wrapper : commandHandlerList){
+                Runnable commandHandler = wrapper.instance;
+                String commandName = wrapper.commandName;
+                String desc = wrapper.desc;
+                String helpMessage = wrapper.help;
+
+                CommandNodeUtil.ClassUtil innerUtil = CommandNodeUtil.getInnerUtil(commandHandler, argumentManager, suggesterManager);
+
+                List<CommandNode> nodeList = new ArrayList<>();
+
+                Command command = commandManager.getCommand(commandName).orElse(null);
+
+                if (command == null)
+                    command = new ClassAnnotationCommand(commandName,desc,helpMessage);
+
+                if (!(command instanceof Nodeable))
+                    throw new RuntimeException("命令: " + commandName + " 已注册，且不支持");
+
+                Nodeable nodeable = (Nodeable) command;
+
+                nodeList.add(nodeable.getNode());
+
+                Class clazz = commandHandler.getClass();
+
+                Field[] fields = clazz.getFields();
+
+                for (Field field : fields) {
+                    if (field.getAnnotation(Ignore.class) != null)
+                        continue;
+                    List<CommandNode> fieldNodes = innerUtil.parseField(field);
+                    ArrayList<CommandNode> branches = new ArrayList<>();
+                    for (CommandNode node : nodeList)
+                        for (CommandNode child : fieldNodes)
+                            try {
+                                CommandNode topCloneChild = CommandNodeUtil.getTopParent(child).clone();
+                                node.addChild(topCloneChild);
+                                branches.addAll(CommandNodeUtil.getAllBottomBranches(topCloneChild));
+                            } catch (CloneNotSupportedException e) {
+                                e.printStackTrace();
+                            }
+                    nodeList = branches;
+                }
+
+                Consumer<List<Object>> executeConsumer = objects -> {
+                    int ignored = 0;
+                    for(int i =0;i<objects.size();i++){
+                        Field field = fields[i+ignored];
+                        if(field.getAnnotation(Ignore.class)!=null){
+                            ignored++;
+                            continue;
+                        }
+                        try {
+                            field.setAccessible(true);
+                            field.set(commandHandler,objects.get(i));
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    commandHandler.run();
+                };
+
+                for(CommandNode node : nodeList){
+                    node.setExecutor(executeConsumer);
+                }
+
+                if (command instanceof ClassAnnotationCommand)
+                    for (Method method : clazz.getMethods()) {
+                        if (method.getAnnotation(Suggest.class) != null && List.class.isAssignableFrom(method.getReturnType())) {
+                            ClassAnnotationCommand innerAnnotationCommand = (ClassAnnotationCommand) command;
+                            innerAnnotationCommand.completeOverrideFunction = ((sender, strings) -> {
+                                try {
+                                    return (List<String>) method.invoke(commandHandler, sender, strings);
+                                } catch (IllegalAccessException e) {
+                                    e.printStackTrace();
+                                } catch (InvocationTargetException e) {
+                                    e.printStackTrace();
+                                }
+                                return Collections.EMPTY_LIST;
+                            });
+                        }
+                    }
+
+                if (nodeable instanceof NodeAnnotationCommand)
+                    ((NodeAnnotationCommand) nodeable).flush();
+                commands.add(command);
+            }
+           return commands;
+        }
 
         public void register() {
-            commands.stream()
+            build().stream()
                     .filter(command -> !commandManager.hasCommand(command.getName()))
                     .forEach(command -> commandManager.registerCommand(command));
+        }
+
+        private class CommandHandlerWrapper{
+            public final String commandName;
+            public final String desc;
+            public final String help;
+            public final Runnable instance;
+
+            public CommandHandlerWrapper(String commandName, String desc, String help, Runnable instance) {
+                this.commandName = commandName;
+                this.desc = desc;
+                this.help = help;
+                this.instance = instance;
+            }
         }
     }
 

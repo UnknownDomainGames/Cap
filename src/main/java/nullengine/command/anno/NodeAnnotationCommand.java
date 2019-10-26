@@ -3,8 +3,12 @@ package nullengine.command.anno;
 import nullengine.command.ArgumentCheckResult;
 import nullengine.command.Command;
 import nullengine.command.CommandSender;
+import nullengine.command.argument.ArgumentManager;
+import nullengine.command.argument.SimpleArgumentManager;
 import nullengine.command.exception.CommandWrongUseException;
 import nullengine.command.exception.PermissionNotEnoughException;
+import nullengine.command.suggestion.SimpleSuggesterManager;
+import nullengine.command.suggestion.SuggesterManager;
 import nullengine.command.util.CommandNodeUtil;
 import nullengine.command.util.node.CommandNode;
 import nullengine.command.util.node.EmptyArgumentNode;
@@ -16,6 +20,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class NodeAnnotationCommand extends Command implements Nodeable {
+
+    protected final static ArgumentManager staticArgumentManage = new SimpleArgumentManager();
+
+    protected final static SuggesterManager staticSuggesterManager = new SimpleSuggesterManager();
 
     private CommandNode node = new EmptyArgumentNode();
 
