@@ -25,7 +25,7 @@ public abstract class Command {
 
     public abstract void execute(CommandSender sender, String[] args) throws Exception;
 
-    public abstract List<String> complete(CommandSender sender, String[] args);
+    public abstract List<String> suggest(CommandSender sender, String[] args);
 
     public abstract List<String> getTips(CommandSender sender,String[] args);
 

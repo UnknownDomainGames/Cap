@@ -6,7 +6,7 @@ import com.google.common.collect.Multimap;
 import nullengine.command.anno.*;
 import nullengine.command.argument.Argument;
 import nullengine.command.argument.ArgumentManager;
-import nullengine.command.completion.CompleteManager;
+import nullengine.command.suggestion.SuggesterManager;
 import nullengine.command.util.node.*;
 
 import java.lang.annotation.Annotation;
@@ -18,12 +18,12 @@ public class CommandNodeUtil {
 
     private Object instance;
 
-    public static AnnotationUtil getAnnotationUtil(Object instance, ArgumentManager argumentManager, CompleteManager completeManager) {
-        return new AnnotationUtil(instance, argumentManager, completeManager);
+    public static AnnotationUtil getAnnotationUtil(Object instance, ArgumentManager argumentManager, SuggesterManager suggesterManager) {
+        return new AnnotationUtil(instance, argumentManager, suggesterManager);
     }
 
-    public static ClassUtil getInnerUtil(Object instance, ArgumentManager argumentManager, CompleteManager completeManager) {
-        return new ClassUtil(instance, argumentManager, completeManager);
+    public static ClassUtil getInnerUtil(Object instance, ArgumentManager argumentManager, SuggesterManager suggesterManager) {
+        return new ClassUtil(instance, argumentManager, suggesterManager);
     }
 
     public CommandNodeUtil(Object instance) {
@@ -123,12 +123,12 @@ public class CommandNodeUtil {
     public static class AnnotationUtil extends CommandNodeUtil {
 
         private ArgumentManager argumentManager;
-        private CompleteManager completeManager;
+        private SuggesterManager suggesterManager;
 
-        public AnnotationUtil(Object instance, ArgumentManager argumentManager, CompleteManager completeManager) {
+        public AnnotationUtil(Object instance, ArgumentManager argumentManager, SuggesterManager suggesterManager) {
             super(instance);
             this.argumentManager = argumentManager;
-            this.completeManager = completeManager;
+            this.suggesterManager = suggesterManager;
         }
 
         public List<CommandNode> parseParameter(Parameter parameter) {
@@ -169,7 +169,7 @@ public class CommandNodeUtil {
         public List<CommandNode> handleArgumentName(String argumentName) {
             Argument argument = argumentManager.getArgument(argumentName);
             CommandNode node = new ArgumentNode(argument);
-            node.setCompleter(completeManager.getCompleter(argument.responsibleClass()));
+            node.setSuggester(suggesterManager.getSuggester(argument.responsibleClass()));
             return Lists.newArrayList(node);
         }
 
@@ -182,7 +182,7 @@ public class CommandNodeUtil {
                 return node;
             } else {
                 CommandNode node = new ArgumentNode(argument);
-                node.setCompleter(completeManager.getCompleter(clazz));
+                node.setSuggester(suggesterManager.getSuggester(clazz));
                 return Lists.newArrayList(node);
             }
         }
@@ -248,9 +248,9 @@ public class CommandNodeUtil {
         public void setCustomAnnotation(List<CommandNode> nodes, Annotation[] annotations) {
             for (Annotation annotation : annotations) {
 
-                if (annotation.annotationType() == Completer.class) {
-                    Completer complete = (Completer) annotation;
-                    nodes.stream().forEach(node -> node.setCompleter(completeManager.getCompleter(complete.value())));
+                if (annotation.annotationType() == Suggester.class) {
+                    Suggester complete = (Suggester) annotation;
+                    nodes.stream().forEach(node -> node.setSuggester(suggesterManager.getSuggester(complete.value())));
                 }
 
                 if (annotation.annotationType() == Tip.class) {
@@ -267,8 +267,8 @@ public class CommandNodeUtil {
 
         private Multimap<String, ProvideWrapper> providerMap = HashMultimap.create();
 
-        public ClassUtil(Object instance, ArgumentManager argumentManager, CompleteManager completeManager) {
-            super(instance, argumentManager, completeManager);
+        public ClassUtil(Object instance, ArgumentManager argumentManager, SuggesterManager suggesterManager) {
+            super(instance, argumentManager, suggesterManager);
             handleClassCommand(instance);
         }
 

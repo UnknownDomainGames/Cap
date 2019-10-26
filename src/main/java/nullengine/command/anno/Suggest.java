@@ -1,14 +1,11 @@
 package nullengine.command.anno;
 
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.ElementType.METHOD;
 
-@Target({PARAMETER, ElementType.FIELD})
+@Target({METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Completer {
-    String value();
-}
+public @interface Suggest {}

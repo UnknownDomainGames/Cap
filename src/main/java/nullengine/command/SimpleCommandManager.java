@@ -101,7 +101,7 @@ public class SimpleCommandManager implements CommandManager {
         if (commandInstance == null)
             return Collections.EMPTY_LIST;
 
-        return commandInstance.complete(sender, args);
+        return commandInstance.suggest(sender, args);
     }
 
     @Override

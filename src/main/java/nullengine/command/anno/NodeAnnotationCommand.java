@@ -133,7 +133,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     }
 
     @Override
-    public List<String> complete(CommandSender sender, String[] args) {
+    public List<String> suggest(CommandSender sender, String[] args) {
         String[] removeLast = args;
         if (args != null && args.length > 0)
             removeLast = Arrays.copyOfRange(args, 0, args.length - 1);
@@ -150,8 +150,8 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         List<String> list = new ArrayList<>();
 
         for (CommandNode child : result.getChildren()) {
-            if (child.getCompleter() != null)
-                list.addAll(child.getCompleter().complete(sender, getName(), args));
+            if (child.getSuggester() != null)
+                list.addAll(child.getSuggester().suggest(sender, getName(), args));
         }
         return list;
     }

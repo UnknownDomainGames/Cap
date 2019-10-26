@@ -1,6 +1,6 @@
 package nullengine.command.argument;
 
-import nullengine.command.completion.Completer;
+import nullengine.command.suggestion.Suggester;
 
 import java.util.Optional;
 
@@ -12,7 +12,7 @@ public abstract class Argument<T> {
 
     public abstract Optional<T> parse(String arg);
 
-    public abstract Completer getCompleter();
+    public abstract Suggester getSuggester();
 
 }
 

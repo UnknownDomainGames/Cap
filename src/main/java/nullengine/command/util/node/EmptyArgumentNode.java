@@ -2,7 +2,7 @@ package nullengine.command.util.node;
 
 import nullengine.command.CommandSender;
 import nullengine.command.argument.Argument;
-import nullengine.command.completion.Completer;
+import nullengine.command.suggestion.Suggester;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,7 +28,7 @@ public class EmptyArgumentNode extends ArgumentNode {
             }
 
             @Override
-            public Completer getCompleter() {
+            public Suggester getSuggester() {
                 return null;
             }
         });

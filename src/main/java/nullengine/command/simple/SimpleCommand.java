@@ -32,7 +32,7 @@ public class SimpleCommand extends Command {
     }
 
     @Override
-    public List<String> complete(CommandSender sender, String[] args) {
+    public List<String> suggest(CommandSender sender, String[] args) {
         if (completer == null) {
             return Collections.EMPTY_LIST;
         }

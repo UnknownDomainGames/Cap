@@ -5,8 +5,8 @@ import nullengine.command.CommandManager;
 import nullengine.command.CommandSender;
 import nullengine.command.argument.ArgumentManager;
 import nullengine.command.argument.SimpleArgumentManager;
-import nullengine.command.completion.CompleteManager;
-import nullengine.command.completion.SimpleCompleteManager;
+import nullengine.command.suggestion.SuggesterManager;
+import nullengine.command.suggestion.SimpleSuggesterManager;
 import nullengine.command.util.CommandNodeUtil;
 import nullengine.command.util.node.CommandNode;
 import nullengine.command.util.node.Nodeable;
@@ -29,11 +29,11 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
     }
 
     @Override
-    public List<String> complete(CommandSender sender, String[] args) {
+    public List<String> suggest(CommandSender sender, String[] args) {
         if (completeOverrideFunction != null) {
             return completeOverrideFunction.apply(sender,args);
         }
-        return super.complete(sender,args);
+        return super.suggest(sender,args);
     }
 
 
@@ -43,7 +43,7 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
 
         private ArgumentManager argumentManager = new SimpleArgumentManager();
 
-        private CompleteManager completeManager = new SimpleCompleteManager();
+        private SuggesterManager suggesterManager = new SimpleSuggesterManager();
 
         private List<Command> commands = new ArrayList<>();
 
@@ -56,12 +56,12 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
             return this;
         }
 
-        public void setCompleteManager(CompleteManager completeManager) {
-            this.completeManager = completeManager;
+        public void setSuggesterManager(SuggesterManager suggesterManager) {
+            this.suggesterManager = suggesterManager;
         }
 
         public Builder caseCommand(String commandName,String desc,String helpMessage,Runnable commandHandler){
-            CommandNodeUtil.ClassUtil innerUtil = CommandNodeUtil.getInnerUtil(commandHandler, argumentManager, completeManager);
+            CommandNodeUtil.ClassUtil innerUtil = CommandNodeUtil.getInnerUtil(commandHandler, argumentManager, suggesterManager);
 
             List<CommandNode> nodeList = new ArrayList<>();
 
@@ -122,7 +122,7 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
 
             if (command instanceof ClassAnnotationCommand)
                 for (Method method : clazz.getMethods()) {
-                    if (method.getAnnotation(Complete.class) != null && List.class.isAssignableFrom(method.getReturnType())) {
+                    if (method.getAnnotation(Suggest.class) != null && List.class.isAssignableFrom(method.getReturnType())) {
                         ClassAnnotationCommand innerAnnotationCommand = (ClassAnnotationCommand) command;
                         innerAnnotationCommand.completeOverrideFunction = ((sender, strings) -> {
                             try {

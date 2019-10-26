@@ -2,7 +2,7 @@ package nullengine.command.util.node;
 
 import com.google.common.collect.Lists;
 import nullengine.command.CommandSender;
-import nullengine.command.completion.Completer;
+import nullengine.command.suggestion.Suggester;
 
 import java.util.Objects;
 
@@ -40,7 +40,7 @@ public class RequiredNode extends CommandNode {
     }
 
     @Override
-    public Completer getCompleter() {
+    public Suggester getSuggester() {
         return (sender, command, args) -> Lists.newArrayList(require);
     }
 

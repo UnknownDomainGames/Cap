@@ -1,8 +1,7 @@
 package nullengine.command.util.node;
 
-import nullengine.command.Command;
 import nullengine.command.CommandSender;
-import nullengine.command.completion.Completer;
+import nullengine.command.suggestion.Suggester;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -17,7 +16,7 @@ public abstract class CommandNode implements Comparable<CommandNode>,Cloneable {
 
     private Set<String> needPermission = new HashSet();
 
-    private Completer completer;
+    private Suggester suggester;
 
     private String tip;
 
@@ -91,12 +90,12 @@ public abstract class CommandNode implements Comparable<CommandNode>,Cloneable {
         this.needPermission = needPermission;
     }
 
-    public Completer getCompleter() {
-        return completer;
+    public Suggester getSuggester() {
+        return suggester;
     }
 
-    public void setCompleter(Completer completer) {
-        this.completer = completer;
+    public void setSuggester(Suggester suggester) {
+        this.suggester = suggester;
     }
 
     public String getTip() {

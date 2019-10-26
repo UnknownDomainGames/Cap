@@ -2,7 +2,7 @@ package nullengine.command.argument.base;
 
 import com.google.common.collect.Lists;
 import nullengine.command.argument.SimpleArgument;
-import nullengine.command.completion.Completer;
+import nullengine.command.suggestion.Suggester;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -19,7 +19,7 @@ public class StringArgument extends SimpleArgument {
     }
 
     @Override
-    public Completer getCompleter() {
+    public Suggester getSuggester() {
         return (sender, command, args) -> {
             String s = args[args.length - 1];
             if (s.isEmpty())

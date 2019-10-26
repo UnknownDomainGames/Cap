@@ -6,10 +6,10 @@ import nullengine.command.anno.*;
 import nullengine.command.argument.Argument;
 import nullengine.command.argument.ArgumentManager;
 import nullengine.command.argument.SimpleArgumentManager;
-import nullengine.command.completion.CompleteManager;
-import nullengine.command.completion.Completer;
-import nullengine.command.completion.NamedCompleter;
-import nullengine.command.completion.SimpleCompleteManager;
+import nullengine.command.suggestion.SuggesterManager;
+import nullengine.command.suggestion.Suggester;
+import nullengine.command.suggestion.NamedSuggester;
+import nullengine.command.suggestion.SimpleSuggesterManager;
 import nullengine.command.exception.CommandWrongUseException;
 import nullengine.command.exception.PermissionNotEnoughException;
 import org.junit.jupiter.api.Assertions;
@@ -145,7 +145,7 @@ public class MethodNodeCommandTest {
             }
 
             @Override
-            public Completer getCompleter() {
+            public Suggester getSuggester() {
                 return ((sender, command, args) -> Collections.EMPTY_LIST);
             }
         });
@@ -167,7 +167,7 @@ public class MethodNodeCommandTest {
             }
 
             @Override
-            public Completer getCompleter() {
+            public Suggester getSuggester() {
                 return (sender, command, args) -> Collections.EMPTY_LIST;
             }
         });
@@ -193,35 +193,35 @@ public class MethodNodeCommandTest {
     }
 
     @Test
-    void completeTest() {
+    void suggestTest() {
 
         SimpleCommandManager simpleCommandManager = new SimpleCommandManager();
-        CompleteManager completeManager = new SimpleCompleteManager();
-        completeManager.putCompleter(new NamedCompleter() {
+        SuggesterManager suggesterManager = new SimpleSuggesterManager();
+        suggesterManager.putSuggester(new NamedSuggester() {
             @Override
             public String getName() {
-                return "completeTest";
+                return "suggestTest";
             }
 
             @Override
-            public List<String> complete(CommandSender sender, String command, String[] args) {
+            public List<String> suggest(CommandSender sender, String command, String[] args) {
                 return List.of("test");
             }
         });
 
         MethodAnnotationCommand.getBuilder(simpleCommandManager)
-                .addCommandHandler(new CompleteTestClass())
-                .setCompleteManager(completeManager)
+                .addCommandHandler(new SuggesterTestClass())
+                .setSuggesterManager(suggesterManager)
                 .register();
 
-        List<String> completeResult = simpleCommandManager.complete(testSender, "complete ");
+        List<String> completeResult = simpleCommandManager.complete(testSender, "suggest ");
         Assertions.assertEquals(1, completeResult.size());
         Assertions.assertEquals("test", completeResult.get(0));
     }
 
-    public class CompleteTestClass {
-        @Command("complete")
-        public void complete(@nullengine.command.anno.Completer("completeTest") String a) {
+    public class SuggesterTestClass {
+        @Command("suggest")
+        public void suggest(@nullengine.command.anno.Suggester("suggestTest") String a) {
         }
     }
 

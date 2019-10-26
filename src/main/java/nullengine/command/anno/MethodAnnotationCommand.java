@@ -5,8 +5,8 @@ import nullengine.command.Command;
 import nullengine.command.CommandManager;
 import nullengine.command.argument.ArgumentManager;
 import nullengine.command.argument.SimpleArgumentManager;
-import nullengine.command.completion.CompleteManager;
-import nullengine.command.completion.SimpleCompleteManager;
+import nullengine.command.suggestion.SuggesterManager;
+import nullengine.command.suggestion.SimpleSuggesterManager;
 import nullengine.command.util.CommandNodeUtil;
 import nullengine.command.util.node.CommandNode;
 import nullengine.command.util.node.Nodeable;
@@ -30,7 +30,7 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
 
         private static ArgumentManager staticArgumentManage = new SimpleArgumentManager();
 
-        private static CompleteManager staticCompleteManager = new SimpleCompleteManager();
+        private static SuggesterManager staticSuggesterManager = new SimpleSuggesterManager();
 
         private Set<Object> commandHandler = new HashSet<>();
 
@@ -38,7 +38,7 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
 
         private CommandManager commandManager;
 
-        private CompleteManager completeManager = staticCompleteManager;
+        private SuggesterManager suggesterManager = staticSuggesterManager;
 
         private AnnotationCommandBuilder(CommandManager commandManager) {
             this.commandManager = commandManager;
@@ -54,8 +54,8 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
             return this;
         }
 
-        public AnnotationCommandBuilder setCompleteManager(CompleteManager completeManager) {
-            this.completeManager = completeManager;
+        public AnnotationCommandBuilder setSuggesterManager(SuggesterManager suggesterManager) {
+            this.suggesterManager = suggesterManager;
             return this;
         }
 
@@ -73,7 +73,7 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
 
             ArrayList<Command> list = new ArrayList();
 
-            CommandNodeUtil.AnnotationUtil annotationUtil = CommandNodeUtil.getAnnotationUtil(o,argumentManager, completeManager);
+            CommandNodeUtil.AnnotationUtil annotationUtil = CommandNodeUtil.getAnnotationUtil(o,argumentManager, suggesterManager);
 
             for (Method method : o.getClass().getMethods()) {
 

@@ -2,7 +2,7 @@ package nullengine.command.util.node;
 
 import nullengine.command.CommandSender;
 import nullengine.command.argument.Argument;
-import nullengine.command.completion.Completer;
+import nullengine.command.suggestion.Suggester;
 
 import java.util.Objects;
 
@@ -69,10 +69,10 @@ public class ArgumentNode extends CommandNode {
     }
 
     @Override
-    public Completer getCompleter() {
-        if (super.getCompleter() != null)
-            return super.getCompleter();
-        return argument.getCompleter();
+    public Suggester getSuggester() {
+        if (super.getSuggester() != null)
+            return super.getSuggester();
+        return argument.getSuggester();
     }
 
 

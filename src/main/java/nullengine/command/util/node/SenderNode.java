@@ -1,8 +1,7 @@
 package nullengine.command.util.node;
 
 import nullengine.command.CommandSender;
-import nullengine.command.completion.Completer;
-import nullengine.command.exception.CommandSenderErrorException;
+import nullengine.command.suggestion.Suggester;
 
 import java.util.*;
 
@@ -61,10 +60,10 @@ public class SenderNode extends CommandNode {
     }
 
     @Override
-    public Completer getCompleter() {
+    public Suggester getSuggester() {
         return (sender, command, args) -> allowedSender(sender)?getChildren()
                 .stream()
-                .map(node -> node.getCompleter().complete(sender, command, args))
+                .map(node -> node.getSuggester().suggest(sender, command, args))
                 .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll): Collections.EMPTY_LIST;
     }
 }
