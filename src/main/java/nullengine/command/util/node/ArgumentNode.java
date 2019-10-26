@@ -2,7 +2,7 @@ package nullengine.command.util.node;
 
 import nullengine.command.CommandSender;
 import nullengine.command.argument.Argument;
-import nullengine.command.completion.Completer;
+import nullengine.command.suggestion.Suggester;
 
 import java.util.Objects;
 
@@ -32,13 +32,14 @@ public class ArgumentNode extends CommandNode {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         ArgumentNode that = (ArgumentNode) o;
         return Objects.equals(argument, that.argument);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(argument);
+        return Objects.hash(super.hashCode(), argument);
     }
 
     @Override
@@ -69,10 +70,10 @@ public class ArgumentNode extends CommandNode {
     }
 
     @Override
-    public Completer getCompleter() {
-        if (super.getCompleter() != null)
-            return super.getCompleter();
-        return argument.getCompleter();
+    public Suggester getSuggester() {
+        if (super.getSuggester() != null)
+            return super.getSuggester();
+        return argument.getSuggester();
     }
 
 

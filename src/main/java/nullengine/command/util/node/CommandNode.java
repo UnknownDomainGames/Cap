@@ -1,8 +1,7 @@
 package nullengine.command.util.node;
 
-import nullengine.command.Command;
 import nullengine.command.CommandSender;
-import nullengine.command.completion.Completer;
+import nullengine.command.suggestion.Suggester;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -17,14 +16,14 @@ public abstract class CommandNode implements Comparable<CommandNode>,Cloneable {
 
     private Set<String> needPermission = new HashSet();
 
-    private Completer completer;
+    private Suggester suggester;
 
     private String tip;
 
+    protected Object parseResult;
+
     public CommandNode() {
     }
-
-    protected Object parseResult;
 
     public boolean parse(CommandSender sender, String command, String... arg) {
         Object result = parseArgs(sender, command, arg);
@@ -65,7 +64,20 @@ public abstract class CommandNode implements Comparable<CommandNode>,Cloneable {
         commandNode.setParent(null);
     }
 
-    public abstract boolean equals(Object obj);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CommandNode node = (CommandNode) o;
+        return Objects.equals(needPermission, node.needPermission) &&
+                Objects.equals(suggester, node.suggester) &&
+                Objects.equals(tip, node.tip);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(needPermission, suggester, tip);
+    }
 
     public boolean canExecuteCommand() {
         return getExecutor() != null;
@@ -91,12 +103,12 @@ public abstract class CommandNode implements Comparable<CommandNode>,Cloneable {
         this.needPermission = needPermission;
     }
 
-    public Completer getCompleter() {
-        return completer;
+    public Suggester getSuggester() {
+        return suggester;
     }
 
-    public void setCompleter(Completer completer) {
-        this.completer = completer;
+    public void setSuggester(Suggester suggester) {
+        this.suggester = suggester;
     }
 
     public String getTip() {

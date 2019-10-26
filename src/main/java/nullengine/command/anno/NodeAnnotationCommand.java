@@ -3,9 +3,12 @@ package nullengine.command.anno;
 import nullengine.command.ArgumentCheckResult;
 import nullengine.command.Command;
 import nullengine.command.CommandSender;
-import nullengine.command.completion.Completer;
+import nullengine.command.argument.ArgumentManager;
+import nullengine.command.argument.SimpleArgumentManager;
 import nullengine.command.exception.CommandWrongUseException;
 import nullengine.command.exception.PermissionNotEnoughException;
+import nullengine.command.suggestion.SimpleSuggesterManager;
+import nullengine.command.suggestion.SuggesterManager;
 import nullengine.command.util.CommandNodeUtil;
 import nullengine.command.util.node.CommandNode;
 import nullengine.command.util.node.EmptyArgumentNode;
@@ -17,6 +20,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class NodeAnnotationCommand extends Command implements Nodeable {
+
+    protected final static ArgumentManager staticArgumentManage = new SimpleArgumentManager();
+
+    protected final static SuggesterManager staticSuggesterManager = new SimpleSuggesterManager();
 
     private CommandNode node = new EmptyArgumentNode();
 
@@ -134,11 +141,22 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     }
 
     @Override
-    public Completer.CompleteResult complete(CommandSender sender, String[] args) {
+    public List<String> suggest(CommandSender sender, String[] args) {
+        CommandNode result = suggestParse(sender,args);
 
+        List<String> list = new ArrayList<>();
+
+        for (CommandNode child : result.getChildren()) {
+            if (child.getSuggester() != null)
+                list.addAll(child.getSuggester().suggest(sender, getName(), args));
+        }
+        return list;
+    }
+
+    protected CommandNode suggestParse(CommandSender sender,String[] args){
         String[] removeLast = args;
         if (args != null && args.length > 0)
-            Arrays.copyOfRange(args, 0, args.length - 1);
+            removeLast = Arrays.copyOfRange(args, 0, args.length - 1);
 
         CommandNode result;
         if (removeLast.length == 0) {
@@ -148,19 +166,19 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
         if (result instanceof SenderNode && result.getParent() != null)
             result = result.getParent();
+        return result;
+    }
 
-        List<String> list = new ArrayList<>();
-
-        for (CommandNode child : result.getChildren()) {
-            if (child.getCompleter() != null)
-                list.addAll(child.getCompleter().complete(sender, getName(), args).getComplete());
-        }
+    @Override
+    public List<String> getTips(CommandSender sender, String[] args) {
+        CommandNode result = suggestParse(sender,args);
 
         List<CommandNode> nodes = CommandNodeUtil.getShortestPath(result);
         List<String> tips = nodes.stream().map(node -> node.hasTip() ? node.getTip() : "").collect(Collectors.toList());
-
-        return new Completer.CompleteResult(list, tips);
+        return tips;
     }
+
+
 
     @Override
     public ArgumentCheckResult checkArguments(CommandSender sender, String[] args) {

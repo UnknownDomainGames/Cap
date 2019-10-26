@@ -1,7 +1,5 @@
 package nullengine.command;
 
-import nullengine.command.completion.Completer;
-
 import java.util.List;
 import java.util.Objects;
 
@@ -27,7 +25,9 @@ public abstract class Command {
 
     public abstract void execute(CommandSender sender, String[] args) throws Exception;
 
-    public abstract Completer.CompleteResult complete(CommandSender sender, String[] args);
+    public abstract List<String> suggest(CommandSender sender, String[] args);
+
+    public abstract List<String> getTips(CommandSender sender,String[] args);
 
     public abstract ArgumentCheckResult checkArguments(CommandSender sender,String[] args);
 
@@ -51,10 +51,6 @@ public abstract class Command {
 
     public void setHelpMessage(String helpMessage) {
         this.helpMessage = helpMessage;
-    }
-
-    public String getParameterDescription(CommandSender sender, String[] args) {
-        return "";
     }
 
     @Override

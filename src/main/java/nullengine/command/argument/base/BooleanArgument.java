@@ -2,7 +2,7 @@ package nullengine.command.argument.base;
 
 import com.google.common.collect.Lists;
 import nullengine.command.argument.Argument;
-import nullengine.command.completion.Completer;
+import nullengine.command.suggestion.Suggester;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,12 +36,12 @@ public class BooleanArgument extends Argument {
     }
 
     @Override
-    public Completer getCompleter() {
+    public Suggester getSuggester() {
         return (sender, command, args) -> {
             List<String> completeSet = Lists.newArrayList("true", "false");
             if (args != null && !args[args.length - 1].isEmpty())
-                return Completer.CompleteResult.completeResult(completeSet.stream().filter(completeName -> completeName.startsWith(args[args.length - 1])).collect(Collectors.toList()));
-            return Completer.CompleteResult.completeResult(completeSet);
+                return completeSet.stream().filter(completeName -> completeName.startsWith(args[args.length - 1])).collect(Collectors.toList());
+            return completeSet;
         };
     }
 }

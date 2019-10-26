@@ -2,7 +2,7 @@ package nullengine.command.argument.base;
 
 import com.google.common.collect.Lists;
 import nullengine.command.argument.SimpleArgument;
-import nullengine.command.completion.Completer;
+import nullengine.command.suggestion.Suggester;
 
 import java.util.Optional;
 
@@ -21,7 +21,7 @@ public class ShortArgument extends SimpleArgument {
     }
 
     @Override
-    public Completer getCompleter() {
-        return (sender, command, args) -> Completer.CompleteResult.completeResult(Lists.newArrayList("[num]"));
+    public Suggester getSuggester() {
+        return (sender, command, args) -> Lists.newArrayList("[num]");
     }
 }

@@ -6,24 +6,26 @@ import com.google.common.collect.Multimap;
 import nullengine.command.anno.*;
 import nullengine.command.argument.Argument;
 import nullengine.command.argument.ArgumentManager;
-import nullengine.command.completion.CompleteManager;
+import nullengine.command.suggestion.SuggesterManager;
 import nullengine.command.util.node.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public class CommandNodeUtil {
 
     private Object instance;
 
-    public static AnnotationUtil getAnnotationUtil(Object instance, ArgumentManager argumentManager, CompleteManager completeManager) {
-        return new AnnotationUtil(instance, argumentManager, completeManager);
+    public static AnnotationUtil getAnnotationUtil(Object instance, ArgumentManager argumentManager, SuggesterManager suggesterManager) {
+        return new AnnotationUtil(instance, argumentManager, suggesterManager);
     }
 
-    public static InnerUtil getInnerUtil(Object instance, ArgumentManager argumentManager, CompleteManager completeManager) {
-        return new InnerUtil(instance, argumentManager, completeManager);
+    public static ClassUtil getInnerUtil(Object instance, ArgumentManager argumentManager, SuggesterManager suggesterManager) {
+        return new ClassUtil(instance, argumentManager, suggesterManager);
     }
 
     public CommandNodeUtil(Object instance) {
@@ -43,6 +45,8 @@ public class CommandNodeUtil {
     public static int getTotalNeedArgs(CommandNode node) {
         int i = 0;
         while (true) {
+            if (node == null)
+                return i;
             if (node.getParent() == null)
                 return i;
             i += node.getNeedArgs();
@@ -88,7 +92,7 @@ public class CommandNodeUtil {
 
     /**
      * 返回从当前node到最近结束的node的路径.
-     * 结束指没有child
+     * 结束指可以执行命令
      * 不包含传入的node
      *
      * @param node
@@ -120,13 +124,13 @@ public class CommandNodeUtil {
 
     public static class AnnotationUtil extends CommandNodeUtil {
 
-        private ArgumentManager argumentManager;
-        private CompleteManager completeManager;
+        protected ArgumentManager argumentManager;
+        protected SuggesterManager suggesterManager;
 
-        public AnnotationUtil(Object instance, ArgumentManager argumentManager, CompleteManager completeManager) {
+        public AnnotationUtil(Object instance, ArgumentManager argumentManager, SuggesterManager suggesterManager) {
             super(instance);
             this.argumentManager = argumentManager;
-            this.completeManager = completeManager;
+            this.suggesterManager = suggesterManager;
         }
 
         public List<CommandNode> parseParameter(Parameter parameter) {
@@ -153,7 +157,7 @@ public class CommandNodeUtil {
                     return handleArgumentName(((ArgumentHandler) annotation).value());
                 }
             }
-            return handleArgument(ClassUtil.packing(clazz));
+            return handleArgument(nullengine.command.util.ClassUtil.packing(clazz));
         }
 
         public List<CommandNode> handleSender(Class... classes) {
@@ -167,7 +171,7 @@ public class CommandNodeUtil {
         public List<CommandNode> handleArgumentName(String argumentName) {
             Argument argument = argumentManager.getArgument(argumentName);
             CommandNode node = new ArgumentNode(argument);
-            node.setCompleter(completeManager.getCompleter(argument.responsibleClass()));
+            node.setSuggester(suggesterManager.getSuggester(argument.responsibleClass()));
             return Lists.newArrayList(node);
         }
 
@@ -176,11 +180,11 @@ public class CommandNodeUtil {
             if (argument == null) {
                 List<CommandNode> node = handleGenerator(clazz);
                 if (node == null || node.isEmpty())
-                    throw new RuntimeException("这个类没有注册进Argument或没有标记Generator");
+                    throw new RuntimeException(clazz + "  这个类没有注册进Argument或没有标记Generator");
                 return node;
             } else {
                 CommandNode node = new ArgumentNode(argument);
-                node.setCompleter(completeManager.getCompleter(clazz));
+                node.setSuggester(suggesterManager.getSuggester(clazz));
                 return Lists.newArrayList(node);
             }
         }
@@ -246,9 +250,9 @@ public class CommandNodeUtil {
         public void setCustomAnnotation(List<CommandNode> nodes, Annotation[] annotations) {
             for (Annotation annotation : annotations) {
 
-                if (annotation.annotationType() == Completer.class) {
-                    Completer complete = (Completer) annotation;
-                    nodes.stream().forEach(node -> node.setCompleter(completeManager.getCompleter(complete.value())));
+                if (annotation.annotationType() == Suggester.class) {
+                    Suggester complete = (Suggester) annotation;
+                    nodes.stream().forEach(node -> node.setSuggester(suggesterManager.getSuggester(complete.value())));
                 }
 
                 if (annotation.annotationType() == Tip.class) {
@@ -261,16 +265,18 @@ public class CommandNodeUtil {
 
     }
 
-    public static class InnerUtil extends AnnotationUtil {
+    public static class ClassUtil extends AnnotationUtil {
 
         private Multimap<String, ProvideWrapper> providerMap = HashMultimap.create();
+        private boolean provided;
+        private boolean replaced;
 
-        public InnerUtil(Object instance, ArgumentManager argumentManager, CompleteManager completeManager) {
-            super(instance, argumentManager, completeManager);
-            handleInnerCommand(instance);
+        public ClassUtil(Object instance, ArgumentManager argumentManager, SuggesterManager suggesterManager) {
+            super(instance, argumentManager, suggesterManager);
+            handleClassCommand(instance);
         }
 
-        private void handleInnerCommand(Object instance) {
+        private void handleClassCommand(Object instance) {
             Method[] methods = instance.getClass().getMethods();
 
             for (Method method : methods) {
@@ -286,35 +292,40 @@ public class CommandNodeUtil {
             List<CommandNode> nodeList = new ArrayList<>();
             if (providerMap.containsKey(field.getName())) {
                 Collection<ProvideWrapper> wrapper = providerMap.get(field.getName());
-                if (checkProvider(field, wrapper))
+                if (!checkProvider(field, wrapper))
                     throw new RuntimeException("provider 方法错误 其返回的对象不是目标Field的类或它的子类");
-                ProvideWrapper replaceProvide = wrapper.stream().filter(provideWrapper -> provideWrapper.provide.replace()).findAny().orElse(null);
-                if (replaceProvide != null) {
-                    nodeList = constructMultiArgument(replaceProvide.method.getParameters(), objects -> {
-                        try {
-                            return replaceProvide.method.invoke(getInstance(), objects);
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        } catch (InvocationTargetException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    });
-                    setCustomAnnotation(nodeList, annotations);
-                    return nodeList;
-                }
-                for (ProvideWrapper provideWrapper : wrapper) {
-                    nodeList.addAll(constructMultiArgument(provideWrapper.method.getParameters(), objects -> {
-                        try {
-                            return replaceProvide.method.invoke(getInstance(), objects);
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        } catch (InvocationTargetException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    }));
-                }
+                List<ProvideWrapper> replaceProvide = wrapper.stream().filter(provideWrapper -> provideWrapper.provide.replace()).collect(Collectors.toList());
+                if (!replaceProvide.isEmpty()) {
+                    for (ProvideWrapper provideWrapper : replaceProvide) {
+                        nodeList = constructMultiArgument(provideWrapper.method.getParameters(), objects -> {
+                            try {
+                                provideWrapper.method.setAccessible(true);
+                                return provideWrapper.method.invoke(getInstance(), objects);
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                            } catch (InvocationTargetException e) {
+                                e.printStackTrace();
+                            }
+                            return null;
+                        });
+                        setCustomAnnotation(nodeList, annotations);
+                        return nodeList;
+                    }
+                } else
+                    for (ProvideWrapper provideWrapper : wrapper) {
+                        provided = true;
+                        nodeList.addAll(constructMultiArgument(provideWrapper.method.getParameters(), objects -> {
+                            try {
+                                provideWrapper.method.setAccessible(true);
+                                return provideWrapper.method.invoke(getInstance(), objects);
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                            } catch (InvocationTargetException e) {
+                                e.printStackTrace();
+                            }
+                            return null;
+                        }));
+                    }
             }
 
             nodeList.addAll(foundMainNode(field.getType(), annotations));
@@ -322,6 +333,25 @@ public class CommandNodeUtil {
             setCustomAnnotation(nodeList, annotations);
 
             return nodeList;
+        }
+
+        @Override
+        public List<CommandNode> handleArgument(Class clazz) {
+            if(replaced)
+                return Collections.EMPTY_LIST;
+            Argument argument = argumentManager.getArgument(clazz);
+            if (argument == null) {
+                List<CommandNode> node = handleGenerator(clazz);
+                if (node == null || node.isEmpty())
+                    if (!provided)
+                        throw new RuntimeException(clazz + "  这个类没有注册进Argument或没有标记Generator");
+                    else return Collections.EMPTY_LIST;
+                return node;
+            } else {
+                CommandNode node = new ArgumentNode(argument);
+                node.setSuggester(suggesterManager.getSuggester(clazz));
+                return Lists.newArrayList(node);
+            }
         }
 
         private boolean checkProvider(Field field, Collection<ProvideWrapper> wrapper) {

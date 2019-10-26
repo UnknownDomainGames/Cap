@@ -3,7 +3,6 @@ package nullengine.command.simple;
 import nullengine.command.ArgumentCheckResult;
 import nullengine.command.Command;
 import nullengine.command.CommandSender;
-import nullengine.command.completion.Completer;
 
 import java.util.Collections;
 import java.util.List;
@@ -11,9 +10,10 @@ import java.util.List;
 public class SimpleCommand extends Command {
 
     private CommandExecutor executor;
-    private CommandCompleter completer;
+    private CommandSuggester completer;
     private CommandUncaughtExceptionHandler uncaughtExceptionHandler;
     private CommandArgumentChecker argumentChecker;
+    private CommandTips tips;
 
     public SimpleCommand(String name) {
         super(name);
@@ -32,12 +32,19 @@ public class SimpleCommand extends Command {
     }
 
     @Override
-    public Completer.CompleteResult complete(CommandSender sender, String[] args) {
+    public List<String> suggest(CommandSender sender, String[] args) {
         if (completer == null) {
-            return Completer.CompleteResult.EMPTY;
+            return Collections.EMPTY_LIST;
         }
 
-        return completer.complete(sender, this, args);
+        return completer.suggest(sender, this, args);
+    }
+
+    @Override
+    public List<String> getTips(CommandSender sender, String[] args) {
+        if(tips==null)
+            return Collections.EMPTY_LIST;
+        return tips.getTips(sender,args);
     }
 
     @Override
@@ -58,7 +65,7 @@ public class SimpleCommand extends Command {
         this.executor = executor;
     }
 
-    public void setCompleter(CommandCompleter completer) {
+    public void setCompleter(CommandSuggester completer) {
         this.completer = completer;
     }
 

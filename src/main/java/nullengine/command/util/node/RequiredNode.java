@@ -2,7 +2,7 @@ package nullengine.command.util.node;
 
 import com.google.common.collect.Lists;
 import nullengine.command.CommandSender;
-import nullengine.command.completion.Completer;
+import nullengine.command.suggestion.Suggester;
 
 import java.util.Objects;
 
@@ -30,18 +30,19 @@ public class RequiredNode extends CommandNode {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         RequiredNode that = (RequiredNode) o;
         return Objects.equals(require, that.require);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(require);
+        return Objects.hash(super.hashCode(), require);
     }
 
     @Override
-    public Completer getCompleter() {
-        return (sender, command, args) -> new Completer.CompleteResult(Lists.newArrayList(require));
+    public Suggester getSuggester() {
+        return (sender, command, args) -> Lists.newArrayList(require);
     }
 
     @Override
