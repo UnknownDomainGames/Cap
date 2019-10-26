@@ -3,8 +3,6 @@ package nullengine.command.simple;
 import nullengine.command.ArgumentCheckResult;
 import nullengine.command.Command;
 import nullengine.command.CommandSender;
-import nullengine.command.completion.CompleteResult;
-import nullengine.command.completion.Completer;
 
 import java.util.Collections;
 import java.util.List;

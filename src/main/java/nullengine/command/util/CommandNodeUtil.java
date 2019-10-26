@@ -22,8 +22,8 @@ public class CommandNodeUtil {
         return new AnnotationUtil(instance, argumentManager, completeManager);
     }
 
-    public static InnerUtil getInnerUtil(Object instance, ArgumentManager argumentManager, CompleteManager completeManager) {
-        return new InnerUtil(instance, argumentManager, completeManager);
+    public static ClassUtil getInnerUtil(Object instance, ArgumentManager argumentManager, CompleteManager completeManager) {
+        return new ClassUtil(instance, argumentManager, completeManager);
     }
 
     public CommandNodeUtil(Object instance) {
@@ -43,6 +43,8 @@ public class CommandNodeUtil {
     public static int getTotalNeedArgs(CommandNode node) {
         int i = 0;
         while (true) {
+            if(node==null)
+                return i;
             if (node.getParent() == null)
                 return i;
             i += node.getNeedArgs();
@@ -88,7 +90,7 @@ public class CommandNodeUtil {
 
     /**
      * 返回从当前node到最近结束的node的路径.
-     * 结束指没有child
+     * 结束指可以执行命令
      * 不包含传入的node
      *
      * @param node
@@ -153,7 +155,7 @@ public class CommandNodeUtil {
                     return handleArgumentName(((ArgumentHandler) annotation).value());
                 }
             }
-            return handleArgument(ClassUtil.packing(clazz));
+            return handleArgument(nullengine.command.util.ClassUtil.packing(clazz));
         }
 
         public List<CommandNode> handleSender(Class... classes) {
@@ -261,16 +263,16 @@ public class CommandNodeUtil {
 
     }
 
-    public static class InnerUtil extends AnnotationUtil {
+    public static class ClassUtil extends AnnotationUtil {
 
         private Multimap<String, ProvideWrapper> providerMap = HashMultimap.create();
 
-        public InnerUtil(Object instance, ArgumentManager argumentManager, CompleteManager completeManager) {
+        public ClassUtil(Object instance, ArgumentManager argumentManager, CompleteManager completeManager) {
             super(instance, argumentManager, completeManager);
-            handleInnerCommand(instance);
+            handleClassCommand(instance);
         }
 
-        private void handleInnerCommand(Object instance) {
+        private void handleClassCommand(Object instance) {
             Method[] methods = instance.getClass().getMethods();
 
             for (Method method : methods) {

@@ -4,9 +4,7 @@ import nullengine.command.CommandSender;
 import nullengine.command.completion.Completer;
 import nullengine.command.exception.CommandSenderErrorException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 
 public class SenderNode extends CommandNode {
 
@@ -26,10 +24,16 @@ public class SenderNode extends CommandNode {
 
     @Override
     public Object parseArgs(CommandSender sender, String command, String... args) {
+        if (allowedSender(sender))
+            return sender;
+        return null;
+    }
+
+    public boolean allowedSender(CommandSender sender) {
         for (Class clazz : allowedSenders)
             if (clazz.isAssignableFrom(sender.getClass()))
-                return sender;
-        throw new CommandSenderErrorException(command, sender);
+                return true;
+        return false;
     }
 
     @Override
@@ -51,15 +55,16 @@ public class SenderNode extends CommandNode {
                 "allowedSender=" + Arrays.toString(allowedSenders) +
                 '}';
     }
-    public boolean hasTip(){
+
+    public boolean hasTip() {
         return false;
     }
 
     @Override
     public Completer getCompleter() {
-        return (sender, command, args) -> getChildren()
+        return (sender, command, args) -> allowedSender(sender)?getChildren()
                 .stream()
-                .map(node -> node.getCompleter().complete(sender,command,args))
-                .collect(ArrayList::new,ArrayList::addAll,ArrayList::addAll);
+                .map(node -> node.getCompleter().complete(sender, command, args))
+                .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll): Collections.EMPTY_LIST;
     }
 }

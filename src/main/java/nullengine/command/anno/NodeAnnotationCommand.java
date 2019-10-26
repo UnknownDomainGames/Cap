@@ -3,8 +3,6 @@ package nullengine.command.anno;
 import nullengine.command.ArgumentCheckResult;
 import nullengine.command.Command;
 import nullengine.command.CommandSender;
-import nullengine.command.completion.CompleteResult;
-import nullengine.command.completion.Completer;
 import nullengine.command.exception.CommandWrongUseException;
 import nullengine.command.exception.PermissionNotEnoughException;
 import nullengine.command.util.CommandNodeUtil;
@@ -136,10 +134,9 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
     @Override
     public List<String> complete(CommandSender sender, String[] args) {
-
         String[] removeLast = args;
         if (args != null && args.length > 0)
-            Arrays.copyOfRange(args, 0, args.length - 1);
+            removeLast = Arrays.copyOfRange(args, 0, args.length - 1);
 
         CommandNode result;
         if (removeLast.length == 0) {
@@ -156,10 +153,6 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             if (child.getCompleter() != null)
                 list.addAll(child.getCompleter().complete(sender, getName(), args));
         }
-
-
-
-
         return list;
     }
 
@@ -167,7 +160,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     public List<String> getTips(CommandSender sender, String[] args) {
         String[] removeLast = args;
         if (args != null && args.length > 0)
-            Arrays.copyOfRange(args, 0, args.length - 1);
+            removeLast = Arrays.copyOfRange(args, 0, args.length - 1);
         CommandNode result;
         if (removeLast.length == 0) {
             result = node;
@@ -177,6 +170,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         if (result instanceof SenderNode && result.getParent() != null)
             result = result.getParent();
         List<CommandNode> nodes = CommandNodeUtil.getShortestPath(result);
+
         List<String> tips = nodes.stream().map(node -> node.hasTip() ? node.getTip() : "").collect(Collectors.toList());
         return tips;
     }

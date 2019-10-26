@@ -14,9 +14,9 @@ public class HashPermissible implements Permissible {
 
     @Override
     public boolean hasPermission(String permission) {
+        if (permission == null || permission.isEmpty())
+            return false;
         try {
-            if (permission == null || permission.isEmpty())
-                return false;
             lock.readLock().lock();
             if (permissionMap.containsKey(permission))
                 return permissionMap.get(permission);

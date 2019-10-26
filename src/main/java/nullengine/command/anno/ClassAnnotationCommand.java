@@ -28,13 +28,13 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
         super(name, description, helpMessage);
     }
 
-//    @Override
-//    public CompleteResult complete(CommandSender sender, String[] args) {
-//        if (completeOverrideFunction != null) {
-//
-//        }
-//        return super.complete(sender,args);
-//    }
+    @Override
+    public List<String> complete(CommandSender sender, String[] args) {
+        if (completeOverrideFunction != null) {
+            return completeOverrideFunction.apply(sender,args);
+        }
+        return super.complete(sender,args);
+    }
 
 
     public static class Builder {
@@ -61,7 +61,7 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
         }
 
         public Builder caseCommand(String commandName,String desc,String helpMessage,Runnable commandHandler){
-            CommandNodeUtil.InnerUtil innerUtil = CommandNodeUtil.getInnerUtil(commandHandler, argumentManager, completeManager);
+            CommandNodeUtil.ClassUtil innerUtil = CommandNodeUtil.getInnerUtil(commandHandler, argumentManager, completeManager);
 
             List<CommandNode> nodeList = new ArrayList<>();
 

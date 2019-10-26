@@ -2,7 +2,6 @@ package nullengine.command.argument.base;
 
 import com.google.common.collect.Lists;
 import nullengine.command.argument.SimpleArgument;
-import nullengine.command.completion.CompleteResult;
 import nullengine.command.completion.Completer;
 
 import java.util.Collections;

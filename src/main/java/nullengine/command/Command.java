@@ -1,7 +1,5 @@
 package nullengine.command;
 
-import nullengine.command.completion.CompleteResult;
-
 import java.util.List;
 import java.util.Objects;
 
