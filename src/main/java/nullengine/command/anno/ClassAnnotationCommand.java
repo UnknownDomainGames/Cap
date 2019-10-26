@@ -9,8 +9,7 @@ import nullengine.command.util.node.CommandNode;
 import nullengine.command.util.node.Nodeable;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class ClassAnnotationCommand extends NodeAnnotationCommand {
@@ -120,6 +119,15 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
 
                 for (CommandNode node : nodeList) {
                     node.setExecutor(executeConsumer);
+                }
+
+                try {
+                    Permission permission = commandHandler.getClass().getMethod("run",new Class[0]).getAnnotation(Permission.class);
+                    Set<String> needPermission = new HashSet<>(Arrays.asList(permission.value()));
+                    if(permission!=null)
+                        nodeList.forEach(node -> node.setNeedPermission(needPermission));
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
                 }
 
                 if (nodeable instanceof NodeAnnotationCommand)
