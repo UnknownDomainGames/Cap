@@ -40,8 +40,9 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         nodes.add(node);
         while (!nodes.isEmpty()) {
             CommandNode node = nodes.remove(0);
-            if (node.canExecuteCommand())
+            if (node.canExecuteCommand()){
                 canExecuteNodes.add(node);
+            }
             nodes.addAll(node.getChildren());
         }
     }
@@ -52,8 +53,9 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         if (args == null || args.length == 0) {
 
             if (node.canExecuteCommand()) {
-                if (!hasPermission(sender, node.getNeedPermission()))
+                if (!hasPermission(sender, node.getNeedPermission())){
                     throw new PermissionNotEnoughException(getName(), node.getNeedPermission().toArray(new String[0]));
+                }
                 node.getExecutor().accept(Collections.EMPTY_LIST);
                 return;
             } else {
@@ -66,10 +68,8 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 }
                 throw new CommandWrongUseException(getName(), args);
             }
-
         } else {
             CommandNode parseResult = parseArgs(sender, args);
-
             if (CommandNodeUtil.getTotalNeedArgs(parseResult) != args.length) {
                 throw new CommandWrongUseException(getName(), args);
             }
@@ -88,8 +88,9 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
     private boolean hasPermission(Permissible permissible, Collection<String> needPermission) {
         for (String s : needPermission) {
-            if (!permissible.hasPermission(s))
+            if (!permissible.hasPermission(s)){
                 return false;
+            }
         }
         return true;
     }
@@ -99,8 +100,9 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         ArrayList<CommandNode> filterExecuteNodes = new ArrayList<>();
 
         for (CommandNode executeNode : canExecuteNodes) {
-            if (CommandNodeUtil.getTotalNeedArgs(executeNode) >= args.length)
+            if (CommandNodeUtil.getTotalNeedArgs(executeNode) >= args.length){
                 filterExecuteNodes.add(executeNode);
+            }
         }
 
         CommandNode bestResult = null;
@@ -110,8 +112,9 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
             int i = 0;
             for (CommandNode node : nodeList) {
-                if (i + node.getNeedArgs() > args.length)
+                if (i + node.getNeedArgs() > args.length){
                     break;
+                }
                 boolean success = node.parse(sender, this.getName(), Arrays.copyOfRange(args, i, i + node.getNeedArgs()));
                 if (success) {
 
@@ -125,7 +128,6 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 }
             }
         }
-
         return bestResult;
     }
 
@@ -143,46 +145,44 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     @Override
     public List<String> suggest(CommandSender sender, String[] args) {
         CommandNode result = suggestParse(sender,args);
-
         List<String> list = new ArrayList<>();
-
         for (CommandNode child : result.getChildren()) {
-            if (child.getSuggester() != null)
+            if (child.getSuggester() != null){
                 list.addAll(child.getSuggester().suggest(sender, getName(), args));
+            }
         }
         return list;
     }
 
     protected CommandNode suggestParse(CommandSender sender,String[] args){
         String[] removeLast = args;
-        if (args != null && args.length > 0)
+        if (args != null && args.length > 0){
             removeLast = Arrays.copyOfRange(args, 0, args.length - 1);
+        }
 
         CommandNode result;
         if (removeLast.length == 0) {
             result = node;
-        } else
+        } else{
             result = parseArgs(sender, removeLast);
+        }
 
-        if (result instanceof SenderNode && result.getParent() != null)
+        if (result instanceof SenderNode && result.getParent() != null){
             result = result.getParent();
+        }
         return result;
     }
 
     @Override
     public List<String> getTips(CommandSender sender, String[] args) {
         CommandNode result = suggestParse(sender,args);
-
         List<CommandNode> nodes = CommandNodeUtil.getShortestPath(result);
         List<String> tips = nodes.stream().filter(node1 -> !(node1 instanceof SenderNode)).map(node -> node.hasTip() ? node.getTip() : "").collect(Collectors.toList());
         return tips;
     }
 
-
-
     @Override
     public ArgumentCheckResult checkArguments(CommandSender sender, String[] args) {
-
         return null;
     }
 

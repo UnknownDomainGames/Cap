@@ -9,8 +9,9 @@ public class SimpleSuggesterManager implements SuggesterManager {
 
     @Override
     public void putSuggester(NamedSuggester completer) {
-        if (suggesterHashMapByName.containsKey(completer.getName()))
-            throw new RuntimeException("completer name already exist");
+        if (suggesterHashMapByName.containsKey(completer.getName())){
+            throw new RuntimeException("suggester name already exist");
+        }
         suggesterHashMapByName.put(completer.getName(), completer);
     }
 

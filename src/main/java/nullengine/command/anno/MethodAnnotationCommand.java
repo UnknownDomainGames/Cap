@@ -54,7 +54,9 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
         }
 
         private List<Command> build() {
-            return commandHandler.stream().map(object -> parse(object)).collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll);
+            return commandHandler.stream()
+                    .map(object -> parse(object))
+                    .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll);
         }
 
         public void register() {
@@ -73,8 +75,9 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
 
                 nullengine.command.anno.Command commandAnnotation = method.getAnnotation(nullengine.command.anno.Command.class);
 
-                if (commandAnnotation == null)
+                if (commandAnnotation == null){
                     continue;
+                }
 
                 Command command = commandManager.getCommand(commandAnnotation.value()).orElse(null);
 
@@ -91,15 +94,16 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
 
                 Nodeable nodeable = (Nodeable) command;
 
-                if (nodeable == null)
+                if (nodeable == null){
                     nodeable = new MethodAnnotationCommand(commandAnnotation.value(), commandAnnotation.desc(), commandAnnotation.helpMessage());
+                }
 
                 List<CommandNode> node = Lists.newArrayList(nodeable.getNode());
 
                 for (Parameter parameter : method.getParameters()) {
                     List<CommandNode> children = annotationUtil.parseParameter(parameter);
                     ArrayList<CommandNode> branches = new ArrayList<>();
-                    for (CommandNode parent : node)
+                    for (CommandNode parent : node){
                         for (CommandNode child : children){
                             try {
                                 CommandNode topCloneChild = CommandNodeUtil.getTopParent(child).clone();
@@ -109,6 +113,8 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
                                 e.printStackTrace();
                             }
                         }
+                    }
+
                     node = branches;
                 }
 
@@ -124,11 +130,13 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
 
                 Permission permission = method.getAnnotation(Permission.class);
                 if (permission != null) {
-                    node.forEach(commandNode -> commandNode.setNeedPermission(new HashSet<>(Arrays.asList(permission.value()))));
+                    node.forEach(commandNode ->
+                            commandNode.setNeedPermission(new HashSet<>(Arrays.asList(permission.value()))));
                 }
 
-                if (nodeable instanceof NodeAnnotationCommand)
+                if (nodeable instanceof NodeAnnotationCommand){
                     ((NodeAnnotationCommand) nodeable).flush();
+                }
                 list.add((Command) nodeable);
             }
 

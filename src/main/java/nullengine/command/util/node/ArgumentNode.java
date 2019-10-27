@@ -12,8 +12,9 @@ public class ArgumentNode extends CommandNode {
 
     public ArgumentNode(Argument argument) {
         this.argument = argument;
-        if (argument != null)
+        if (argument != null){
             setTip(argument.getName());
+        }
     }
 
     @Override
@@ -23,8 +24,9 @@ public class ArgumentNode extends CommandNode {
 
     @Override
     public Object parseArgs(CommandSender sender, String command, String... args) {
-        if(args[0].isEmpty())
+        if(args[0].isEmpty()){
             return null;
+        }
         return argument.parse(args[0]).orElse(null);
     }
 
@@ -71,8 +73,9 @@ public class ArgumentNode extends CommandNode {
 
     @Override
     public Suggester getSuggester() {
-        if (super.getSuggester() != null)
+        if (super.getSuggester() != null){
             return super.getSuggester();
+        }
         return argument.getSuggester();
     }
 

@@ -9,9 +9,6 @@ public class SenderNode extends CommandNode {
 
     private Class<? extends CommandSender>[] allowedSenders;
 
-    public SenderNode() {
-    }
-
     public SenderNode(Class<? extends CommandSender>... clazz) {
         allowedSenders = clazz;
     }
@@ -23,15 +20,18 @@ public class SenderNode extends CommandNode {
 
     @Override
     public Object parseArgs(CommandSender sender, String command, String... args) {
-        if (allowedSender(sender))
+        if (allowedSender(sender)){
             return sender;
+        }
         return null;
     }
 
     public boolean allowedSender(CommandSender sender) {
-        for (Class clazz : allowedSenders)
-            if (clazz.isAssignableFrom(sender.getClass()))
+        for (Class clazz : allowedSenders){
+            if (clazz.isAssignableFrom(sender.getClass())){
                 return true;
+            }
+        }
         return false;
     }
 

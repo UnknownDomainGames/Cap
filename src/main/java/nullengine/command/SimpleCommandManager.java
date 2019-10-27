@@ -27,14 +27,14 @@ public class SimpleCommandManager implements CommandManager {
                     sb.append(c);
                 else
                     quotes = !quotes;
-            }else if(c == '\\'){
-                if(escape){
+            } else if (c == '\\') {
+                if (escape) {
                     escape = false;
                     sb.append(c);
-                }else{
+                } else {
                     escape = true;
                 }
-            }else{
+            } else {
                 sb.append(c);
                 escape = false;
             }
@@ -70,18 +70,19 @@ public class SimpleCommandManager implements CommandManager {
     @Override
     public void execute(CommandSender sender, String command, String... args) {
         Command commandInstance = commands.get(command);
-        if (commandInstance == null)
+        if (commandInstance == null){
             throw new CommandNotFoundException(command);
+        }
 
-        if (args == null)
+        if (args == null){
             args = new String[0];
+        }
         try {
             commandInstance.execute(sender, args);
         } catch (Exception e) {
             if (commandInstance.handleUncaughtException(e, sender, args)) {
                 return;
             }
-
             uncaughtExceptionHandler.handle(e, sender, commandInstance, args);
         }
     }
@@ -95,8 +96,11 @@ public class SimpleCommandManager implements CommandManager {
     @Override
     public List<String> complete(CommandSender sender, String command, String... args) {
         Command commandInstance = commands.get(command);
-        if ((args == null || args.length == 0) && commandInstance == null)
-            return commands.keySet().stream().filter(commandName -> commandName.startsWith(command)).collect(Collectors.toList());
+        if ((args == null || args.length == 0) && commandInstance == null) {
+            return commands.keySet()
+                    .stream()
+                    .filter(commandName -> commandName.startsWith(command)).collect(Collectors.toList());
+        }
 
         if (commandInstance == null)
             return Collections.EMPTY_LIST;
@@ -107,17 +111,17 @@ public class SimpleCommandManager implements CommandManager {
     @Override
     public List<String> getTips(CommandSender sender, String rawCommand) {
         CommandResolver.Result result = resolver.resolve(rawCommand);
-        return getTips(sender,result.command,result.args);
+        return getTips(sender, result.command, result.args);
     }
 
     @Override
     public List<String> getTips(CommandSender sender, String command, String... args) {
-        if(command==null||command.isEmpty())
+        if (command == null || command.isEmpty())
             return Collections.EMPTY_LIST;
         Command commandInstance = commands.get(command);
-        if(commandInstance==null)
+        if (commandInstance == null)
             return Collections.EMPTY_LIST;
-        return commandInstance.getTips(sender,args);
+        return commandInstance.getTips(sender, args);
     }
 
     @Override

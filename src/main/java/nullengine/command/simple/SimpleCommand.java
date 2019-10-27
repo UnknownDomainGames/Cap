@@ -49,15 +49,17 @@ public class SimpleCommand extends Command {
 
     @Override
     public boolean handleUncaughtException(Exception e, CommandSender sender, String[] args) {
-        if (uncaughtExceptionHandler == null)
+        if (uncaughtExceptionHandler == null){
             return false;
+        }
         return uncaughtExceptionHandler.handleUncaughtException(e, sender, this, args);
     }
 
     @Override
     public ArgumentCheckResult checkArguments(CommandSender sender, String[] args) {
-        if(argumentChecker!=null)
+        if(argumentChecker!=null){
             return argumentChecker.checkArguments(sender,args);
+        }
         return ArgumentCheckResult.Right();
     }
 

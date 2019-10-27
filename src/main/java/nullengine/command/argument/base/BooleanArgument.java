@@ -28,10 +28,12 @@ public class BooleanArgument extends Argument {
      */
     @Override
     public Optional parse(String arg) {
-        if(arg.equals("true"))
+        if(arg.equals("true")){
             return Optional.of(true);
-        else if(arg.equals("false"))
+        }
+        else if(arg.equals("false")){
             return Optional.of(false);
+        }
         return Optional.empty();
     }
 
@@ -39,8 +41,9 @@ public class BooleanArgument extends Argument {
     public Suggester getSuggester() {
         return (sender, command, args) -> {
             List<String> completeSet = Lists.newArrayList("true", "false");
-            if (args != null && !args[args.length - 1].isEmpty())
+            if (args != null && !args[args.length - 1].isEmpty()){
                 return completeSet.stream().filter(completeName -> completeName.startsWith(args[args.length - 1])).collect(Collectors.toList());
+            }
             return completeSet;
         };
     }

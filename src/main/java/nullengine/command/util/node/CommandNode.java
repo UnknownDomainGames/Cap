@@ -37,8 +37,9 @@ public abstract class CommandNode implements Comparable<CommandNode>,Cloneable {
     public List<Object> collect() {
         ArrayList list = new ArrayList();
         list.add(parseResult);
-        if (parent != null)
+        if (parent != null){
             list.addAll(parent.collect());
+        }
         return list;
     }
 

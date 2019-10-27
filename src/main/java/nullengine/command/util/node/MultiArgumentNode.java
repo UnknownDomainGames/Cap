@@ -29,8 +29,9 @@ public class MultiArgumentNode extends CommandNode {
 
         list.add(instance.instance);
 
-        if (instance.parent != null)
+        if (instance.parent != null){
             list.addAll(instance.parent.collect());
+        }
 
         return list;
     }
@@ -39,8 +40,9 @@ public class MultiArgumentNode extends CommandNode {
         ArrayList<Object> args = new ArrayList<>();
         CommandNode parent = this;
         for (int i = 0; i < this.argsNum + getNeedArgs(); i++) {
-            if (parent.parseResult == null)
+            if (parent.parseResult == null){
                 i--;
+            }
             else {
                 args.add(parent.parseResult);
                 parent.parseResult = null;
@@ -51,7 +53,6 @@ public class MultiArgumentNode extends CommandNode {
         return new MultiInstance(parent, instanceFunction.apply(args.toArray(new Object[0])));
     }
 
-
     @Override
     public int getNeedArgs() {
         return commandNode.getNeedArgs();
@@ -60,6 +61,22 @@ public class MultiArgumentNode extends CommandNode {
     @Override
     protected Object parseArgs(CommandSender sender, String command, String... args) {
         return commandNode.parseArgs(sender, command, args);
+    }
+
+
+    @Override
+    public String getTip() {
+        return commandNode.getTip();
+    }
+
+    @Override
+    public void setTip(String tip) {
+        commandNode.setTip(tip);
+    }
+
+    @Override
+    public boolean hasTip() {
+        return commandNode.hasTip();
     }
 
     @Override
@@ -97,18 +114,4 @@ public class MultiArgumentNode extends CommandNode {
                 '}';
     }
 
-    @Override
-    public String getTip() {
-        return commandNode.getTip();
-    }
-
-    @Override
-    public void setTip(String tip) {
-        commandNode.setTip(tip);
-    }
-
-    @Override
-    public boolean hasTip() {
-        return commandNode.hasTip();
-    }
 }

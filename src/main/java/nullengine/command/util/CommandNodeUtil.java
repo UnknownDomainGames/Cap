@@ -44,10 +44,12 @@ public class CommandNodeUtil {
     public static int getTotalNeedArgs(CommandNode node) {
         int i = 0;
         while (true) {
-            if (node == null)
+            if (node == null){
                 return i;
-            if (node.getParent() == null)
+            }
+            if (node.getParent() == null){
                 return i;
+            }
             i += node.getNeedArgs();
             node = node.getParent();
         }
@@ -55,8 +57,9 @@ public class CommandNodeUtil {
 
     public static CommandNode getTopParent(CommandNode child) {
         while (true) {
-            if (child.getParent() == null)
+            if (child.getParent() == null){
                 return child;
+            }
             child = child.getParent();
         }
     }
@@ -80,10 +83,12 @@ public class CommandNodeUtil {
         arrayList.add(clone);
         while (!arrayList.isEmpty()) {
             CommandNode node = arrayList.remove(0);
-            if (node.getChildren().isEmpty())
+            if (node.getChildren().isEmpty()){
                 list.add(node);
-            else
+            }
+            else{
                 arrayList.addAll(node.getChildren());
+            }
         }
         return list;
     }
@@ -102,8 +107,9 @@ public class CommandNodeUtil {
         List<CommandNode> path = new LinkedList<>();
         path.add(node1);
         while (true) {
-            if (node1.getParent() == node)
+            if (node1.getParent() == node){
                 return path;
+            }
             path.add(0, node1.getParent());
             node1 = node1.getParent();
         }
@@ -114,8 +120,9 @@ public class CommandNodeUtil {
         arrayList.add(commandNode);
         while (!arrayList.isEmpty()) {
             CommandNode node = arrayList.remove(0);
-            if (node.canExecuteCommand())
+            if (node.canExecuteCommand()){
                 return node;
+            }
             arrayList.addAll(node.getChildren());
         }
         return null;
@@ -133,12 +140,9 @@ public class CommandNodeUtil {
         }
 
         public List<CommandNode> parseParameter(Parameter parameter) {
-
             Annotation[] annotations = parameter.getAnnotations();
-
             List<CommandNode> node = foundMainNode(parameter.getType(), annotations);
             setCustomAnnotation(node, annotations);
-
             return node;
         }
 
@@ -147,9 +151,12 @@ public class CommandNodeUtil {
                 if (annotation.annotationType() == Sender.class) {
                     Sender sender = (Sender) annotation;
                     Class[] senderClass = sender.value();
-                    if (senderClass == null || senderClass.length == 0)
+                    if (senderClass == null || senderClass.length == 0){
                         return handleSender(clazz);
-                    else return handleSender(senderClass);
+                    }
+                    else{
+                        return handleSender(senderClass);
+                    }
                 } else if (annotation.annotationType() == Required.class) {
                     return handleRequired(((Required) annotation).value());
                 } else if (annotation.annotationType() == ArgumentHandler.class) {
@@ -178,8 +185,9 @@ public class CommandNodeUtil {
             Argument argument = argumentManager.getArgument(clazz);
             if (argument == null) {
                 List<CommandNode> node = handleGenerator(clazz);
-                if (node == null || node.isEmpty())
+                if (node == null || node.isEmpty()){
                     throw new RuntimeException(clazz + "  这个类没有注册进Argument或没有标记Generator");
+                }
                 return node;
             } else {
                 CommandNode node = new ArgumentNode(argument);
@@ -197,8 +205,9 @@ public class CommandNodeUtil {
                 Generator generator = (Generator) constructor.getAnnotation(Generator.class);
                 if (generator != null) {
                     Parameter[] parameters = constructor.getParameters();
-                    if (parameters == null || parameters.length == 0)
+                    if (parameters == null || parameters.length == 0){
                         throw new RuntimeException("不知道要不要支持没有形参的构造方法");
+                    }
                     List<CommandNode> nodes = constructMultiArgument(parameters, objects -> {
                         try {
                             return constructor.newInstance(objects);
@@ -210,7 +219,6 @@ public class CommandNodeUtil {
                     list.addAll(nodes);
                 }
             }
-
             return list;
         }
 
@@ -248,7 +256,6 @@ public class CommandNodeUtil {
 
         public void setCustomAnnotation(List<CommandNode> nodes, Annotation[] annotations) {
             for (Annotation annotation : annotations) {
-
                 if (annotation.annotationType() == Suggester.class) {
                     Suggester complete = (Suggester) annotation;
                     nodes.stream().forEach(node -> node.setSuggester(suggesterManager.getSuggester(complete.value())));
@@ -260,8 +267,6 @@ public class CommandNodeUtil {
                 }
             }
         }
-
-
     }
 
     public static class ClassUtil extends AnnotationUtil {
@@ -280,19 +285,20 @@ public class CommandNodeUtil {
 
             for (Method method : methods) {
                 Provide provide = method.getAnnotation(Provide.class);
-                if (provide != null)
+                if (provide != null){
                     providerMap.put(provide.value(), new ProvideWrapper(provide, method));
+                }
             }
         }
 
         public List<CommandNode> parseField(Field field) {
-
             Annotation[] annotations = field.getAnnotations();
             List<CommandNode> nodeList = new ArrayList<>();
             if (providerMap.containsKey(field.getName())) {
                 Collection<ProvideWrapper> wrapper = providerMap.get(field.getName());
-                if (!checkProvider(field, wrapper))
+                if (!checkProvider(field, wrapper)){
                     throw new RuntimeException("provider 方法错误 其返回的对象不是目标Field的类或它的子类");
+                }
                 List<ProvideWrapper> replaceProvide = wrapper.stream().filter(provideWrapper -> provideWrapper.provide.replace()).collect(Collectors.toList());
                 if (!replaceProvide.isEmpty()) {
                     for (ProvideWrapper provideWrapper : replaceProvide) {
@@ -311,7 +317,7 @@ public class CommandNodeUtil {
                         setCustomAnnotation(nodeList, annotations);
                         return nodeList;
                     }
-                } else
+                } else{
                     for (ProvideWrapper provideWrapper : wrapper) {
                         provided = true;
                         nodeList.addAll(constructMultiArgument(provideWrapper.method.getParameters(), objects -> {
@@ -326,26 +332,29 @@ public class CommandNodeUtil {
                             return null;
                         }));
                     }
+                }
             }
-
             nodeList.addAll(foundMainNode(field.getType(), annotations));
-
             setCustomAnnotation(nodeList, annotations);
-
             return nodeList;
         }
 
         @Override
         public List<CommandNode> handleArgument(Class clazz) {
-            if(replaced)
+            if(replaced){
                 return Collections.EMPTY_LIST;
+            }
             Argument argument = argumentManager.getArgument(clazz);
             if (argument == null) {
                 List<CommandNode> node = handleGenerator(clazz);
-                if (node == null || node.isEmpty())
-                    if (!provided)
+                if (node == null || node.isEmpty()){
+                    if (!provided){
                         throw new RuntimeException(clazz + "  这个类没有注册进Argument或没有标记Generator");
-                    else return Collections.EMPTY_LIST;
+                    }
+                    else{
+                        return Collections.EMPTY_LIST;
+                    }
+                }
                 return node;
             } else {
                 CommandNode node = new ArgumentNode(argument);

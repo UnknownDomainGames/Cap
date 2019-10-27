@@ -87,8 +87,8 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
                         continue;
                     List<CommandNode> fieldNodes = innerUtil.parseField(field);
                     ArrayList<CommandNode> branches = new ArrayList<>();
-                    for (CommandNode node : nodeList)
-                        for (CommandNode child : fieldNodes)
+                    for (CommandNode node : nodeList){
+                        for (CommandNode child : fieldNodes){
                             try {
                                 CommandNode topCloneChild = CommandNodeUtil.getTopParent(child).clone();
                                 node.addChild(topCloneChild);
@@ -96,6 +96,8 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
                             } catch (CloneNotSupportedException e) {
                                 e.printStackTrace();
                             }
+                        }
+                    }
                     nodeList = branches;
                 }
 

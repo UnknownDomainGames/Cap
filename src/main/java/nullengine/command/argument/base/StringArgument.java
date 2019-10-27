@@ -22,8 +22,9 @@ public class StringArgument extends SimpleArgument {
     public Suggester getSuggester() {
         return (sender, command, args) -> {
             String s = args[args.length - 1];
-            if (s.isEmpty())
+            if (s.isEmpty()){
                 return Lists.newArrayList("[text]");
+            }
             else return Collections.EMPTY_LIST;
         };
     }

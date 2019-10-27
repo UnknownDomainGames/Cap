@@ -14,19 +14,23 @@ public class HashPermissible implements Permissible {
 
     @Override
     public boolean hasPermission(String permission) {
-        if (permission == null || permission.isEmpty())
+        if (permission == null || permission.isEmpty()){
             return false;
+        }
         try {
             lock.readLock().lock();
-            if (permissionMap.containsKey(permission))
+            if (permissionMap.containsKey(permission)){
                 return permissionMap.get(permission);
+            }
             while (true) {
                 int lastDot = permission.lastIndexOf('.');
-                if (lastDot <= 0)
+                if (lastDot <= 0){
                     break;
+                }
                 permission = permission.substring(0, lastDot);
-                if (permissionMap.containsKey(permission))
+                if (permissionMap.containsKey(permission)){
                     return permissionMap.get(permission);
+                }
             }
         } finally {
             lock.readLock().unlock();
