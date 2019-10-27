@@ -129,6 +129,10 @@ public class SimpleCommandManager implements CommandManager {
         this.uncaughtExceptionHandler = uncaughtExceptionHandler;
     }
 
+    public CommandResolver getResolver() {
+        return resolver;
+    }
+
     public void setResolver(CommandResolver resolver) {
         this.resolver = resolver;
     }

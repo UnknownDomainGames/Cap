@@ -13,7 +13,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class CommandNodeUtil {
@@ -297,6 +296,7 @@ public class CommandNodeUtil {
                 List<ProvideWrapper> replaceProvide = wrapper.stream().filter(provideWrapper -> provideWrapper.provide.replace()).collect(Collectors.toList());
                 if (!replaceProvide.isEmpty()) {
                     for (ProvideWrapper provideWrapper : replaceProvide) {
+                        replaced = true;
                         nodeList = constructMultiArgument(provideWrapper.method.getParameters(), objects -> {
                             try {
                                 provideWrapper.method.setAccessible(true);
