@@ -164,6 +164,7 @@ public class SwingTest {
                             if (result.args == null || result.args.length == 0) {
                                 if (!completeList.contains(result.command)) {
                                     completeList = commandManager.complete(consoleSender, result.command, result.args);
+                                    System.out.println("suggest: "+completeList.toString());
                                     completeIndex = -1;
                                 }
                                 if (completeList.isEmpty())
@@ -174,6 +175,7 @@ public class SwingTest {
                             } else {
                                 if (!completeList.contains(result.args[result.args.length - 1])) {
                                     completeList = commandManager.complete(consoleSender, result.command, result.args);
+                                    System.out.println("suggest: "+completeList.toString());
                                     completeIndex = -1;
                                 }
                                 if (completeList.isEmpty())
