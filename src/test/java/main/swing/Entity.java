@@ -23,7 +23,7 @@ public class Entity implements CommandSender {
 
     @Override
     public void sendMessage(String message) {
-        System.out.println("bob receive message:"+message);
+        System.out.println(name+" receive message:"+message);
     }
 
     @Override

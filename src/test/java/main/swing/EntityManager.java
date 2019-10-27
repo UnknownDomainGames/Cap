@@ -19,4 +19,8 @@ public class EntityManager {
         return entities.stream().filter(entity -> entity.getName().equals(name)).findAny().orElse(null);
     }
 
+    public void removeEntity(Entity entity){
+        this.entities.remove(entity);
+    }
+
 }
