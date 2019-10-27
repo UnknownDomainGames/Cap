@@ -174,7 +174,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         CommandNode result = suggestParse(sender,args);
 
         List<CommandNode> nodes = CommandNodeUtil.getShortestPath(result);
-        List<String> tips = nodes.stream().map(node -> node.hasTip() ? node.getTip() : "").collect(Collectors.toList());
+        List<String> tips = nodes.stream().filter(node1 -> !(node1 instanceof SenderNode)).map(node -> node.hasTip() ? node.getTip() : "").collect(Collectors.toList());
         return tips;
     }
 
