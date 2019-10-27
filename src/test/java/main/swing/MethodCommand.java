@@ -29,7 +29,7 @@ public class MethodCommand {
         SwingTest.getInstance().getEntityManager().removeEntity(entity);
     }
 
-    @Command("Permission")
+    @Command("permission")
     public void setPermission(@Tip("entity") Entity entity, @Tip("permission") String permission, @Tip("true/false") boolean bool) {
         entity.setPermission(permission, bool);
     }
