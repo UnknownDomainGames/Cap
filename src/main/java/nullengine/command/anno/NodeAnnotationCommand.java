@@ -122,25 +122,14 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 if (!success) {
                     break;
                 }
-                if (getDepth(node) >= bestResultDepth) {
+                if (CommandNodeUtil.getDepth(node) >= bestResultDepth) {
                     bestResult = node;
-                    bestResultDepth = getDepth(bestResult);
+                    bestResultDepth = CommandNodeUtil.getDepth(bestResult);
                 }
                 i += node.getRequiredArgsNum();
             }
         }
         return bestResult;
-    }
-
-    private int getDepth(CommandNode node) {
-        if (node == null)
-            return 0;
-        int i = 0;
-        while (node.getParent() != null) {
-            i++;
-            node = node.getParent();
-        }
-        return i;
     }
 
     @Override

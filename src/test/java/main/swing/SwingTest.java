@@ -109,7 +109,6 @@ public class SwingTest {
                     ArgumentCheckResult argumentCheckResult = commandManager.checkLastArgument(consoleSender,result.command,Arrays.copyOfRange(result.args,0,result.args.length-1));
                     if(!argumentCheckResult.isValid()){
                         System.out.println(argumentCheckResult.getHelpMessage());
-
                     }
                     if (text.startsWith("/")) {
                         setTips();

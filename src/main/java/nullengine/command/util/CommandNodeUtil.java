@@ -64,6 +64,17 @@ public class CommandNodeUtil {
         }
     }
 
+    public static int getDepth(CommandNode node) {
+        if (node == null)
+            return 0;
+        int i = 0;
+        while (node.getParent() != null) {
+            i++;
+            node = node.getParent();
+        }
+        return i;
+    }
+
     public static List<CommandNode> getLinkedFromParent2Child(CommandNode child) {
         ArrayList<CommandNode> list = new ArrayList<>();
         list.add(child);
@@ -242,7 +253,7 @@ public class CommandNodeUtil {
             }
             for (int i = 0; i < nodes.size(); i++) {
                 CommandNode node = nodes.get(i);
-                MultiArgumentNode multiArgumentNode = new MultiArgumentNode(node, constructFunction, CommandNodeUtil.getRequiredArgsAmountFromParent2Child(node));
+                MultiArgumentNode multiArgumentNode = new MultiArgumentNode(node, constructFunction, CommandNodeUtil.getDepth(node));
                 if (node.getParent() != null) {
                     CommandNode parent = node.getParent();
                     parent.removeChild(node);
