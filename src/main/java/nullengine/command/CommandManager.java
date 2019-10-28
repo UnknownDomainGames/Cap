@@ -25,6 +25,10 @@ public interface CommandManager {
 
     List<String> getTips(CommandSender sender,String command,String... args);
 
+    ArgumentCheckResult checkLastArgument(CommandSender sender,String rawCommand);
+
+    ArgumentCheckResult checkLastArgument(CommandSender sender,String command,String... args);
+
     @FunctionalInterface
     interface UncaughtExceptionHandler {
         void handle(Exception e, CommandSender sender, Command command, String[] args);

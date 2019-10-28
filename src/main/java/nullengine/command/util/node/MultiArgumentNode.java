@@ -1,7 +1,6 @@
 package nullengine.command.util.node;
 
 import nullengine.command.CommandSender;
-import nullengine.command.argument.Argument;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,7 +38,7 @@ public class MultiArgumentNode extends CommandNode {
     private MultiInstance getMultiArgInstance() {
         ArrayList<Object> args = new ArrayList<>();
         CommandNode parent = this;
-        for (int i = 0; i < this.argsNum + getNeedArgs(); i++) {
+        for (int i = 0; i < this.argsNum + getRequiredArgsNum(); i++) {
             if (parent.parseResult == null){
                 i--;
             }
@@ -54,8 +53,8 @@ public class MultiArgumentNode extends CommandNode {
     }
 
     @Override
-    public int getNeedArgs() {
-        return commandNode.getNeedArgs();
+    public int getRequiredArgsNum() {
+        return commandNode.getRequiredArgsNum();
     }
 
     @Override

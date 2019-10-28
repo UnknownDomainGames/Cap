@@ -1,5 +1,6 @@
 package main.swing;
 
+import nullengine.command.ArgumentCheckResult;
 import nullengine.command.CommandManager;
 import nullengine.command.CommandResolver;
 import nullengine.command.SimpleCommandManager;
@@ -103,6 +104,16 @@ public class SwingTest {
                         commandManager.execute(consoleSender, text.substring(1));
                     textField.setText("");
                     setTips();
+                } else if (e.getKeyChar() == KeyEvent.VK_SPACE) {
+                    CommandResolver.Result result = commandManager.getResolver().resolve(text.substring(1));
+                    ArgumentCheckResult argumentCheckResult = commandManager.checkLastArgument(consoleSender,result.command,Arrays.copyOfRange(result.args,0,result.args.length-1));
+                    if(!argumentCheckResult.isValid()){
+                        System.out.println(argumentCheckResult.getHelpMessage());
+
+                    }
+                    if (text.startsWith("/")) {
+                        setTips();
+                    }
                 } else {
                     if (text.startsWith("/")) {
                         setTips();
@@ -144,6 +155,7 @@ public class SwingTest {
                     fullNum++;
                 }
             }
+
         });
 
         Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
@@ -164,7 +176,7 @@ public class SwingTest {
                             if (result.args == null || result.args.length == 0) {
                                 if (!completeList.contains(result.command)) {
                                     completeList = commandManager.complete(consoleSender, result.command, result.args);
-                                    System.out.println("suggest: "+completeList.toString());
+                                    System.out.println("suggest: " + completeList.toString());
                                     completeIndex = -1;
                                 }
                                 if (completeList.isEmpty())
@@ -175,7 +187,7 @@ public class SwingTest {
                             } else {
                                 if (!completeList.contains(result.args[result.args.length - 1])) {
                                     completeList = commandManager.complete(consoleSender, result.command, result.args);
-                                    System.out.println("suggest: "+completeList.toString());
+                                    System.out.println("suggest: " + completeList.toString());
                                     completeIndex = -1;
                                 }
                                 if (completeList.isEmpty())

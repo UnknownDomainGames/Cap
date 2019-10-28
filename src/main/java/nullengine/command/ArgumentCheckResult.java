@@ -4,35 +4,29 @@ import java.util.List;
 
 public class ArgumentCheckResult {
 
-        private String helpMessage;
+    private String helpMessage;
 
-        private boolean right;
+    private boolean valid;
 
-        private List<Integer> wrongLocation;
+    private ArgumentCheckResult(String helpMessage, boolean valid) {
+        this.helpMessage = helpMessage;
+        this.valid = valid;
+    }
 
-        private ArgumentCheckResult(String helpMessage, boolean right, List<Integer> wrongLocation) {
-            this.helpMessage = helpMessage;
-            this.right = right;
-            this.wrongLocation = wrongLocation;
-        }
+    public static ArgumentCheckResult Valid() {
+        return new ArgumentCheckResult(null, true);
+    }
 
-        public static ArgumentCheckResult Right(){
-            return new ArgumentCheckResult(null,true,null);
-        }
-
-        public static ArgumentCheckResult Error(String helpMessage,List<Integer> wrongLocation){
-            return new ArgumentCheckResult(helpMessage,false,wrongLocation);
-        }
+    public static ArgumentCheckResult Error(String helpMessage) {
+        return new ArgumentCheckResult(helpMessage, false);
+    }
 
     public String getHelpMessage() {
         return helpMessage;
     }
 
-    public boolean isRight() {
-        return right;
+    public boolean isValid() {
+        return valid;
     }
 
-    public List<Integer> getWrongLocation() {
-        return wrongLocation;
-    }
 }

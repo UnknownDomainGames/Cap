@@ -56,11 +56,11 @@ public class SimpleCommand extends Command {
     }
 
     @Override
-    public ArgumentCheckResult checkArguments(CommandSender sender, String[] args) {
+    public ArgumentCheckResult checkLastArgument(CommandSender sender, String[] args) {
         if(argumentChecker!=null){
             return argumentChecker.checkArguments(sender,args);
         }
-        return ArgumentCheckResult.Right();
+        return ArgumentCheckResult.Valid();
     }
 
     public void setExecutor(CommandExecutor executor) {

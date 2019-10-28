@@ -35,7 +35,7 @@ public class EmptyArgumentNode extends ArgumentNode {
     }
 
     @Override
-    public int getNeedArgs() {
+    public int getRequiredArgsNum() {
         return 0;
     }
 

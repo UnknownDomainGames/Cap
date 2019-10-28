@@ -18,7 +18,7 @@ public class ArgumentNode extends CommandNode {
     }
 
     @Override
-    public int getNeedArgs() {
+    public int getRequiredArgsNum() {
         return 1;
     }
 

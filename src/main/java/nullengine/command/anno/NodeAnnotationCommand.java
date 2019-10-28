@@ -70,7 +70,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             }
         } else {
             CommandNode parseResult = parseArgs(sender, args);
-            if (CommandNodeUtil.getTotalNeedArgs(parseResult) != args.length) {
+            if (CommandNodeUtil.getRequiredArgsAmountFromParent2Child(parseResult) != args.length) {
                 throw new CommandWrongUseException(getName(), args);
             }
             if (parseResult.canExecuteCommand()) {
@@ -100,38 +100,39 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         ArrayList<CommandNode> filterExecuteNodes = new ArrayList<>();
 
         for (CommandNode executeNode : canExecuteNodes) {
-            if (CommandNodeUtil.getTotalNeedArgs(executeNode) >= args.length) {
+            if (CommandNodeUtil.getRequiredArgsAmountFromParent2Child(executeNode) >= args.length) {
                 filterExecuteNodes.add(executeNode);
             }
         }
 
         CommandNode bestResult = null;
+        int bestResultDepth = 0;
+
+        ArrayCopy<String> arrayCopy = new ArrayCopy<>(args);
 
         for (CommandNode executeNode : filterExecuteNodes) {
             List<CommandNode> nodeList = CommandNodeUtil.getLinkedFromParent2Child(executeNode);
 
             int i = 0;
             for (CommandNode node : nodeList) {
-                if (i + node.getNeedArgs() > args.length) {
+                if (i + node.getRequiredArgsNum() > args.length) {
                     break;
                 }
-                boolean success = node.parse(sender, this.getName(), Arrays.copyOfRange(args, i, i + node.getNeedArgs()));
-                if (success) {
-
-                    if (getParentNum(node) >= getParentNum(bestResult)) {
-                        bestResult = node;
-                    }
-                    i += node.getNeedArgs();
-
-                } else {
+                boolean success = node.parse(sender, this.getName(), arrayCopy.copyOfRange(i,i+node.getRequiredArgsNum()));
+                if (!success) {
                     break;
                 }
+                if (getDepth(node) >= bestResultDepth) {
+                    bestResult = node;
+                    bestResultDepth = getDepth(bestResult);
+                }
+                i += node.getRequiredArgsNum();
             }
         }
         return bestResult;
     }
 
-    private int getParentNum(CommandNode node) {
+    private int getDepth(CommandNode node) {
         if (node == null)
             return 0;
         int i = 0;
@@ -176,6 +177,9 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     @Override
     public List<String> getTips(CommandSender sender, String[] args) {
         CommandNode result = suggestParse(sender, args);
+        if(CommandNodeUtil.getRequiredArgsAmountFromParent2Child(result)!=args.length-1 || result==null || result.getChildren().isEmpty()){
+            return Collections.EMPTY_LIST;
+        }
         List<CommandNode> nodes = CommandNodeUtil.getShortestPath(result);
         List<String> tips = nodes.stream()
                 .filter(node1 -> !(node1 instanceof SenderNode)).map(node -> node.hasTip() ? node.getTip() : "")
@@ -184,15 +188,21 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     }
 
     @Override
-    public ArgumentCheckResult checkArguments(CommandSender sender, String[] args) {
-        if (args == null || args.length == 0)
-            return ArgumentCheckResult.Right();
+    public ArgumentCheckResult checkLastArgument(CommandSender sender, String[] args) {
+        if (args == null || args.length == 0){
+            return ArgumentCheckResult.Valid();
+        }
         int index = args.length;
         for (CommandNode node : getNodesOnArgumentIndex(index)) {
-            if (node.parse(sender, this.getName(), args[index - 1]))
-                return ArgumentCheckResult.Right();
+            if (node.parse(sender, this.getName(), args[index - 1])){
+                return ArgumentCheckResult.Valid();
+            }
         }
-        return null;
+        return ArgumentCheckResult.Error("/"+this.getName()+" "+formatArgs(args)+" <- wrong");
+    }
+
+    private String formatArgs(String[] args){
+        return Arrays.stream(args).map(s -> s+" ").collect(Collectors.joining());
     }
 
     private List<CommandNode> getNodesOnArgumentIndex(int index) {
@@ -200,8 +210,8 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 .map(node1 -> CommandNodeUtil
                         .getLinkedFromParent2Child(node1)
                         .stream()
-                        .filter(node2 -> node2.getNeedArgs() > 0)
-                        .filter(node2 -> CommandNodeUtil.getTotalNeedArgs(node2) == index)
+                        .filter(node2 -> node2.getRequiredArgsNum() > 0)
+                        .filter(node2 -> CommandNodeUtil.getRequiredArgsAmountFromParent2Child(node2) == index)
                         .findFirst().orElse(null)
                 ).filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -217,5 +227,26 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         return node;
     }
 
+    private class ArrayCopy<T>{
 
+        private HashMap<Integer,T[]> cacheMap = new HashMap<>();
+        T[] arrays;
+
+        public ArrayCopy(T[] arrays) {
+            this.arrays = arrays;
+        }
+
+        public T[] copyOfRange(int i,int to){
+            int key = geyKey(i,to);
+            if(cacheMap.containsKey(key))
+                return cacheMap.get(key);
+            T[] copy = Arrays.copyOfRange(arrays,i,to);
+            cacheMap.put(key,copy);
+            return copy;
+        }
+
+        private int geyKey(int i,int i2){
+            return i*100+i2;
+        }
+    }
 }

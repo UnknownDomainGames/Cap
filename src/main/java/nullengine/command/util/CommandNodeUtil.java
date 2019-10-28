@@ -41,16 +41,16 @@ public class CommandNodeUtil {
      * @param node
      * @return
      */
-    public static int getTotalNeedArgs(CommandNode node) {
+    public static int getRequiredArgsAmountFromParent2Child(CommandNode node) {
         int i = 0;
         while (true) {
             if (node == null){
                 return i;
             }
+            i += node.getRequiredArgsNum();
             if (node.getParent() == null){
                 return i;
             }
-            i += node.getNeedArgs();
             node = node.getParent();
         }
     }
@@ -242,7 +242,7 @@ public class CommandNodeUtil {
             }
             for (int i = 0; i < nodes.size(); i++) {
                 CommandNode node = nodes.get(i);
-                MultiArgumentNode multiArgumentNode = new MultiArgumentNode(node, constructFunction, CommandNodeUtil.getTotalNeedArgs(node));
+                MultiArgumentNode multiArgumentNode = new MultiArgumentNode(node, constructFunction, CommandNodeUtil.getRequiredArgsAmountFromParent2Child(node));
                 if (node.getParent() != null) {
                     CommandNode parent = node.getParent();
                     parent.removeChild(node);

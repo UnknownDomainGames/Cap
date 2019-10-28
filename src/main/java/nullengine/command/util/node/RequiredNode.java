@@ -15,7 +15,7 @@ public class RequiredNode extends CommandNode {
     }
 
     @Override
-    public int getNeedArgs() {
+    public int getRequiredArgsNum() {
         return 1;
     }
 

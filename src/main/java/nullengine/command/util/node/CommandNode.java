@@ -43,7 +43,7 @@ public abstract class CommandNode implements Comparable<CommandNode>,Cloneable {
         return list;
     }
 
-    public abstract int getNeedArgs();
+    public abstract int getRequiredArgsNum();
 
     protected abstract Object parseArgs(CommandSender sender, String command, String... args);
 

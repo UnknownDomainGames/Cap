@@ -29,7 +29,7 @@ public abstract class Command {
 
     public abstract List<String> getTips(CommandSender sender,String[] args);
 
-    public abstract ArgumentCheckResult checkArguments(CommandSender sender,String[] args);
+    public abstract ArgumentCheckResult checkLastArgument(CommandSender sender, String[] args);
 
     public abstract boolean handleUncaughtException(Exception e, CommandSender sender, String[] args);
 

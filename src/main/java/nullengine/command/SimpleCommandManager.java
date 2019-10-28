@@ -125,6 +125,20 @@ public class SimpleCommandManager implements CommandManager {
     }
 
     @Override
+    public ArgumentCheckResult checkLastArgument(CommandSender sender, String rawCommand) {
+        CommandResolver.Result result = this.resolver.resolve(rawCommand);
+        return checkLastArgument(sender,result.command,result.args);
+    }
+
+    @Override
+    public ArgumentCheckResult checkLastArgument(CommandSender sender, String command, String... args) {
+        Command command1 = commands.get(command);
+        if(command1==null)
+            return ArgumentCheckResult.Error("/"+command+"  command not found");
+        return command1.checkLastArgument(sender,args);
+    }
+
+    @Override
     public void unregisterCommand(String command) {
         commands.remove(command);
     }

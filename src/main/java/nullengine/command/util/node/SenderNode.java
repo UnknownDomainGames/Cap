@@ -14,7 +14,7 @@ public class SenderNode extends CommandNode {
     }
 
     @Override
-    public int getNeedArgs() {
+    public int getRequiredArgsNum() {
         return 0;
     }
 
