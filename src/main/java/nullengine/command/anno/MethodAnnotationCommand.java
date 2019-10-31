@@ -24,23 +24,24 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
         return new AnnotationCommandBuilder(commandManager);
     }
 
-    public static class AnnotationCommandBuilder {
+    public static class AnnotationCommandBuilder extends NodeBuilder{
 
         private Set<Object> commandHandler = new HashSet<>();
 
-        private ArgumentManager argumentManager = staticArgumentManage;
-
-        private CommandManager commandManager;
-
-        private SuggesterManager suggesterManager = staticSuggesterManager;
-
         private AnnotationCommandBuilder(CommandManager commandManager) {
-            this.commandManager = commandManager;
+            super(commandManager);
         }
 
         public AnnotationCommandBuilder setArgumentManager(ArgumentManager argumentManager) {
-            this.argumentManager = argumentManager;
-            return this;
+            return (AnnotationCommandBuilder) super.setArgumentManager(argumentManager);
+        }
+
+        public AnnotationCommandBuilder setSuggesterManager(SuggesterManager suggesterManager) {
+            return (AnnotationCommandBuilder) super.setSuggesterManager(suggesterManager);
+        }
+
+        public AnnotationCommandBuilder addProvider(Object object){
+            return (AnnotationCommandBuilder) super.addProvider(object);
         }
 
         public AnnotationCommandBuilder addCommandHandler(Object object) {
@@ -48,28 +49,19 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
             return this;
         }
 
-        public AnnotationCommandBuilder setSuggesterManager(SuggesterManager suggesterManager) {
-            this.suggesterManager = suggesterManager;
-            return this;
-        }
-
-        private List<Command> build() {
+        protected List<Command> build() {
             return commandHandler.stream()
                     .map(object -> parse(object))
                     .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll);
-        }
-
-        public void register() {
-            build().stream()
-                    .filter(command -> !commandManager.hasCommand(command.getName()))
-                    .forEach(command -> commandManager.registerCommand(command));
         }
 
         private List<Command> parse(Object o) {
 
             ArrayList<Command> list = new ArrayList();
 
-            CommandNodeUtil.AnnotationUtil annotationUtil = CommandNodeUtil.getAnnotationUtil(o,argumentManager, suggesterManager);
+            CommandNodeUtil annotationUtil = CommandNodeUtil.getMethodUtil(o,argumentManager, suggesterManager);
+
+            providerList.forEach(object->annotationUtil.addProvider(object));
 
             for (Method method : o.getClass().getMethods()) {
 
@@ -80,7 +72,6 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
                 }
 
                 Command command = commandManager.getCommand(commandAnnotation.value()).orElse(null);
-
 
                 if (command != null && !(command instanceof Nodeable)) {
                     throw new RuntimeException("command already exist " + command.getName() + " and not Nodeable");
@@ -105,13 +96,9 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
                     ArrayList<CommandNode> branches = new ArrayList<>();
                     for (CommandNode parent : node){
                         for (CommandNode child : children){
-                            try {
-                                CommandNode topCloneChild = CommandNodeUtil.getTopParent(child).clone();
-                                parent.addChild(topCloneChild);
-                                branches.addAll(CommandNodeUtil.getAllBottomBranches(topCloneChild));
-                            } catch (CloneNotSupportedException e) {
-                                e.printStackTrace();
-                            }
+                            CommandNode topCloneChild = CommandNodeUtil.getTopParent(child).clone();
+                            parent.addChild(topCloneChild);
+                            branches.addAll(CommandNodeUtil.getAllBottomNode(topCloneChild));
                         }
                     }
 

@@ -9,11 +9,5 @@ import static java.lang.annotation.ElementType.METHOD;
 @Target({METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Provide {
-
-    /**
-     * @return field name
-     */
-    String value();
-
-    boolean replace() default false;
+    String name() default "";
 }

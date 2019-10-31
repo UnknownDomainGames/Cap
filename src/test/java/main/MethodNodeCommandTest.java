@@ -1,5 +1,6 @@
 package main;
 
+import nullengine.command.CommandManager;
 import nullengine.command.CommandSender;
 import nullengine.command.SimpleCommandManager;
 import nullengine.command.anno.*;
@@ -12,6 +13,7 @@ import nullengine.command.suggestion.NamedSuggester;
 import nullengine.command.suggestion.SimpleSuggesterManager;
 import nullengine.command.exception.CommandWrongUseException;
 import nullengine.command.exception.PermissionNotEnoughException;
+import nullengine.permission.HashPermissible;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +27,7 @@ public class MethodNodeCommandTest {
 
     private TestSender testSender = new TestSender("methodNodeTest", string -> message = string);
 
-    private String message;
+    public String message;
 
     SimpleCommandManager simpleCommandManager = new SimpleCommandManager();
 
@@ -263,15 +265,18 @@ public class MethodNodeCommandTest {
     public void tip(@Tip("x") int x, @Tip("y") int y, @Tip("z") int z) {}
 
     @Test
-    void generator() {
-        Entity entitySender = new Entity() {
+    void provide() {
+        Entity testEntity = new Entity() {
+            HashPermissible permissible = new HashPermissible();
+
             @Override
             public String getWorld() {
-                return "testWorld";
+                return "EntityWorld";
             }
 
             @Override
-            public void sendMessage(String message) {}
+            public void sendMessage(String message) {
+            }
 
             @Override
             public String getSenderName() {
@@ -280,23 +285,45 @@ public class MethodNodeCommandTest {
 
             @Override
             public boolean hasPermission(String permission) {
-                return true;
+                return permissible.hasPermission(permission);
             }
 
             @Override
-            public void setPermission(String permission, boolean bool) {}
+            public void setPermission(String permission, boolean bool) {
+                permissible.setPermission(permission,bool);
+            }
 
             @Override
-            public void removePermission(String permission) {}
+            public void removePermission(String permission) {
+                permissible.removePermission(permission);
+            }
         };
+        CommandManager commandManager = new SimpleCommandManager();
 
-        simpleCommandManager.execute(entitySender,"generator 2 3 4 hell 12 13 14");
-        Assertions.assertEquals(message, entitySender.getSenderName()+new Location(entitySender,2,3,4)+new Location("hell",12,13,14));
+
+
+        NodeAnnotationCommand.METHOD.get(commandManager)
+                .addProvider(new LocationProvider())
+                .addCommandHandler(new ProvideTest())
+                .register();
+
+
+        commandManager.execute(testEntity,"location 11 1 2 3 \"hello world\" commandWorld 4 5 6");
+        Assertions.assertEquals(message,11+new Location(testEntity,1,2,3).toString()+"hello world"+new Location("commandWorld",4,5,6).toString());
+        commandManager.execute(testEntity,"location 12 commandWorld 1 2 3 \"hello world\" 4 5 6");
+        Assertions.assertEquals(message,12+new Location("commandWorld",1,2,3).toString()+"hello world"+new Location(testEntity,4,5,6).toString());
+        commandManager.execute(testEntity,"location 13 commandWorld 1 2 3 \"hello world\" commandWorld 4 5 6");
+        Assertions.assertEquals(message,13+new Location("commandWorld",1,2,3).toString()+"hello world"+new Location("commandWorld",4,5,6).toString());
     }
 
-    @Command("generator")
-    public void generatorTest(@Sender CommandSender sender,Location location,Location location2){
-        message = sender.getSenderName()+location+location2;
+    public class ProvideTest{
+
+        @Command("location")
+        public void location(int i,Location location,String b,Location location2){
+            message = i+location.toString()+b+location2.toString();
+        }
+
     }
+
 
 }

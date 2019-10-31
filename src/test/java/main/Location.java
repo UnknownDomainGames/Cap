@@ -1,9 +1,9 @@
 package main;
 
-import nullengine.command.CommandSender;
-import nullengine.command.anno.Generator;
 import nullengine.command.anno.Sender;
 import nullengine.command.anno.Tip;
+
+import java.util.Objects;
 
 public class Location {
 
@@ -12,7 +12,6 @@ public class Location {
     private int y;
     private int z;
 
-    @Generator
     public Location(@Sender Entity sender,@Tip("x") int x, @Tip("y") int y, @Tip("z") int z) {
         this.world = sender.getWorld();
         this.x = x;
@@ -20,7 +19,6 @@ public class Location {
         this.z = z;
     }
 
-    @Generator
     public Location(String world,@Tip("x") int x, @Tip("y") int y, @Tip("z") int z) {
         this.world = world;
         this.x = x;
@@ -53,11 +51,29 @@ public class Location {
     }
 
     @Override
-    public String toString() {
+    public String
+    toString() {
         return "Location{" +
-                "x=" + x +
+                "world='" + world + '\'' +
+                ", x=" + x +
                 ", y=" + y +
                 ", z=" + z +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Location location = (Location) o;
+        return x == location.x &&
+                y == location.y &&
+                z == location.z &&
+                Objects.equals(world, location.world);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(world, x, y, z);
     }
 }

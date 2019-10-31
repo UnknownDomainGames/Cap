@@ -2,6 +2,7 @@ package nullengine.command.anno;
 
 import nullengine.command.ArgumentCheckResult;
 import nullengine.command.Command;
+import nullengine.command.CommandManager;
 import nullengine.command.CommandSender;
 import nullengine.command.argument.ArgumentManager;
 import nullengine.command.argument.SimpleArgumentManager;
@@ -24,6 +25,10 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     protected final static ArgumentManager staticArgumentManage = new SimpleArgumentManager();
 
     protected final static SuggesterManager staticSuggesterManager = new SimpleSuggesterManager();
+
+    public static final CommandBuilderGetter<ClassAnnotationCommand.ClassAnnotationBuilder> CLASS = new ClassBuilderGetter();
+
+    public static final CommandBuilderGetter<MethodAnnotationCommand.AnnotationCommandBuilder> METHOD = new MethodBuilderGetter();
 
     private CommandNode node = new EmptyArgumentNode();
 
@@ -122,9 +127,9 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 if (!success) {
                     break;
                 }
-                if (CommandNodeUtil.getDepth(node) >= bestResultDepth) {
+                if (CommandNodeUtil.getDepthOn(node) >= bestResultDepth) {
                     bestResult = node;
-                    bestResultDepth = CommandNodeUtil.getDepth(bestResult);
+                    bestResultDepth = CommandNodeUtil.getDepthOn(bestResult);
                 }
                 i += node.getRequiredArgsNum();
             }
@@ -236,6 +241,20 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
         private int geyKey(int i,int i2){
             return i*100+i2;
+        }
+    }
+
+    private static class ClassBuilderGetter extends CommandBuilderGetter<ClassAnnotationCommand.ClassAnnotationBuilder>{
+
+        public ClassAnnotationCommand.ClassAnnotationBuilder get(CommandManager commandManager){
+            return ClassAnnotationCommand.getBuilder(commandManager);
+        }
+    }
+
+    private static class MethodBuilderGetter extends CommandBuilderGetter<MethodAnnotationCommand.AnnotationCommandBuilder>{
+
+        public MethodAnnotationCommand.AnnotationCommandBuilder get(CommandManager commandManager){
+            return MethodAnnotationCommand.getBuilder(commandManager);
         }
     }
 }

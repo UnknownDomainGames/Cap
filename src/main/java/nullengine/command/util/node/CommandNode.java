@@ -2,11 +2,12 @@ package nullengine.command.util.node;
 
 import nullengine.command.CommandSender;
 import nullengine.command.suggestion.Suggester;
+import nullengine.command.util.CommandNodeUtil;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-public abstract class CommandNode implements Comparable<CommandNode>,Cloneable {
+public abstract class CommandNode implements Comparable<CommandNode>, Cloneable {
 
     private CommandNode parent;
 
@@ -37,7 +38,7 @@ public abstract class CommandNode implements Comparable<CommandNode>,Cloneable {
     public List<Object> collect() {
         ArrayList list = new ArrayList();
         list.add(parseResult);
-        if (parent != null){
+        if (parent != null) {
             list.addAll(parent.collect());
         }
         return list;
@@ -60,7 +61,7 @@ public abstract class CommandNode implements Comparable<CommandNode>,Cloneable {
         this.children.add(commandNode);
     }
 
-    public void removeChild(CommandNode commandNode){
+    public void removeChild(CommandNode commandNode) {
         this.children.remove(commandNode);
         commandNode.setParent(null);
     }
@@ -70,7 +71,8 @@ public abstract class CommandNode implements Comparable<CommandNode>,Cloneable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CommandNode node = (CommandNode) o;
-        return Objects.equals(needPermission, node.needPermission) &&
+        return Objects.equals(children, node.children) &&
+                Objects.equals(needPermission, node.needPermission) &&
                 Objects.equals(suggester, node.suggester) &&
                 Objects.equals(tip, node.tip);
     }
@@ -120,15 +122,20 @@ public abstract class CommandNode implements Comparable<CommandNode>,Cloneable {
         this.tip = tip;
     }
 
-    public boolean hasTip(){
-        return tip !=null;
+    public boolean hasTip() {
+        return tip != null;
     }
 
     @Override
-    public CommandNode clone() throws CloneNotSupportedException {
-        CommandNode node = (CommandNode) super.clone();
+    public CommandNode clone() {
+        CommandNode node = null;
+        try {
+            node = (CommandNode) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
         node.children = new TreeSet<>();
-        for(CommandNode child : children){
+        for (CommandNode child : children) {
             node.addChild(child.clone());
         }
         return node;

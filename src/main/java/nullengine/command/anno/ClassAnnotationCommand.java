@@ -18,43 +18,43 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
         super(name, description, helpMessage);
     }
 
-    public static class Builder {
-
-        private CommandManager commandManager;
-
-        private ArgumentManager argumentManager = staticArgumentManage;
-
-        private SuggesterManager suggesterManager = staticSuggesterManager;
+    public static class ClassAnnotationBuilder extends NodeBuilder{
 
         private List<CommandHandlerWrapper> commandHandlerList = new ArrayList<>();
 
-        public Builder(CommandManager commandManager) {
-            this.commandManager = commandManager;
+        private ClassAnnotationBuilder(CommandManager commandManager) {
+            super(commandManager);
         }
 
-        public Builder setArgumentManager(ArgumentManager argumentManager) {
-            this.argumentManager = argumentManager;
-            return this;
+        @Override
+        public ClassAnnotationBuilder setArgumentManager(ArgumentManager argumentManager) {
+            return (ClassAnnotationBuilder) super.setArgumentManager(argumentManager);
         }
 
-        public void setSuggesterManager(SuggesterManager suggesterManager) {
-            this.suggesterManager = suggesterManager;
+        @Override
+        public ClassAnnotationBuilder setSuggesterManager(SuggesterManager suggesterManager) {
+            return (ClassAnnotationBuilder) super.setSuggesterManager(suggesterManager);
         }
 
-        public Builder caseCommand(String commandName, String desc, String helpMessage, Runnable commandHandler) {
+        @Override
+        public ClassAnnotationBuilder addProvider(Object object) {
+            return (ClassAnnotationBuilder) super.addProvider(object);
+        }
+
+        public ClassAnnotationBuilder caseCommand(String commandName, String desc, String helpMessage, Runnable commandHandler) {
             commandHandlerList.add(new CommandHandlerWrapper(commandName, desc, helpMessage, commandHandler));
             return this;
         }
 
-        public Builder caseCommand(String commandName, String desc, Runnable commandHandler) {
+        public ClassAnnotationBuilder caseCommand(String commandName, String desc, Runnable commandHandler) {
             return caseCommand(commandName, desc, "", commandHandler);
         }
 
-        public Builder caseCommand(String commandName, Runnable commandHandler) {
+        public ClassAnnotationBuilder caseCommand(String commandName, Runnable commandHandler) {
             return caseCommand(commandName, "", commandHandler);
         }
 
-        private List<Command> build() {
+        protected List<Command> build() {
             List<Command> commands = new ArrayList<>();
             for (CommandHandlerWrapper wrapper : commandHandlerList) {
                 Runnable commandHandler = wrapper.instance;
@@ -62,7 +62,7 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
                 String desc = wrapper.desc;
                 String helpMessage = wrapper.help;
 
-                CommandNodeUtil.ClassUtil innerUtil = CommandNodeUtil.getInnerUtil(commandHandler, argumentManager, suggesterManager);
+                CommandNodeUtil.ClassUtil innerUtil = CommandNodeUtil.getClassUtil(commandHandler, argumentManager, suggesterManager);
 
                 List<CommandNode> nodeList = new ArrayList<>();
 
@@ -89,13 +89,9 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
                     ArrayList<CommandNode> branches = new ArrayList<>();
                     for (CommandNode node : nodeList){
                         for (CommandNode child : fieldNodes){
-                            try {
-                                CommandNode topCloneChild = CommandNodeUtil.getTopParent(child).clone();
-                                node.addChild(topCloneChild);
-                                branches.addAll(CommandNodeUtil.getAllBottomBranches(topCloneChild));
-                            } catch (CloneNotSupportedException e) {
-                                e.printStackTrace();
-                            }
+                            CommandNode topCloneChild = CommandNodeUtil.getTopParent(child).clone();
+                            node.addChild(topCloneChild);
+                            branches.addAll(CommandNodeUtil.getAllBottomNode(topCloneChild));
                         }
                     }
                     nodeList = branches;
@@ -140,12 +136,6 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
             return commands;
         }
 
-        public void register() {
-            build().stream()
-                    .filter(command -> !commandManager.hasCommand(command.getName()))
-                    .forEach(command -> commandManager.registerCommand(command));
-        }
-
         private class CommandHandlerWrapper {
             public final String commandName;
             public final String desc;
@@ -161,8 +151,8 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
         }
     }
 
-    public static Builder getBuilder(CommandManager commandManager) {
-        return new Builder(commandManager);
+    public static ClassAnnotationBuilder getBuilder(CommandManager commandManager) {
+        return new ClassAnnotationBuilder(commandManager);
     }
 
 }
