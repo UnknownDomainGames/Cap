@@ -59,7 +59,7 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
 
             ArrayList<Command> list = new ArrayList();
 
-            CommandNodeUtil annotationUtil = CommandNodeUtil.getMethodUtil(o,argumentManager, suggesterManager);
+            CommandNodeUtil annotationUtil = CommandNodeUtil.getMethodUtil(argumentManager, suggesterManager);
 
             providerList.forEach(object->annotationUtil.addProvider(object));
 

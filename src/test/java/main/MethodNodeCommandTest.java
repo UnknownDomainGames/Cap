@@ -309,9 +309,9 @@ public class MethodNodeCommandTest {
 
 
         commandManager.execute(testEntity,"location 11 1 2 3 \"hello world\" commandWorld 4 5 6");
-        Assertions.assertEquals(message,11+new Location(testEntity,1,2,3).toString()+"hello world"+new Location("commandWorld",4,5,6).toString());
+        Assertions.assertEquals(message,11+new Location(testEntity.getWorld(),1,2,3).toString()+"hello world"+new Location("commandWorld",4,5,6).toString());
         commandManager.execute(testEntity,"location 12 commandWorld 1 2 3 \"hello world\" 4 5 6");
-        Assertions.assertEquals(message,12+new Location("commandWorld",1,2,3).toString()+"hello world"+new Location(testEntity,4,5,6).toString());
+        Assertions.assertEquals(message,12+new Location("commandWorld",1,2,3).toString()+"hello world"+new Location(testEntity.getWorld(),4,5,6).toString());
         commandManager.execute(testEntity,"location 13 commandWorld 1 2 3 \"hello world\" commandWorld 4 5 6");
         Assertions.assertEquals(message,13+new Location("commandWorld",1,2,3).toString()+"hello world"+new Location("commandWorld",4,5,6).toString());
     }

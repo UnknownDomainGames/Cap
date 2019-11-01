@@ -18,7 +18,7 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
         super(name, description, helpMessage);
     }
 
-    public static class ClassAnnotationBuilder extends NodeBuilder{
+    public static class ClassAnnotationBuilder extends NodeBuilder {
 
         private List<CommandHandlerWrapper> commandHandlerList = new ArrayList<>();
 
@@ -56,13 +56,14 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
 
         protected List<Command> build() {
             List<Command> commands = new ArrayList<>();
+            CommandNodeUtil.ClassUtil classAnnotationUtil = CommandNodeUtil.getClassUtil(argumentManager, suggesterManager);
+            providerList.forEach(object -> classAnnotationUtil.addProvider(object));
             for (CommandHandlerWrapper wrapper : commandHandlerList) {
                 Runnable commandHandler = wrapper.instance;
                 String commandName = wrapper.commandName;
                 String desc = wrapper.desc;
                 String helpMessage = wrapper.help;
 
-                CommandNodeUtil.ClassUtil innerUtil = CommandNodeUtil.getClassUtil(commandHandler, argumentManager, suggesterManager);
 
                 List<CommandNode> nodeList = new ArrayList<>();
 
@@ -85,10 +86,10 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
                 for (Field field : fields) {
                     if (field.getAnnotation(Ignore.class) != null)
                         continue;
-                    List<CommandNode> fieldNodes = innerUtil.parseField(field);
+                    List<CommandNode> fieldNodes = classAnnotationUtil.parseField(field);
                     ArrayList<CommandNode> branches = new ArrayList<>();
-                    for (CommandNode node : nodeList){
-                        for (CommandNode child : fieldNodes){
+                    for (CommandNode node : nodeList) {
+                        for (CommandNode child : fieldNodes) {
                             CommandNode topCloneChild = CommandNodeUtil.getTopParent(child).clone();
                             node.addChild(topCloneChild);
                             branches.addAll(CommandNodeUtil.getAllBottomNode(topCloneChild));
@@ -121,9 +122,9 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
                 }
 
                 try {
-                    Permission permission = commandHandler.getClass().getMethod("run",new Class[0]).getAnnotation(Permission.class);
+                    Permission permission = commandHandler.getClass().getMethod("run", new Class[0]).getAnnotation(Permission.class);
                     Set<String> needPermission = new HashSet<>(Arrays.asList(permission.value()));
-                    if(permission!=null)
+                    if (permission != null)
                         nodeList.forEach(node -> node.setNeedPermission(needPermission));
                 } catch (NoSuchMethodException e) {
                     e.printStackTrace();

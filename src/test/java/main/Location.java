@@ -1,6 +1,5 @@
 package main;
 
-import nullengine.command.anno.Sender;
 import nullengine.command.anno.Tip;
 
 import java.util.Objects;
@@ -12,14 +11,7 @@ public class Location {
     private int y;
     private int z;
 
-    public Location(@Sender Entity sender,@Tip("x") int x, @Tip("y") int y, @Tip("z") int z) {
-        this.world = sender.getWorld();
-        this.x = x;
-        this.y = y;
-        this.z = z;
-    }
-
-    public Location(String world,@Tip("x") int x, @Tip("y") int y, @Tip("z") int z) {
+    public Location(String world,int x, int y,int z) {
         this.world = world;
         this.x = x;
         this.y = y;

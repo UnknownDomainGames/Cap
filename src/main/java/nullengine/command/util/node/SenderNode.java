@@ -69,4 +69,9 @@ public class SenderNode extends CommandNode {
                 .map(node -> node.getSuggester().suggest(sender, command, args))
                 .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll): Collections.EMPTY_LIST;
     }
+
+    @Override
+    public int compareTo(CommandNode o) {
+        return 1;
+    }
 }

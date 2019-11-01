@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 
 public class CommandNodeUtil {
 
-    private Object instance;
-
     protected ArgumentManager argumentManager;
     protected SuggesterManager suggesterManager;
 
@@ -26,22 +24,17 @@ public class CommandNodeUtil {
 
     private HashMap<String, List<CommandNode>> nameProvideCommandNodeMap = new HashMap<>();
 
-    public static CommandNodeUtil getMethodUtil(Object instance, ArgumentManager argumentManager, SuggesterManager suggesterManager) {
-        return new CommandNodeUtil(instance, argumentManager, suggesterManager);
+    public static CommandNodeUtil getMethodUtil(ArgumentManager argumentManager, SuggesterManager suggesterManager) {
+        return new CommandNodeUtil(argumentManager, suggesterManager);
     }
 
-    public static ClassUtil getClassUtil(Object instance, ArgumentManager argumentManager, SuggesterManager suggesterManager) {
-        return new ClassUtil(instance, argumentManager, suggesterManager);
+    public static ClassUtil getClassUtil(ArgumentManager argumentManager, SuggesterManager suggesterManager) {
+        return new ClassUtil(argumentManager, suggesterManager);
     }
 
-    private CommandNodeUtil(Object instance, ArgumentManager argumentManager, SuggesterManager suggesterManager) {
-        this.instance = instance;
+    private CommandNodeUtil(ArgumentManager argumentManager, SuggesterManager suggesterManager) {
         this.argumentManager = argumentManager;
         this.suggesterManager = suggesterManager;
-    }
-
-    public Object getInstance() {
-        return instance;
     }
 
     public void addProvider(Object object) {
@@ -52,6 +45,7 @@ public class CommandNodeUtil {
                 .forEach(constructor -> handleProvider(providerClass, (Provide) constructor.getAnnotation(Provide.class),
                         constructor.getParameters(), objects -> {
                             try {
+                                constructor.setAccessible(true);
                                 return constructor.newInstance(objects);
                             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                                 e.printStackTrace();
@@ -64,6 +58,7 @@ public class CommandNodeUtil {
                 .forEach(method -> handleProvider(method.getReturnType(), method.getAnnotation(Provide.class),
                         method.getParameters(), objects -> {
                             try {
+                                method.setAccessible(true);
                                 return method.invoke(object, objects);
                             } catch (IllegalAccessException | InvocationTargetException e) {
                                 e.printStackTrace();
@@ -316,8 +311,8 @@ public class CommandNodeUtil {
 
     public static class ClassUtil extends CommandNodeUtil {
 
-        public ClassUtil(Object instance, ArgumentManager argumentManager, SuggesterManager suggesterManager) {
-            super(instance, argumentManager, suggesterManager);
+        public ClassUtil(ArgumentManager argumentManager, SuggesterManager suggesterManager) {
+            super(argumentManager, suggesterManager);
         }
 
         public List<CommandNode> parseField(Field field) {
