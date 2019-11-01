@@ -102,10 +102,14 @@ public class CommandNodeUtil {
                 return handleArgumentName(((ArgumentHandler) annotation).value());
             } else if (annotation.annotationType() == UseProvide.class) {
                 UseProvide useProvide = (UseProvide) annotation;
-                if (!nameProvideCommandNodeMap.containsKey(useProvide.value())) {
-                    throw new RuntimeException("provide: " + useProvide.value() + " can not found");
-                }
-                return cloneList(nameProvideCommandNodeMap.get(useProvide.value()));
+                List<String> provides = Arrays.asList(useProvide.value());
+                for (String provide : provides)
+                    if (!nameProvideCommandNodeMap.containsKey(provide)) {
+                        throw new RuntimeException("provide: " + provide + " can not found");
+                    }
+                return cloneList(provides.stream()
+                        .map(name -> nameProvideCommandNodeMap.get(name))
+                        .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll));
             }
         }
         List<CommandNode> nodeList = handleArgument(nullengine.command.util.ClassUtil.packing(clazz));

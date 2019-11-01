@@ -8,5 +8,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.PARAMETER,ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface UseProvide {
-    String value();
+    String[] value();
 }
