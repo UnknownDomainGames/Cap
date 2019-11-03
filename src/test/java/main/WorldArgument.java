@@ -3,7 +3,6 @@ package main;
 import nullengine.command.argument.Argument;
 import nullengine.command.suggestion.Suggester;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
