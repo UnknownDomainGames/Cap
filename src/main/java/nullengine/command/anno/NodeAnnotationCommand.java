@@ -123,7 +123,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 if (i + node.getRequiredArgsNum() > args.length) {
                     break;
                 }
-                boolean success = node.parse(sender, this.getName(), arrayCopy.copyOfRange(i,i+node.getRequiredArgsNum()));
+                boolean success = node.parse(sender, this.getName(), arrayCopy.copyOfRange(i, i + node.getRequiredArgsNum()));
                 if (!success) {
                     break;
                 }
@@ -162,8 +162,10 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             result = parseArgs(sender, removeLast);
         }
 
-        if (result instanceof SenderNode && result.getParent() != null) {
-            result = result.getParent();
+        while (result instanceof SenderNode){
+            if (result.getParent() != null) {
+                result = result.getParent();
+            }
         }
         return result;
     }
@@ -171,7 +173,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     @Override
     public List<String> getTips(CommandSender sender, String[] args) {
         CommandNode result = suggestParse(sender, args);
-        if(CommandNodeUtil.getRequiredArgsAmountFromParent2Child(result)!=args.length-1 || result==null || result.getChildren().isEmpty()){
+        if (CommandNodeUtil.getRequiredArgsAmountFromParent2Child(result) != args.length - 1 || result == null || result.getChildren().isEmpty()) {
             return Collections.EMPTY_LIST;
         }
         List<CommandNode> nodes = CommandNodeUtil.getShortestPath(result);
@@ -183,20 +185,20 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
     @Override
     public ArgumentCheckResult checkLastArgument(CommandSender sender, String[] args) {
-        if (args == null || args.length == 0){
+        if (args == null || args.length == 0) {
             return ArgumentCheckResult.Valid();
         }
         int index = args.length;
         for (CommandNode node : getNodesOnArgumentIndex(index)) {
-            if (node.parse(sender, this.getName(), args[index - 1])){
+            if (node.parse(sender, this.getName(), args[index - 1])) {
                 return ArgumentCheckResult.Valid();
             }
         }
-        return ArgumentCheckResult.Error("/"+this.getName()+" "+formatArgs(args)+" <- wrong");
+        return ArgumentCheckResult.Error("/" + this.getName() + " " + formatArgs(args) + " <- wrong");
     }
 
-    private String formatArgs(String[] args){
-        return Arrays.stream(args).map(s -> s+" ").collect(Collectors.joining());
+    private String formatArgs(String[] args) {
+        return Arrays.stream(args).map(s -> s + " ").collect(Collectors.joining());
     }
 
     private List<CommandNode> getNodesOnArgumentIndex(int index) {
@@ -221,39 +223,39 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         return node;
     }
 
-    private class ArrayCopy<T>{
+    private class ArrayCopy<T> {
 
-        private HashMap<Integer,T[]> cacheMap = new HashMap<>();
+        private HashMap<Integer, T[]> cacheMap = new HashMap<>();
         T[] arrays;
 
         public ArrayCopy(T[] arrays) {
             this.arrays = arrays;
         }
 
-        public T[] copyOfRange(int i,int to){
-            int key = geyKey(i,to);
-            if(cacheMap.containsKey(key))
+        public T[] copyOfRange(int i, int to) {
+            int key = geyKey(i, to);
+            if (cacheMap.containsKey(key))
                 return cacheMap.get(key);
-            T[] copy = Arrays.copyOfRange(arrays,i,to);
-            cacheMap.put(key,copy);
+            T[] copy = Arrays.copyOfRange(arrays, i, to);
+            cacheMap.put(key, copy);
             return copy;
         }
 
-        private int geyKey(int i,int i2){
-            return i*100+i2;
+        private int geyKey(int i, int i2) {
+            return i * 100 + i2;
         }
     }
 
-    private static class ClassBuilderGetter extends CommandBuilderGetter<ClassAnnotationCommand.ClassAnnotationBuilder>{
+    private static class ClassBuilderGetter extends CommandBuilderGetter<ClassAnnotationCommand.ClassAnnotationBuilder> {
 
-        public ClassAnnotationCommand.ClassAnnotationBuilder get(CommandManager commandManager){
+        public ClassAnnotationCommand.ClassAnnotationBuilder get(CommandManager commandManager) {
             return ClassAnnotationCommand.getBuilder(commandManager);
         }
     }
 
-    private static class MethodBuilderGetter extends CommandBuilderGetter<MethodAnnotationCommand.AnnotationCommandBuilder>{
+    private static class MethodBuilderGetter extends CommandBuilderGetter<MethodAnnotationCommand.AnnotationCommandBuilder> {
 
-        public MethodAnnotationCommand.AnnotationCommandBuilder get(CommandManager commandManager){
+        public MethodAnnotationCommand.AnnotationCommandBuilder get(CommandManager commandManager) {
             return MethodAnnotationCommand.getBuilder(commandManager);
         }
     }
