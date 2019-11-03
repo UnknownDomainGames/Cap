@@ -10,13 +10,14 @@ public class TextArea extends JTextArea {
 
     private CopyOnWriteArrayList<String> cache = new CopyOnWriteArrayList<>();
     private boolean stop = false;
+
     public TextArea() {
 
         Thread thread = new Thread(() -> {
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> stop = true));
 
-            while (!stop){
+            while (!stop) {
                 for (String s : cache)
                     append(s);
                 cache.clear();
@@ -33,6 +34,10 @@ public class TextArea extends JTextArea {
         System.setOut(new PrintStream(System.out) {
             public void println(String x) {
                 TextArea.this.cache.add(x + "\n");
+            }
+
+            public void println(Object o) {
+                println(o.toString());
             }
         });
     }

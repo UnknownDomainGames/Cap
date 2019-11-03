@@ -1,9 +1,7 @@
 package main.swing;
 
-import nullengine.command.ArgumentCheckResult;
-import nullengine.command.CommandManager;
-import nullengine.command.CommandResolver;
-import nullengine.command.SimpleCommandManager;
+import main.LocationProvider;
+import nullengine.command.*;
 import nullengine.command.anno.MethodAnnotationCommand;
 import nullengine.command.argument.ArgumentManager;
 import nullengine.command.argument.SimpleArgumentManager;
@@ -16,6 +14,7 @@ import java.awt.*;
 import java.awt.event.AWTEventListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +28,8 @@ public class SwingTest {
     private ArgumentManager argumentManager = new SimpleArgumentManager();
     private ConsoleSender consoleSender = new ConsoleSender();
     private EntityManager entityManager = new EntityManager();
+
+    private CommandResolver resolve;
 
     public SwingTest() {
         INSTANCE = this;
@@ -56,9 +57,18 @@ public class SwingTest {
 
         MethodAnnotationCommand.getBuilder(commandManager)
                 .setArgumentManager(argumentManager)
+                .addProvider(new LocationProvider())
                 .setSuggesterManager(suggesterManager)
                 .addCommandHandler(new MethodCommand())
                 .register();
+
+        try {
+            Field field = BaseCommandManager.class.getDeclaredField("resolver");
+            field.setAccessible(true);
+            resolve = (CommandResolver) field.get(commandManager);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     public CommandManager getCommandManager() {
@@ -105,7 +115,7 @@ public class SwingTest {
                     textField.setText("");
                     setTips();
                 } else if (e.getKeyChar() == KeyEvent.VK_SPACE) {
-                    CommandResolver.Result result = commandManager.getResolver().resolve(text.substring(1));
+                    CommandResolver.Result result = resolve.resolve(text.substring(1));
                     ArgumentCheckResult argumentCheckResult = commandManager.checkLastArgument(consoleSender,result.command,Arrays.copyOfRange(result.args,0,result.args.length-1));
                     if(!argumentCheckResult.isValid()){
                         System.out.println(argumentCheckResult.getHelpMessage());
@@ -126,9 +136,10 @@ public class SwingTest {
                     return;
                 }
                 String text = textField.getText().substring(1);
-                CommandResolver.Result result = commandManager.getResolver().resolve(text);
+                CommandResolver.Result result = resolve.resolve(text);
                 if (result.args != null && result.args.length != 0) {
                     List<String> tips = commandManager.getTips(consoleSender, result.command, result.args);
+                    System.out.println(tips);
                     String tipsString = tips.stream().map(str -> "<" + str + "> ").collect(Collectors.joining());
                     String space = getSpace("/" + result.command + " " + Arrays.stream(Arrays.copyOfRange(result.args, 0, result.args.length - 1)).map(str -> str + " ").collect(Collectors.joining()) + " ");
                     label.setText(space + tipsString);
@@ -171,7 +182,7 @@ public class SwingTest {
 
                         String text = textField.getText();
                         if (text.startsWith("/")) {
-                            CommandResolver.Result result = commandManager.getResolver().resolve(text.substring(1));
+                            CommandResolver.Result result = resolve.resolve(text.substring(1));
                             if (result.args == null || result.args.length == 0) {
                                 if (!completeList.contains(result.command)) {
                                     completeList = commandManager.complete(consoleSender, result.command, result.args);
