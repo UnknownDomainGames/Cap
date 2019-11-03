@@ -1,6 +1,7 @@
 package main.swing;
 
 import main.LocationProvider;
+import main.WorldArgument;
 import nullengine.command.*;
 import nullengine.command.anno.MethodAnnotationCommand;
 import nullengine.command.argument.ArgumentManager;
@@ -54,6 +55,7 @@ public class SwingTest {
         EntityArgument entityArgument = new EntityArgument();
 
         argumentManager.setClassDefaultArgument(entityArgument);
+        argumentManager.setClassDefaultArgument(new WorldArgument());
 
         MethodAnnotationCommand.getBuilder(commandManager)
                 .setArgumentManager(argumentManager)
@@ -139,7 +141,6 @@ public class SwingTest {
                 CommandResolver.Result result = resolve.resolve(text);
                 if (result.args != null && result.args.length != 0) {
                     List<String> tips = commandManager.getTips(consoleSender, result.command, result.args);
-                    System.out.println(tips);
                     String tipsString = tips.stream().map(str -> "<" + str + "> ").collect(Collectors.joining());
                     String space = getSpace("/" + result.command + " " + Arrays.stream(Arrays.copyOfRange(result.args, 0, result.args.length - 1)).map(str -> str + " ").collect(Collectors.joining()) + " ");
                     label.setText(space + tipsString);

@@ -6,12 +6,12 @@ import java.util.Objects;
 
 public class Location {
 
-    private String world;
+    private World world;
     private int x;
     private int y;
     private int z;
 
-    public Location(String world,int x, int y,int z) {
+    public Location(World world,int x, int y,int z) {
         this.world = world;
         this.x = x;
         this.y = y;

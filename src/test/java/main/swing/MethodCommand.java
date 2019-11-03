@@ -1,5 +1,6 @@
 package main.swing;
 
+import main.Location;
 import nullengine.command.CommandSender;
 import nullengine.command.anno.Command;
 import nullengine.command.anno.Sender;
@@ -32,6 +33,11 @@ public class MethodCommand {
     @Command("permission")
     public void setPermission(@Tip("entity") Entity entity, @Tip("permission") String permission, @Tip("true/false") boolean bool) {
         entity.setPermission(permission, bool);
+    }
+
+    @Command("test")
+    public void commandTest(Location location){
+
     }
 
 

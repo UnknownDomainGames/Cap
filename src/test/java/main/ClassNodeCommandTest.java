@@ -52,8 +52,8 @@ public class ClassNodeCommandTest {
             private HashPermissible permissible = new HashPermissible();
 
             @Override
-            public String getWorld() {
-                return "testWorld";
+            public World getWorld() {
+                return new World("testWorld");
             }
 
             @Override
@@ -112,7 +112,7 @@ public class ClassNodeCommandTest {
         }).register();
 
         int seed = 12356;
-        String world = "abc";
+        World world = new World("abc");
         Location location = new Location(world, 1, 2, 3);
 
         String text = "耗子女装";
