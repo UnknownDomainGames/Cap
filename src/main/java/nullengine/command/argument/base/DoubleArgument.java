@@ -19,7 +19,11 @@ public class DoubleArgument extends Argument {
 
     @Override
     public Optional parse(String arg) {
-        return Optional.ofNullable(Double.valueOf(arg));
+        try {
+            return Optional.of(Double.valueOf(arg));
+        }catch (Exception e){
+            return Optional.empty();
+        }
     }
 
     @Override

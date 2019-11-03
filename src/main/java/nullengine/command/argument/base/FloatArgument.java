@@ -19,7 +19,11 @@ public class FloatArgument extends Argument {
 
     @Override
     public Optional parse(String arg) {
-        return Optional.ofNullable(Float.valueOf(arg));
+        try {
+            return Optional.of(Float.valueOf(arg));
+        }catch (Exception e){
+            return Optional.empty();
+        }
     }
 
     @Override
