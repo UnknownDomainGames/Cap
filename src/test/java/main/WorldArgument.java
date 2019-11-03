@@ -4,6 +4,7 @@ import nullengine.command.argument.Argument;
 import nullengine.command.suggestion.Suggester;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public class WorldArgument extends Argument {
@@ -24,6 +25,6 @@ public class WorldArgument extends Argument {
 
     @Override
     public Suggester getSuggester() {
-        return (sender, command, args) -> Collections.EMPTY_LIST;
+        return (sender, command, args) -> List.of("world");
     }
 }

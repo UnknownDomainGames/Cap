@@ -36,7 +36,7 @@ public class MethodCommand {
     }
 
     @Command("test")
-    public void commandTest(Location location){
+    public void commandTest(@Sender CommandSender sender, Location location){
 
     }
 
