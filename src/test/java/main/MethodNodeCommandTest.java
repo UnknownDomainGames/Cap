@@ -327,7 +327,17 @@ public class MethodNodeCommandTest {
             message = i+location.toString()+b+location2.toString();
         }
 
+
     }
 
+    @Test
+    void enumTest() {
+        simpleCommandManager.execute(testSender,"enum A");
+        Assertions.assertEquals("A",message);
+    }
 
+    @Command("enum")
+    public void enumCommand(TestEnum testEnum){
+        message = testEnum.name();
+    }
 }

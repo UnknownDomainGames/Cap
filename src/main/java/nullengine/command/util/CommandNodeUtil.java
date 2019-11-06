@@ -119,11 +119,14 @@ public class CommandNodeUtil {
 
         nodeList = foundNodesByProvider(clazz);
 
-        if (nodeList.isEmpty()) {
-            throw new RuntimeException(clazz + " no argument or provide");
+        if (!nodeList.isEmpty()) {
+            return nodeList;
+        }
+        if(clazz.isEnum()){
+            return handleEnum(clazz);
         }
 
-        return nodeList;
+        throw new RuntimeException(clazz + " no argument or provide");
     }
 
     private List<CommandNode> cloneList(Collection<CommandNode> list) {
@@ -191,6 +194,9 @@ public class CommandNodeUtil {
         return nodes;
     }
 
+    public List<CommandNode> handleEnum(Class enumClazz) {
+        return Lists.newArrayList(new EnumNode(enumClazz));
+    }
 
     public void setCustomAnnotation(List<CommandNode> nodes, Annotation[] annotations) {
         for (Annotation annotation : annotations) {
