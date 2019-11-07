@@ -22,6 +22,11 @@ public abstract class BaseCommandManager implements CommandManager {
     }
 
     @Override
+    public Collection<Command> registerCommands() {
+        return commands.values();
+    }
+
+    @Override
     public Optional<Command> getCommand(String command) {
         return Optional.ofNullable(commands.get(command));
     }
