@@ -34,6 +34,6 @@ public interface CommandManager {
 
     @FunctionalInterface
     interface UncaughtExceptionHandler {
-        void handle(Exception e, CommandSender sender, Command command, String[] args);
+        void handle(Exception e, CommandSender sender, String command, String[] args);
     }
 }

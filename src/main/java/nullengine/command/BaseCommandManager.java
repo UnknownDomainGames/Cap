@@ -46,7 +46,7 @@ public abstract class BaseCommandManager implements CommandManager {
     public void execute(CommandSender sender, String command, String... args) {
         Command commandInstance = commands.get(command);
         if (commandInstance == null) {
-            throw new CommandNotFoundException(command);
+            uncaughtExceptionHandler.handle(new CommandNotFoundException(command), sender, command, args);
         }
 
         if (args == null) {
@@ -58,7 +58,7 @@ public abstract class BaseCommandManager implements CommandManager {
             if (commandInstance.handleUncaughtException(e, sender, args)) {
                 return;
             }
-            uncaughtExceptionHandler.handle(e, sender, commandInstance, args);
+            uncaughtExceptionHandler.handle(e, sender, command, args);
         }
     }
 
