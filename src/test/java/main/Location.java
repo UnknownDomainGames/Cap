@@ -66,4 +66,14 @@ public class Location {
     public void setZ(double z) {
         this.z = z;
     }
+
+    @Override
+    public String toString() {
+        return "Location{" +
+                "world=" + world +
+                ", x=" + x +
+                ", y=" + y +
+                ", z=" + z +
+                '}';
+    }
 }

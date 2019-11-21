@@ -8,8 +8,8 @@ import nullengine.command.anno.Tip;
 public class LocationProvider {
 
     @Provide
-    public Location a(@Sender CommandSender entity, @Tip("x") double x, @Tip("y") double y, @Tip("z") double z){
-        return b(new World("123"),x,y,z);
+    public Location a(@Sender Entity entity, @Tip("x") double x, @Tip("y") double y, @Tip("z") double z){
+        return b(entity.getWorld(),x,y,z);
     }
 
     @Provide
