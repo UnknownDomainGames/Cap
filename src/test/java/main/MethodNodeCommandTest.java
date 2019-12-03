@@ -336,8 +336,8 @@ public class MethodNodeCommandTest {
         Assertions.assertEquals("A",message);
     }
 
-    @Command("enum")
-    public void enumCommand(TestEnum testEnum){
-        message = testEnum.name();
-    }
+//    @Command("enum")
+//    public void enumCommand(TestEnum testEnum){
+//        message = testEnum.name();
+//    }
 }
