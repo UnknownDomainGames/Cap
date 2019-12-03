@@ -1,5 +1,6 @@
 package nullengine.command;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,6 +9,8 @@ public interface CommandManager {
     void registerCommand(Command command);
 
     void unregisterCommand(String command);
+
+    Collection<Command> registerCommands();
 
     Optional<Command> getCommand(String command);
 
@@ -31,6 +34,6 @@ public interface CommandManager {
 
     @FunctionalInterface
     interface UncaughtExceptionHandler {
-        void handle(Exception e, CommandSender sender, Command command, String[] args);
+        void handle(Exception e, CommandSender sender, String command, String[] args);
     }
 }
