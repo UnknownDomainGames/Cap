@@ -52,4 +52,9 @@ public class EmptyArgumentNode extends ArgumentNode {
     public boolean hasTip() {
         return false;
     }
+
+    @Override
+    public boolean same(CommandNode node) {
+        return super.same(node) && node instanceof EmptyArgumentNode;
+    }
 }

@@ -62,7 +62,7 @@ public abstract class CommandNode implements Cloneable {
         sortChildrenList();
     }
 
-    private void sortChildrenList(){
+    private void sortChildrenList() {
         Collections.sort(children, Comparator.comparingInt(CommandNode::weights));
         Collections.reverse(children);
     }
@@ -147,10 +147,17 @@ public abstract class CommandNode implements Cloneable {
         return node;
     }
 
-    public CommandNode cloneWithoutParent(){
+    public CommandNode cloneWithoutParent() {
         CommandNode node = clone();
         node.setParent(null);
         return node;
+    }
+
+    public boolean same(CommandNode node) {
+        return node != null &&
+                Objects.equals(needPermission,node.needPermission) &&
+                Objects.equals(suggester,node.suggester) &&
+                Objects.equals(tip,node.tip);
     }
 
     public abstract int weights();

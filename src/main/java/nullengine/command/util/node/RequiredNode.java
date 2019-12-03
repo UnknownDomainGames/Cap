@@ -57,4 +57,12 @@ public class RequiredNode extends CommandNode {
     public int weights() {
         return 10;
     }
+
+    @Override
+    public boolean same(CommandNode node) {
+        if (super.same(node) && node instanceof RequiredNode) {
+            return ((RequiredNode) node).require.equals(require);
+        }
+        return false;
+    }
 }

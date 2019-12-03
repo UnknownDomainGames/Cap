@@ -54,9 +54,8 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
 
     @Override
-    public void execute(CommandSender sender, String[] args) throws Exception {
+    public void execute(CommandSender sender, String[] args) {
         if (args == null || args.length == 0) {
-
             if (node.canExecuteCommand()) {
                 if (!hasPermission(sender, node.getNeedPermission())) {
                     throw new PermissionNotEnoughException(getName(), node.getNeedPermission().toArray(new String[0]));
@@ -66,12 +65,13 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             } else {
                 CommandNode commandNode = parseArgs(sender, args);
                 if (commandNode != null && commandNode.canExecuteCommand()) {
-                    List<Object> list = commandNode.collect();
-                    Collections.reverse(list);
-                    commandNode.getExecutor().accept(list);
+                    execute(commandNode);
                     return;
                 }
-                throw new CommandWrongUseException(getName(), args);
+                commandNode = sameCheck(commandNode);
+                if (commandNode == null)
+                    throw new CommandWrongUseException(getName(), args);
+                execute(commandNode);
             }
         } else {
             CommandNode parseResult = parseArgs(sender, args);
@@ -81,14 +81,32 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             if (parseResult.canExecuteCommand()) {
                 if (!hasPermission(sender, parseResult.getNeedPermission()))
                     throw new PermissionNotEnoughException(getName(), node.getNeedPermission().toArray(new String[0]));
-                List list = parseResult.collect();
-                Collections.reverse(list);
-                parseResult.getExecutor().accept(list);
-                return;
             } else {
-                throw new CommandWrongUseException(getName(), args);
+                parseResult = sameCheck(parseResult);
+                if (parseResult == null)
+                    throw new CommandWrongUseException(getName(), args);
             }
+            execute(parseResult);
         }
+    }
+
+    private CommandNode sameCheck(CommandNode node) {
+        if (node.getParent() == null)
+            return null;
+        CommandNode parent = node.getParent();
+        for (CommandNode child : parent.getChildren()) {
+            if (child == node)
+                continue;
+            if (child.same(node) && child.canExecuteCommand())
+                return child;
+        }
+        return null;
+    }
+
+    private void execute(CommandNode node) {
+        List list = node.collect();
+        Collections.reverse(list);
+        node.getExecutor().accept(list);
     }
 
     private boolean hasPermission(Permissible permissible, Collection<String> needPermission) {
@@ -140,7 +158,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     @Override
     public List<String> suggest(CommandSender sender, String[] args) {
         CommandNode result = suggestParse(sender, args);
-        if(result==null)
+        if (result == null)
             return Collections.EMPTY_LIST;
         List<String> list = new ArrayList<>();
         for (CommandNode child : result.getChildren()) {
@@ -164,7 +182,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             result = parseArgs(sender, removeLast);
         }
 
-        while (result instanceof SenderNode){
+        while (result instanceof SenderNode) {
             if (result.getParent() != null) {
                 result = result.getParent();
             }
@@ -175,7 +193,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     @Override
     public List<String> getTips(CommandSender sender, String[] args) {
         CommandNode result = suggestParse(sender, args);
-        if(result==null)
+        if (result == null)
             return Collections.EMPTY_LIST;
         if (CommandNodeUtil.getRequiredArgsAmountFromParent2Child(result) != args.length - 1 || result == null || result.getChildren().isEmpty()) {
             return Collections.EMPTY_LIST;

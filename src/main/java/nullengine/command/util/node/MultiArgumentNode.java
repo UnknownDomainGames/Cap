@@ -28,7 +28,7 @@ public class MultiArgumentNode extends CommandNode {
 
         list.add(instance.instance);
 
-        if (instance.parent != null){
+        if (instance.parent != null) {
             list.addAll(instance.parent.collect());
         }
 
@@ -39,10 +39,9 @@ public class MultiArgumentNode extends CommandNode {
         ArrayList<Object> args = new ArrayList<>();
         CommandNode parent = this;
         for (int i = 0; i < this.argsNum + getRequiredArgsNum(); i++) {
-            if (parent.parseResult == null){
+            if (parent.parseResult == null) {
                 i--;
-            }
-            else {
+            } else {
                 args.add(parent.parseResult);
                 parent.parseResult = null;
                 parent = parent.getParent();
@@ -116,5 +115,15 @@ public class MultiArgumentNode extends CommandNode {
     @Override
     public int weights() {
         return commandNode.weights();
+    }
+
+    @Override
+    public boolean same(CommandNode node) {
+        if (super.same(node) && node instanceof MultiArgumentNode) {
+            MultiArgumentNode multiArgumentNode = (MultiArgumentNode) node;
+            return argsNum == multiArgumentNode.argsNum &&
+                    commandNode.same(multiArgumentNode.commandNode);
+        }
+        return false;
     }
 }

@@ -69,4 +69,12 @@ public class EnumNode extends CommandNode {
     public int weights() {
         return 2;
     }
+
+    @Override
+    public boolean same(CommandNode node) {
+        if (super.same(node) && node instanceof EnumNode) {
+            return ((EnumNode) node).enumClass.equals(enumClass);
+        }
+        return false;
+    }
 }

@@ -339,4 +339,24 @@ public class MethodNodeCommandTest {
     public void enumCommand(TestEnum testEnum){
         message = testEnum.name();
     }
+
+    @Test
+    void commandTest() {
+        simpleCommandManager.execute(testSender,"command1");
+        Assertions.assertEquals(message,testSender.getSenderName()+"command1");
+        simpleCommandManager.execute(testSender,"command1 abc");
+        Assertions.assertEquals(message,testSender.getSenderName()+"abc");
+    }
+
+    @Command("command1")
+    public void command1(@Sender CommandSender sender){
+        message = sender.getSenderName()+"command1";
+    }
+
+    @Command("command1")
+    public void command1(@Sender CommandSender sender,String message){
+        this.message = sender.getSenderName()+message;
+    }
+
+
 }

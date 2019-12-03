@@ -74,4 +74,12 @@ public class SenderNode extends CommandNode {
     public int weights() {
         return 5;
     }
+
+    @Override
+    public boolean same(CommandNode node) {
+        if (super.same(node) && node instanceof SenderNode) {
+            return Arrays.equals(((SenderNode) node).allowedSenders,allowedSenders);
+        }
+        return false;
+    }
 }
