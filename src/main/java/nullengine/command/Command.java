@@ -23,15 +23,13 @@ public abstract class Command {
         this.helpMessage = helpMessage;
     }
 
-    public abstract void execute(CommandSender sender, String[] args) throws Exception;
+    public abstract void execute(CommandSender sender, String[] args);
 
     public abstract List<String> suggest(CommandSender sender, String[] args);
 
     public abstract List<String> getTips(CommandSender sender,String[] args);
 
     public abstract ArgumentCheckResult checkLastArgument(CommandSender sender, String[] args);
-
-    public abstract boolean handleUncaughtException(Exception e, CommandSender sender, String[] args);
 
     public String getName() {
         return name;

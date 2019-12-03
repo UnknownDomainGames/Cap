@@ -1,6 +1,7 @@
 package main;
 
 import nullengine.command.Command;
+import nullengine.command.CommandException;
 import nullengine.command.CommandSender;
 import nullengine.command.SimpleCommandManager;
 import nullengine.command.anno.*;
@@ -14,7 +15,7 @@ import java.util.Random;
 public class ClassNodeCommandTest {
 
     SimpleCommandManager simpleCommandManager = new SimpleCommandManager();
-    private TestSender testSender = new TestSender("methodNodeTest", string -> message = string);
+    private TestSender testSender = new TestSender("methodNodeTest", string -> message = string,c->message=c.getException().getClass().getName());
 
     private String message;
 
@@ -64,6 +65,11 @@ public class ClassNodeCommandTest {
             @Override
             public String getSenderName() {
                 return "entity";
+            }
+
+            @Override
+            public void handleException(CommandException exception) {
+
             }
 
             @Override

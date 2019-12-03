@@ -1,5 +1,6 @@
 package main.swing;
 
+import nullengine.command.CommandException;
 import nullengine.command.CommandSender;
 import nullengine.permission.HashPermissible;
 
@@ -13,6 +14,11 @@ public class ConsoleSender implements CommandSender {
     @Override
     public String getSenderName() {
         return "console";
+    }
+
+    @Override
+    public void handleException(CommandException exception) {
+
     }
 
     @Override

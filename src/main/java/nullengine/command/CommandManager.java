@@ -31,9 +31,4 @@ public interface CommandManager {
     ArgumentCheckResult checkLastArgument(CommandSender sender,String rawCommand);
 
     ArgumentCheckResult checkLastArgument(CommandSender sender,String command,String... args);
-
-    @FunctionalInterface
-    interface UncaughtExceptionHandler {
-        void handle(Exception e, CommandSender sender, String command, String[] args);
-    }
 }

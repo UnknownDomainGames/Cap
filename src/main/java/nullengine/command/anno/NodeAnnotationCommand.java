@@ -1,9 +1,7 @@
 package nullengine.command.anno;
 
-import nullengine.command.ArgumentCheckResult;
+import nullengine.command.*;
 import nullengine.command.Command;
-import nullengine.command.CommandManager;
-import nullengine.command.CommandSender;
 import nullengine.command.argument.ArgumentManager;
 import nullengine.command.argument.SimpleArgumentManager;
 import nullengine.command.exception.CommandWrongUseException;
@@ -58,7 +56,8 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         if (args == null || args.length == 0) {
             if (node.canExecuteCommand()) {
                 if (!hasPermission(sender, node.getNeedPermission())) {
-                    throw new PermissionNotEnoughException(getName(), node.getNeedPermission().toArray(new String[0]));
+                    permissionNotEnough(sender,node.getNeedPermission().toArray(new String[0]));
+                    return;
                 }
                 node.getExecutor().accept(Collections.EMPTY_LIST);
                 return;
@@ -69,22 +68,29 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                     return;
                 }
                 commandNode = sameCheck(commandNode);
-                if (commandNode == null)
-                    throw new CommandWrongUseException(getName(), args);
+                if (commandNode == null){
+                    commandWrongUse(sender,args);
+                    return;
+                }
                 execute(commandNode);
             }
         } else {
             CommandNode parseResult = parseArgs(sender, args);
             if (CommandNodeUtil.getRequiredArgsAmountFromParent2Child(parseResult) != args.length) {
-                throw new CommandWrongUseException(getName(), args);
+                commandWrongUse(sender,args);
+                return;
             }
             if (parseResult.canExecuteCommand()) {
-                if (!hasPermission(sender, parseResult.getNeedPermission()))
-                    throw new PermissionNotEnoughException(getName(), node.getNeedPermission().toArray(new String[0]));
+                if (!hasPermission(sender, parseResult.getNeedPermission())){
+                    permissionNotEnough(sender,node.getNeedPermission().toArray(new String[0]));
+                    return;
+                }
             } else {
                 parseResult = sameCheck(parseResult);
-                if (parseResult == null)
-                    throw new CommandWrongUseException(getName(), args);
+                if (parseResult == null){
+                    commandWrongUse(sender,args);
+                    return;
+                }
             }
             execute(parseResult);
         }
@@ -107,6 +113,14 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         List list = node.collect();
         Collections.reverse(list);
         node.getExecutor().accept(list);
+    }
+
+    private void permissionNotEnough(CommandSender sender, String[] permission) {
+        sender.handleException(CommandException.exception(new PermissionNotEnoughException(this.getName(),permission), this));
+    }
+
+    private void commandWrongUse(CommandSender sender,String[] args){
+        sender.handleException(CommandException.exception(new CommandWrongUseException(this.getName(),args),this,args));
     }
 
     private boolean hasPermission(Permissible permissible, Collection<String> needPermission) {
@@ -233,11 +247,6 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                         .findFirst().orElse(null)
                 ).filter(Objects::nonNull)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean handleUncaughtException(Exception e, CommandSender sender, String[] args) {
-        return false;
     }
 
     @Override

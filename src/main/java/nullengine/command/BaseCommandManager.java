@@ -7,10 +7,7 @@ import java.util.stream.Collectors;
 
 public abstract class BaseCommandManager implements CommandManager {
     private final Map<String, Command> commands = new HashMap<>();
-    private final UncaughtExceptionHandler uncaughtExceptionHandler = createUncaughtExceptionHandler();
     private final CommandResolver resolver = createCommandResolver();
-
-    protected abstract UncaughtExceptionHandler createUncaughtExceptionHandler();
 
     protected abstract CommandResolver createCommandResolver();
 
@@ -46,21 +43,14 @@ public abstract class BaseCommandManager implements CommandManager {
     public void execute(CommandSender sender, String command, String... args) {
         Command commandInstance = commands.get(command);
         if (commandInstance == null) {
-            uncaughtExceptionHandler.handle(new CommandNotFoundException(command), sender, command, args);
+            sender.handleException(CommandException.commandNotFound(new CommandNotFoundException(command), command));
             return;
         }
 
         if (args == null) {
             args = new String[0];
         }
-        try {
-            commandInstance.execute(sender, args);
-        } catch (Exception e) {
-            if (commandInstance.handleUncaughtException(e, sender, args)) {
-                return;
-            }
-            uncaughtExceptionHandler.handle(e, sender, command, args);
-        }
+        commandInstance.execute(sender, args);
     }
 
     @Override

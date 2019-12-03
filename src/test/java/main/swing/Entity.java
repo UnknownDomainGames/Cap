@@ -1,5 +1,6 @@
 package main.swing;
 
+import nullengine.command.CommandException;
 import nullengine.command.CommandSender;
 import nullengine.permission.HashPermissible;
 
@@ -19,6 +20,11 @@ public class Entity implements CommandSender {
     @Override
     public String getSenderName() {
         return getName();
+    }
+
+    @Override
+    public void handleException(CommandException exception) {
+
     }
 
     @Override

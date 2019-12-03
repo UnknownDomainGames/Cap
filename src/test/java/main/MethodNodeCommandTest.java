@@ -1,5 +1,6 @@
 package main;
 
+import nullengine.command.CommandException;
 import nullengine.command.CommandManager;
 import nullengine.command.CommandSender;
 import nullengine.command.SimpleCommandManager;
@@ -25,7 +26,7 @@ import java.util.Random;
 
 public class MethodNodeCommandTest {
 
-    private TestSender testSender = new TestSender("methodNodeTest", string -> message = string);
+    private TestSender testSender = new TestSender("methodNodeTest", string -> message = string,commandException->message=commandException.getException().getClass().getName());
 
     public String message;
 
@@ -59,7 +60,8 @@ public class MethodNodeCommandTest {
         testSender.removePermission("permission");
         testSender.removePermission("op");
         nullengine.command.Command command = simpleCommandManager.getCommand("permission").get();
-        Assertions.assertThrows(PermissionNotEnoughException.class, () -> command.execute(testSender, new String[0]));
+        command.execute(testSender, new String[0]);
+        Assertions.assertEquals(message, PermissionNotEnoughException.class.getName());
         testSender.setPermission("permission", true);
         Assertions.assertDoesNotThrow(() -> command.execute(testSender, new String[0]));
         testSender.setPermission("permission", false);
@@ -77,7 +79,7 @@ public class MethodNodeCommandTest {
     }
 
     @Test
-    public void senderTest() throws Exception {
+    public void senderTest() {
         nullengine.command.Command command = simpleCommandManager.getCommand("sender").get();
         Sender1 sender1 = new Sender1();
         command.execute(sender1, new String[0]);
@@ -85,7 +87,8 @@ public class MethodNodeCommandTest {
         Sender2 sender2 = new Sender2();
         command.execute(sender2, new String[0]);
         Assertions.assertEquals(message, sender2.getSenderName());
-        Assertions.assertThrows(CommandWrongUseException.class, () -> command.execute(testSender, new String[0]));
+        command.execute(testSender, new String[0]);
+        Assertions.assertEquals(message, CommandWrongUseException.class.getName());
     }
 
     @Command("sender")
@@ -96,8 +99,7 @@ public class MethodNodeCommandTest {
     private class Sender1 extends TestSender {
 
         public Sender1() {
-            super("testSender1", s -> {
-            });
+            super("testSender1", s -> {},c->{});
         }
     }
 
@@ -109,6 +111,11 @@ public class MethodNodeCommandTest {
         @Override
         public String getSenderName() {
             return "sender2";
+        }
+
+        @Override
+        public void handleException(CommandException exception) {
+
         }
 
         @Override
@@ -231,7 +238,8 @@ public class MethodNodeCommandTest {
     public void requiredTest() throws Exception {
         nullengine.command.Command command = simpleCommandManager.getCommand("required").get();
 
-        Assertions.assertThrows(CommandWrongUseException.class, () -> command.execute(testSender, new String[]{"c"}));
+        command.execute(testSender, new String[]{"c"});
+        Assertions.assertEquals(message, CommandWrongUseException.class.getName());
 
         command.execute(testSender, new String[]{"a"});
         Assertions.assertEquals(message, "a");
@@ -281,6 +289,11 @@ public class MethodNodeCommandTest {
             @Override
             public String getSenderName() {
                 return "entity";
+            }
+
+            @Override
+            public void handleException(CommandException exception) {
+                System.out.println(exception.toString());
             }
 
             @Override

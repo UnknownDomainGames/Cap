@@ -7,4 +7,7 @@ public interface CommandSender extends Permissible {
     void sendMessage(String message);
 
     String getSenderName();
+
+    void handleException(CommandException exception);
+
 }

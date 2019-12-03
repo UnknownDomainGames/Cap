@@ -1,5 +1,6 @@
 package main;
 
+import nullengine.command.CommandException;
 import nullengine.command.CommandSender;
 import nullengine.permission.HashPermissible;
 
@@ -13,9 +14,12 @@ public class TestSender implements CommandSender {
 
     private Consumer<String> sendConsumer;
 
-    public TestSender(String name, Consumer<String> sendConsumer) {
+    private Consumer<CommandException> commandExceptionConsumer;
+
+    public TestSender(String name, Consumer<String> sendConsumer,Consumer<CommandException> commandExceptionConsumer) {
         this.name = name;
         this.sendConsumer = sendConsumer;
+        this.commandExceptionConsumer = commandExceptionConsumer;
     }
 
     @Override
@@ -26,6 +30,11 @@ public class TestSender implements CommandSender {
     @Override
     public String getSenderName() {
         return name;
+    }
+
+    @Override
+    public void handleException(CommandException exception) {
+        commandExceptionConsumer.accept(exception);
     }
 
     @Override

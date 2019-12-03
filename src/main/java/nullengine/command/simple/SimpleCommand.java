@@ -25,7 +25,7 @@ public class SimpleCommand extends Command {
     }
 
     @Override
-    public void execute(CommandSender sender, String[] args) throws Exception {
+    public void execute(CommandSender sender, String[] args) {
         if (sender != null) {
             executor.execute(sender, this, args);
         }
@@ -45,14 +45,6 @@ public class SimpleCommand extends Command {
         if(tips==null)
             return Collections.EMPTY_LIST;
         return tips.getTips(sender,args);
-    }
-
-    @Override
-    public boolean handleUncaughtException(Exception e, CommandSender sender, String[] args) {
-        if (uncaughtExceptionHandler == null){
-            return false;
-        }
-        return uncaughtExceptionHandler.handleUncaughtException(e, sender, this, args);
     }
 
     @Override
