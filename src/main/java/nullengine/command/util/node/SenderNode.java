@@ -71,7 +71,7 @@ public class SenderNode extends CommandNode {
     }
 
     @Override
-    public int compareTo(CommandNode o) {
-        return -1;
+    public int weights() {
+        return 5;
     }
 }

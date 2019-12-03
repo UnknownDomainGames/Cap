@@ -7,13 +7,13 @@ import nullengine.command.util.CommandNodeUtil;
 import java.util.*;
 import java.util.function.Consumer;
 
-public abstract class CommandNode implements Comparable<CommandNode>, Cloneable {
+public abstract class CommandNode implements Cloneable {
 
     private CommandNode parent;
 
     private Consumer<List<Object>> executor;
 
-    private TreeSet<CommandNode> children = new TreeSet<>();
+    private LinkedList<CommandNode> children = new LinkedList<>();
 
     private Set<String> needPermission = new HashSet();
 
@@ -59,6 +59,12 @@ public abstract class CommandNode implements Comparable<CommandNode>, Cloneable 
     public void addChild(CommandNode commandNode) {
         commandNode.setParent(this);
         this.children.add(commandNode);
+        sortChildrenList();
+    }
+
+    private void sortChildrenList(){
+        Collections.sort(children, Comparator.comparingInt(CommandNode::weights));
+        Collections.reverse(children);
     }
 
     public void removeChild(CommandNode commandNode) {
@@ -134,15 +140,18 @@ public abstract class CommandNode implements Comparable<CommandNode>, Cloneable 
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
-        node.children = new TreeSet<>();
+        node.children = new LinkedList<>();
         for (CommandNode child : children) {
             node.addChild(child.clone());
         }
         return node;
     }
 
-    @Override
-    public int compareTo(CommandNode o) {
-        return needPermission.size() - o.needPermission.size();
+    public CommandNode cloneWithoutParent(){
+        CommandNode node = clone();
+        node.setParent(null);
+        return node;
     }
+
+    public abstract int weights();
 }

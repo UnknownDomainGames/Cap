@@ -60,18 +60,6 @@ public class ArgumentNode extends CommandNode {
     }
 
     @Override
-    public int compareTo(CommandNode o) {
-        if (argument.getName().equals("String"))
-            return -1;
-        if (o instanceof ArgumentNode) {
-            ArgumentNode other = (ArgumentNode) o;
-            if (other.argument.getName().equals("String") && argument.responsibleClass().equals(String.class))
-                return 1;
-        }
-        return super.compareTo(o);
-    }
-
-    @Override
     public Suggester getSuggester() {
         if (super.getSuggester() != null){
             return super.getSuggester();
@@ -79,5 +67,8 @@ public class ArgumentNode extends CommandNode {
         return argument.getSuggester();
     }
 
-
+    @Override
+    public int weights() {
+        return 0 + (argument.getName().equals("String")? -1 : 0) + (argument.responsibleClass().equals(String.class)?-1:0);
+    }
 }

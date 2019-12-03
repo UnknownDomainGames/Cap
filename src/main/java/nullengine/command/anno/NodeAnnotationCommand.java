@@ -252,14 +252,14 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
     private static class ClassBuilderGetter extends CommandBuilderGetter<ClassAnnotationCommand.ClassAnnotationBuilder> {
 
-        public ClassAnnotationCommand.ClassAnnotationBuilder get(CommandManager commandManager) {
+        public ClassAnnotationCommand.ClassAnnotationBuilder getBuilder(CommandManager commandManager) {
             return ClassAnnotationCommand.getBuilder(commandManager);
         }
     }
 
     private static class MethodBuilderGetter extends CommandBuilderGetter<MethodAnnotationCommand.AnnotationCommandBuilder> {
 
-        public MethodAnnotationCommand.AnnotationCommandBuilder get(CommandManager commandManager) {
+        public MethodAnnotationCommand.AnnotationCommandBuilder getBuilder(CommandManager commandManager) {
             return MethodAnnotationCommand.getBuilder(commandManager);
         }
     }

@@ -298,36 +298,35 @@ public class MethodNodeCommandTest {
                 permissible.removePermission(permission);
             }
         };
-        CommandManager commandManager = new SimpleCommandManager();
+        for(int i =0 ;i<10000;i++){
+            CommandManager commandManager = new SimpleCommandManager();
 
-        ArgumentManager argumentManager = new SimpleArgumentManager();
-        argumentManager.setClassDefaultArgument(new WorldArgument());
+            ArgumentManager argumentManager = new SimpleArgumentManager();
+            argumentManager.setClassDefaultArgument(new WorldArgument());
 
-        NodeAnnotationCommand.METHOD.get(commandManager)
-                .setArgumentManager(argumentManager)
-                .addProvider(new LocationProvider())
-                .addCommandHandler(new ProvideTest())
-                .register();
+            NodeAnnotationCommand.METHOD.getBuilder(commandManager)
+                    .setArgumentManager(argumentManager)
+                    .addProvider(new LocationProvider())
+                    .addCommandHandler(new ProvideTest())
+                    .register();
 
 
-        World commandWorld = new World("commandWorld");
+            World commandWorld = new World("commandWorld");
 
-        commandManager.execute(testEntity,"location 11 1 2 3 \"hello world\" commandWorld 4 5 6");
-        Assertions.assertEquals(message,11+new Location(testEntity.getWorld(),1,2,3).toString()+"hello world"+new Location(commandWorld,4,5,6).toString());
-        commandManager.execute(testEntity,"location 12 commandWorld 1 2 3 \"hello world\" 4 5 6");
-        Assertions.assertEquals(message,12+new Location(commandWorld,1,2,3).toString()+"hello world"+new Location(testEntity.getWorld(),4,5,6).toString());
-        commandManager.execute(testEntity,"location 13 commandWorld 1 2 3 \"hello world\" commandWorld 4 5 6");
-        Assertions.assertEquals(message,13+new Location(commandWorld,1,2,3).toString()+"hello world"+new Location(commandWorld,4,5,6).toString());
+            commandManager.execute(testEntity,"location 11 1 2 3 \"hello world\" commandWorld 4 5 6");
+            Assertions.assertEquals(message,11+new Location(testEntity.getWorld(),1,2,3).toString()+"hello world"+new Location(commandWorld,4,5,6).toString());
+            commandManager.execute(testEntity,"location 12 commandWorld 1 2 3 \"hello world\" 4 5 6");
+            Assertions.assertEquals(message,12+new Location(commandWorld,1,2,3).toString()+"hello world"+new Location(testEntity.getWorld(),4,5,6).toString());
+            commandManager.execute(testEntity,"location 13 commandWorld 1 2 3 \"hello world\" commandWorld 4 5 6");
+            Assertions.assertEquals(message,13+new Location(commandWorld,1,2,3).toString()+"hello world"+new Location(commandWorld,4,5,6).toString());
+        }
     }
 
     public class ProvideTest{
-
         @Command("location")
         public void location(int i,Location location,String b,Location location2){
             message = i+location.toString()+b+location2.toString();
         }
-
-
     }
 
     @Test
@@ -336,8 +335,8 @@ public class MethodNodeCommandTest {
         Assertions.assertEquals("A",message);
     }
 
-//    @Command("enum")
-//    public void enumCommand(TestEnum testEnum){
-//        message = testEnum.name();
-//    }
+    @Command("enum")
+    public void enumCommand(TestEnum testEnum){
+        message = testEnum.name();
+    }
 }

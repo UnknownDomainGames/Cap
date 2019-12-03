@@ -64,4 +64,9 @@ public class EnumNode extends CommandNode {
     public Suggester getSuggester() {
         return (sender, command, args) -> SuggesterHelper.filterStartWith(enumNames,args[args.length-1]);
     }
+
+    @Override
+    public int weights() {
+        return 2;
+    }
 }

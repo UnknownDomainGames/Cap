@@ -1,6 +1,5 @@
 package main;
 
-import nullengine.command.CommandSender;
 import nullengine.command.anno.Provide;
 import nullengine.command.anno.Sender;
 import nullengine.command.anno.Tip;

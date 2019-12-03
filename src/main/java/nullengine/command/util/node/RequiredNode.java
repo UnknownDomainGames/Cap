@@ -54,11 +54,7 @@ public class RequiredNode extends CommandNode {
     }
 
     @Override
-    public int compareTo(CommandNode o) {
-        if (!(o instanceof RequiredNode)){
-            return 1;
-        }
-        RequiredNode other = (RequiredNode) o;
-        return this.require.compareTo(other.require);
+    public int weights() {
+        return 10;
     }
 }
