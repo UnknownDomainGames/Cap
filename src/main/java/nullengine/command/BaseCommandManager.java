@@ -3,9 +3,11 @@ package nullengine.command;
 import nullengine.command.exception.CommandNotFoundException;
 
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public abstract class BaseCommandManager implements CommandManager {
+
     private final Map<String, Command> commands = new HashMap<>();
     private final CommandResolver resolver = createCommandResolver();
 
@@ -16,6 +18,7 @@ public abstract class BaseCommandManager implements CommandManager {
         if (commands.containsKey(command.getName()))
             throw new RuntimeException("Command \"" + command.getName() + "\" already exists");
         commands.put(command.getName(), command);
+        getLogger().info("register "+command.getName());
     }
 
     @Override
@@ -50,6 +53,7 @@ public abstract class BaseCommandManager implements CommandManager {
         if (args == null) {
             args = new String[0];
         }
+        getLogger().info(sender.getSenderName()+" execute "+command);
         commandInstance.execute(sender, args);
     }
 
@@ -108,4 +112,6 @@ public abstract class BaseCommandManager implements CommandManager {
     public void unregisterCommand(String command) {
         commands.remove(command);
     }
+
+    public abstract Logger getLogger();
 }
