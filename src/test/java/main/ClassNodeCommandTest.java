@@ -5,6 +5,7 @@ import nullengine.command.CommandException;
 import nullengine.command.CommandSender;
 import nullengine.command.SimpleCommandManager;
 import nullengine.command.anno.*;
+import nullengine.command.argument.SimpleArgumentManager;
 import nullengine.command.exception.PermissionNotEnoughException;
 import nullengine.permission.HashPermissible;
 import org.junit.jupiter.api.Assertions;
@@ -69,7 +70,7 @@ public class ClassNodeCommandTest {
 
             @Override
             public void handleException(CommandException exception) {
-
+                message = exception.getException().getClass().getName();
             }
 
             @Override
@@ -87,7 +88,8 @@ public class ClassNodeCommandTest {
                 permissible.removePermission(permission);
             }
         };
-
+        SimpleArgumentManager argumentManager = new SimpleArgumentManager();
+        argumentManager.appendArgumentAndSetDefaultIfNotExist(new WorldArgument());
         ClassAnnotationCommand.getBuilder(simpleCommandManager)
                 .addProvider(new Object() {
                                  @Provide
@@ -96,6 +98,7 @@ public class ClassNodeCommandTest {
                                  }
                              }
                 )
+                .setArgumentManager(argumentManager)
                 .addProvider(new LocationProvider())
                 .caseCommand("test", new Runnable() {
             @Sender
@@ -115,6 +118,7 @@ public class ClassNodeCommandTest {
             public void run() {
                 sender.sendMessage(sender.getSenderName() + location + random.nextInt() + text);
             }
+
         }).register();
 
         int seed = 12356;
@@ -125,15 +129,16 @@ public class ClassNodeCommandTest {
 
         Command command = simpleCommandManager.getCommand("test").get();
 
-        Assertions.assertThrows(PermissionNotEnoughException.class, () -> command.execute(entitySender, new String[]{"1", "2", "3", Integer.valueOf(seed).toString(), text}));
+        command.execute(entitySender, new String[]{"1", "2", "3", Integer.valueOf(seed).toString(), text});
+        Assertions.assertEquals(message, PermissionNotEnoughException.class.getName());
 
         entitySender.setPermission("test", true);
 
-        simpleCommandManager.execute(entitySender, String.format("test %d %d %d %d %s", location.getX(), location.getY(), location.getZ(), seed, text));
+        simpleCommandManager.execute(entitySender, String.format("test %f %f %f %d %s", location.getX(), location.getY(), location.getZ(), seed, text));
 
         Assertions.assertEquals(message, entitySender.getSenderName() + new Location(entitySender.getWorld(), location.getX(), location.getY(), location.getZ()) + new Random(seed).nextInt() + text);
 
-        simpleCommandManager.execute(entitySender, String.format("test %s %d %d %d %d %s", world, location.getX(), location.getY(), location.getZ(), seed, text));
+        simpleCommandManager.execute(entitySender, String.format("test %s %f %f %f %d %s", world.getWorldName(), location.getX(), location.getY(), location.getZ(), seed, text));
 
         Assertions.assertEquals(message, entitySender.getSenderName() + location + new Random(seed).nextInt() + text);
     }
