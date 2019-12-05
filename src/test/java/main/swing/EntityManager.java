@@ -5,22 +5,22 @@ import java.util.List;
 
 public class EntityManager {
 
-    private List<Entity> entities = new ArrayList<>();
+    private List<SwingEntity> entities = new ArrayList<>();
 
-    public void addEntity(Entity entity){
-        entities.add(entity);
+    public void addEntity(SwingEntity swingEntity){
+        entities.add(swingEntity);
     }
 
-    public List<Entity> getEntities(){
+    public List<SwingEntity> getEntities(){
         return entities;
     }
 
-    public Entity getEntity(String name){
-        return entities.stream().filter(entity -> entity.getName().equals(name)).findAny().orElse(null);
+    public SwingEntity getEntity(String name){
+        return entities.stream().filter(swingEntity -> swingEntity.getName().equals(name)).findAny().orElse(null);
     }
 
-    public void removeEntity(Entity entity){
-        this.entities.remove(entity);
+    public void removeEntity(SwingEntity swingEntity){
+        this.entities.remove(swingEntity);
     }
 
 }

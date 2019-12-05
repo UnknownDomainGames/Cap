@@ -18,21 +18,16 @@ public class ConsoleSender implements CommandSender {
 
     @Override
     public void handleException(CommandException exception) {
-
+        System.out.println(exception.toString());
     }
 
     @Override
     public boolean hasPermission(String permission) {
-        return permissible.hasPermission(permission);
+        return true;
     }
 
-    @Override
-    public void setPermission(String permission, boolean bool) {
-        permissible.setPermission(permission,bool);
-    }
+    public void setPermission(String permission, boolean bool) {}
 
     @Override
-    public void removePermission(String permission) {
-        permissible.removePermission(permission);
-    }
+    public void removePermission(String permission) {}
 }

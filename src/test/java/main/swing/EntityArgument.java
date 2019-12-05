@@ -15,7 +15,7 @@ public class EntityArgument extends Argument {
 
     @Override
     public Class responsibleClass() {
-        return Entity.class;
+        return SwingEntity.class;
     }
 
     @Override
@@ -26,7 +26,7 @@ public class EntityArgument extends Argument {
     @Override
     public Suggester getSuggester() {
         return (sender, command, args) -> {
-            List<String> entityNames = SwingTest.getInstance().getEntityManager().getEntities().stream().map(Entity::getName).collect(Collectors.toList());
+            List<String> entityNames = SwingTest.getInstance().getEntityManager().getEntities().stream().map(SwingEntity::getName).collect(Collectors.toList());
             if(args!=null&&!args[args.length-1].isEmpty())
                 return entityNames.stream().filter(name->name.startsWith(args[args.length-1])).collect(Collectors.toList());
             return entityNames;

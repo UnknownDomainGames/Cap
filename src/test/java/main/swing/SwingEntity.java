@@ -1,15 +1,17 @@
 package main.swing;
 
+import main.Entity;
+import main.World;
 import nullengine.command.CommandException;
-import nullengine.command.CommandSender;
 import nullengine.permission.HashPermissible;
 
-public class Entity implements CommandSender {
+public class SwingEntity implements Entity {
 
+    private static World world = new World("SwingWorld");
     private String name;
     private HashPermissible permissible = new HashPermissible();
 
-    public Entity(String name) {
+    public SwingEntity(String name) {
         this.name = name;
     }
 
@@ -24,7 +26,7 @@ public class Entity implements CommandSender {
 
     @Override
     public void handleException(CommandException exception) {
-
+        sendMessage(exception.getException().toString());
     }
 
     @Override
@@ -45,5 +47,10 @@ public class Entity implements CommandSender {
     @Override
     public void removePermission(String permission) {
         permissible.removePermission(permission);
+    }
+
+    @Override
+    public World getWorld() {
+        return world;
     }
 }

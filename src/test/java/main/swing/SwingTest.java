@@ -8,7 +8,6 @@ import nullengine.command.argument.ArgumentManager;
 import nullengine.command.argument.SimpleArgumentManager;
 import nullengine.command.suggestion.SimpleSuggesterManager;
 import nullengine.command.suggestion.SuggesterManager;
-import nullengine.permission.HashPermissible;
 
 import javax.swing.*;
 import java.awt.*;
