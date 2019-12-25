@@ -82,7 +82,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             }
             if (parseResult.canExecuteCommand()) {
                 if (!hasPermission(sender, parseResult.getNeedPermission())){
-                    permissionNotEnough(sender,node.getNeedPermission().toArray(new String[0]));
+                    permissionNotEnough(sender,parseResult.getNeedPermission().toArray(new String[0]));
                     return;
                 }
             } else {
