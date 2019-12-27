@@ -9,6 +9,7 @@ import nullengine.command.exception.PermissionNotEnoughException;
 import nullengine.command.suggestion.SimpleSuggesterManager;
 import nullengine.command.suggestion.SuggesterManager;
 import nullengine.command.util.CommandNodeUtil;
+import nullengine.command.util.SuggesterHelper;
 import nullengine.command.util.node.CommandNode;
 import nullengine.command.util.node.EmptyArgumentNode;
 import nullengine.command.util.node.Nodeable;
@@ -174,13 +175,13 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         CommandNode result = suggestParse(sender, args);
         if (result == null)
             return Collections.EMPTY_LIST;
-        List<String> list = new ArrayList<>();
+        Set<String> list = new HashSet<>();
         for (CommandNode child : result.getChildren()) {
             if (child.getSuggester() != null) {
                 list.addAll(child.getSuggester().suggest(sender, getName(), args));
             }
         }
-        return list;
+        return SuggesterHelper.filterStartWith(new ArrayList<>(list),args[args.length-1]);
     }
 
     protected CommandNode suggestParse(CommandSender sender, String[] args) {
