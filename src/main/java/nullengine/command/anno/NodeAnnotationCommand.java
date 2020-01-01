@@ -49,6 +49,9 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             }
             nodes.addAll(node.getChildren());
         }
+
+        Collections.sort(canExecuteNodes, Comparator.comparingInt(CommandNode::weights));
+
     }
 
 
@@ -57,7 +60,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         if (args == null || args.length == 0) {
             if (node.canExecuteCommand()) {
                 if (!hasPermission(sender, node.getNeedPermission())) {
-                    permissionNotEnough(sender,node.getNeedPermission().toArray(new String[0]));
+                    permissionNotEnough(sender, node.getNeedPermission().toArray(new String[0]));
                     return;
                 }
                 node.getExecutor().accept(Collections.EMPTY_LIST);
@@ -69,8 +72,8 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                     return;
                 }
                 commandNode = sameCheck(commandNode);
-                if (commandNode == null){
-                    commandWrongUse(sender,args);
+                if (commandNode == null) {
+                    commandWrongUse(sender, args);
                     return;
                 }
                 execute(commandNode);
@@ -78,18 +81,18 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         } else {
             CommandNode parseResult = parseArgs(sender, args);
             if (CommandNodeUtil.getRequiredArgsAmountFromParent2Child(parseResult) != args.length) {
-                commandWrongUse(sender,args);
+                commandWrongUse(sender, args);
                 return;
             }
             if (parseResult.canExecuteCommand()) {
-                if (!hasPermission(sender, parseResult.getNeedPermission())){
-                    permissionNotEnough(sender,parseResult.getNeedPermission().toArray(new String[0]));
+                if (!hasPermission(sender, parseResult.getNeedPermission())) {
+                    permissionNotEnough(sender, parseResult.getNeedPermission().toArray(new String[0]));
                     return;
                 }
             } else {
                 parseResult = sameCheck(parseResult);
-                if (parseResult == null){
-                    commandWrongUse(sender,args);
+                if (parseResult == null) {
+                    commandWrongUse(sender, args);
                     return;
                 }
             }
@@ -117,11 +120,11 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     }
 
     private void permissionNotEnough(CommandSender sender, String[] permission) {
-        sender.handleException(CommandException.exception(new PermissionNotEnoughException(this.getName(),permission), this));
+        sender.handleException(CommandException.exception(new PermissionNotEnoughException(this.getName(), permission), this));
     }
 
-    private void commandWrongUse(CommandSender sender,String[] args){
-        sender.handleException(CommandException.exception(new CommandWrongUseException(this.getName(),args),this,args));
+    private void commandWrongUse(CommandSender sender, String[] args) {
+        sender.handleException(CommandException.exception(new CommandWrongUseException(this.getName(), args), this, args));
     }
 
     private boolean hasPermission(Permissible permissible, Collection<String> needPermission) {
@@ -157,10 +160,14 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                     break;
                 }
                 boolean success = node.parse(sender, this.getName(), arrayCopy.copyOfRange(i, i + node.getRequiredArgsNum()));
+
                 if (!success) {
                     break;
                 }
-                if (CommandNodeUtil.getDepthOn(node) >= bestResultDepth) {
+
+                int nodeDepth = CommandNodeUtil.getDepthOn(node);
+
+                if (nodeDepth > bestResultDepth || bestResult == null || node.weights() > bestResult.weights() || node.canExecuteCommand()) {
                     bestResult = node;
                     bestResultDepth = CommandNodeUtil.getDepthOn(bestResult);
                 }
@@ -181,7 +188,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 list.addAll(child.getSuggester().suggest(sender, getName(), args));
             }
         }
-        return SuggesterHelper.filterStartWith(new ArrayList<>(list),args[args.length-1]);
+        return SuggesterHelper.filterStartWith(new ArrayList<>(list), args[args.length - 1]);
     }
 
     protected CommandNode suggestParse(CommandSender sender, String[] args) {

@@ -2,6 +2,7 @@ package nullengine.command;
 
 import nullengine.command.exception.CommandNotFoundException;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -53,7 +54,7 @@ public abstract class BaseCommandManager implements CommandManager {
         if (args == null) {
             args = new String[0];
         }
-        getLogger().info(sender.getSenderName()+" execute "+command);
+        getLogger().info(sender.getSenderName()+" execute ["+command+"] args: "+ Arrays.toString(args));
         commandInstance.execute(sender, args);
     }
 

@@ -13,7 +13,7 @@ public class CommandWrongUseException extends CommandException {
 
     @Override
     public String getMessage() {
-        return "command: "+command+" args:"+ Arrays.toString(args);
+        return "command: ["+command+"] args:"+ Arrays.toString(args);
     }
 
 }

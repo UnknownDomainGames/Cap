@@ -1,10 +1,8 @@
 package main;
 
-import nullengine.command.CommandException;
-import nullengine.command.CommandManager;
-import nullengine.command.CommandSender;
-import nullengine.command.SimpleCommandManager;
+import nullengine.command.*;
 import nullengine.command.anno.*;
+import nullengine.command.anno.Command;
 import nullengine.command.argument.Argument;
 import nullengine.command.argument.ArgumentManager;
 import nullengine.command.argument.SimpleArgumentManager;
@@ -26,7 +24,7 @@ import java.util.Random;
 
 public class MethodNodeCommandTest {
 
-    private TestSender testSender = new TestSender("methodNodeTest", string -> message = string,commandException->message=commandException.getException().getClass().getName());
+    private TestSender testSender = new TestSender("methodNodeTest", string -> message = string, commandException -> message = commandException.getException().getClass().getName());
 
     public String message;
 
@@ -99,7 +97,9 @@ public class MethodNodeCommandTest {
     private class Sender1 extends TestSender {
 
         public Sender1() {
-            super("testSender1", s -> {},c->{});
+            super("testSender1", s -> {
+            }, c -> {
+            });
         }
     }
 
@@ -260,17 +260,18 @@ public class MethodNodeCommandTest {
     @Test
     void tip() {
         List<String> tips = simpleCommandManager.getTips(testSender, "tip ");
-        Assertions.assertArrayEquals(tips.toArray(),new String[]{"x","y","z"});
+        Assertions.assertArrayEquals(tips.toArray(), new String[]{"x", "y", "z"});
         tips = simpleCommandManager.getTips(testSender, "tip 2");
-        Assertions.assertArrayEquals(tips.toArray(),new String[]{"x","y","z"});
+        Assertions.assertArrayEquals(tips.toArray(), new String[]{"x", "y", "z"});
         tips = simpleCommandManager.getTips(testSender, "tip 2 5");
-        Assertions.assertArrayEquals(tips.toArray(),new String[]{"y","z"});
+        Assertions.assertArrayEquals(tips.toArray(), new String[]{"y", "z"});
         tips = simpleCommandManager.getTips(testSender, "tip 2 5 6");
-        Assertions.assertArrayEquals(tips.toArray(),new String[]{"z"});
+        Assertions.assertArrayEquals(tips.toArray(), new String[]{"z"});
     }
 
     @Command("tip")
-    public void tip(@Tip("x") int x, @Tip("y") int y, @Tip("z") int z) {}
+    public void tip(@Tip("x") int x, @Tip("y") int y, @Tip("z") int z) {
+    }
 
     @Test
     void provide() {
@@ -303,7 +304,7 @@ public class MethodNodeCommandTest {
 
             @Override
             public void setPermission(String permission, boolean bool) {
-                permissible.setPermission(permission,bool);
+                permissible.setPermission(permission, bool);
             }
 
             @Override
@@ -311,8 +312,10 @@ public class MethodNodeCommandTest {
                 permissible.removePermission(permission);
             }
         };
-        for(int i =0 ;i<10000;i++){
-            CommandManager commandManager = new SimpleCommandManager();
+        for (int i = 0; i < 10000; i++) {
+            BaseCommandManager commandManager = new SimpleCommandManager();
+
+            commandManager.getLogger().setUseParentHandlers(false);
 
             ArgumentManager argumentManager = new SimpleArgumentManager();
             argumentManager.setClassDefaultArgument(new WorldArgument());
@@ -326,49 +329,99 @@ public class MethodNodeCommandTest {
 
             World commandWorld = new World("commandWorld");
 
-            commandManager.execute(testEntity,"location 11 1 2 3 \"hello world\" commandWorld 4 5 6");
-            Assertions.assertEquals(message,11+new Location(testEntity.getWorld(),1,2,3).toString()+"hello world"+new Location(commandWorld,4,5,6).toString());
-            commandManager.execute(testEntity,"location 12 commandWorld 1 2 3 \"hello world\" 4 5 6");
-            Assertions.assertEquals(message,12+new Location(commandWorld,1,2,3).toString()+"hello world"+new Location(testEntity.getWorld(),4,5,6).toString());
-            commandManager.execute(testEntity,"location 13 commandWorld 1 2 3 \"hello world\" commandWorld 4 5 6");
-            Assertions.assertEquals(message,13+new Location(commandWorld,1,2,3).toString()+"hello world"+new Location(commandWorld,4,5,6).toString());
+            commandManager.execute(testEntity, "location 11 1 2 3 \"hello world\" commandWorld 4 5 6");
+            Assertions.assertEquals(message, 11 + new Location(testEntity.getWorld(), 1, 2, 3).toString() + "hello world" + new Location(commandWorld, 4, 5, 6).toString());
+            commandManager.execute(testEntity, "location 12 commandWorld 1 2 3 \"hello world\" 4 5 6");
+            Assertions.assertEquals(message, 12 + new Location(commandWorld, 1, 2, 3).toString() + "hello world" + new Location(testEntity.getWorld(), 4, 5, 6).toString());
+            commandManager.execute(testEntity, "location 13 commandWorld 1 2 3 \"hello world\" commandWorld 4 5 6");
+            Assertions.assertEquals(message, 13 + new Location(commandWorld, 1, 2, 3).toString() + "hello world" + new Location(commandWorld, 4, 5, 6).toString());
         }
     }
 
-    public class ProvideTest{
+    public class ProvideTest {
         @Command("location")
-        public void location(int i,Location location,String b,Location location2){
-            message = i+location.toString()+b+location2.toString();
+        public void location(int i, Location location, String b, Location location2) {
+            message = i + location.toString() + b + location2.toString();
         }
     }
 
     @Test
     void enumTest() {
-        simpleCommandManager.execute(testSender,"enum A");
-        Assertions.assertEquals("A",message);
+        simpleCommandManager.execute(testSender, "enum A");
+        Assertions.assertEquals("A", message);
     }
 
     @Command("enum")
-    public void enumCommand(TestEnum testEnum){
+    public void enumCommand(TestEnum testEnum) {
         message = testEnum.name();
     }
 
     @Test
     void commandTest() {
-        simpleCommandManager.execute(testSender,"command1");
-        Assertions.assertEquals(message,testSender.getSenderName()+"command1");
-        simpleCommandManager.execute(testSender,"command1 abc");
-        Assertions.assertEquals(message,testSender.getSenderName()+"abc");
+        simpleCommandManager.execute(testSender, "command1");
+        Assertions.assertEquals(message, testSender.getSenderName() + "command1");
+        simpleCommandManager.execute(testSender, "command1 abc");
+        Assertions.assertEquals(message, testSender.getSenderName() + "abc");
     }
 
     @Command("command1")
-    public void command1(@Sender CommandSender sender){
-        message = sender.getSenderName()+"command1";
+    public void command1(@Sender CommandSender sender) {
+        message = sender.getSenderName() + "command1";
     }
 
     @Command("command1")
-    public void command1(@Sender CommandSender sender,String message){
-        this.message = sender.getSenderName()+message;
+    public void command1(@Sender CommandSender sender, String message) {
+        this.message = sender.getSenderName() + message;
+    }
+
+    @Test
+    void commandTest1() {
+        Random random = new Random(System.currentTimeMillis());
+        for (int i = 0; i < 1000; i++) {
+            BaseCommandManager commandManager = new SimpleCommandManager();
+            commandManager.getLogger().setUseParentHandlers(false);
+
+            ArgumentManager argumentManager = new SimpleArgumentManager();
+            argumentManager.setClassDefaultArgument(new WorldArgument());
+
+            NodeAnnotationCommand.METHOD.getBuilder(commandManager)
+                    .setArgumentManager(argumentManager)
+                    .addCommandHandler(new CommandTest())
+                    .register();
+
+            for (int j = 0; j < 100; j++) {
+                if (random.nextInt() % 3 == 0) {
+                    commandManager.execute(testSender, "command a");
+                    Assertions.assertEquals(message, testSender.getSenderName() + "a");
+                } else if (random.nextInt() % 7 == 0) {
+                    String text = Double.toHexString(random.nextDouble());
+                    commandManager.execute(testSender, "command a " + text);
+                    Assertions.assertEquals(message, testSender.getSenderName() + "a" + text);
+                }else{
+                    commandManager.execute(testSender, "command");
+                    Assertions.assertEquals(message, testSender.getSenderName());
+                }
+            }
+        }
+    }
+
+    public class CommandTest {
+
+        @Command("command")
+        public void command2(@Sender CommandSender sender, @Required("a") String s) {
+            message = sender.getSenderName() + "a";
+        }
+
+        @Command("command")
+        public void command1(@Sender CommandSender sender, @Required("a") String a, String s) {
+            message = sender.getSenderName() + "a" + s;
+        }
+
+        @Command("command")
+        public void command1(@Sender TestSender sender) {
+            message = sender.getSenderName();
+        }
+
     }
 
 

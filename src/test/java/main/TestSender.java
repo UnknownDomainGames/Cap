@@ -34,6 +34,7 @@ public class TestSender implements CommandSender {
 
     @Override
     public void handleException(CommandException exception) {
+        exception.getException().printStackTrace();
         commandExceptionConsumer.accept(exception);
     }
 
