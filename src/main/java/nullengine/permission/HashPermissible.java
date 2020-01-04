@@ -57,4 +57,10 @@ public class HashPermissible implements Permissible {
         return Collections.unmodifiableMap(permissionMap);
     }
 
+    @Override
+    public void clean() {
+        lock.writeLock().lock();
+        this.permissionMap.clear();
+        lock.writeLock().unlock();
+    }
 }
