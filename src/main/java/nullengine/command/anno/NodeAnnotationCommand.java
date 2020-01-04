@@ -167,7 +167,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
                 int nodeDepth = CommandNodeUtil.getDepthOn(node);
 
-                if (nodeDepth > bestResultDepth || bestResult == null || node.weights() > bestResult.weights() || node.canExecuteCommand()) {
+                if (bestNodeCheck(bestResult,bestResultDepth,node,nodeDepth)) {
                     bestResult = node;
                     bestResultDepth = CommandNodeUtil.getDepthOn(bestResult);
                 }
@@ -175,6 +175,22 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             }
         }
         return bestResult;
+    }
+
+    private boolean bestNodeCheck(CommandNode bestNode,int bestNodeDepth,CommandNode checkNode,int checkNodeDepth){
+        if(bestNode==null)
+            return true;
+        if(checkNodeDepth>bestNodeDepth)
+            return true;
+        if(bestNode.canExecuteCommand()){
+            if(checkNode.weights()>bestNode.weights())
+                return true;
+        }else{
+            if(checkNode.canExecuteCommand())
+                return true;
+            return checkNode.weights()>bestNode.weights();
+        }
+        return false;
     }
 
     @Override
