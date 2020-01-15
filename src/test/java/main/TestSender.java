@@ -52,4 +52,9 @@ public class TestSender implements CommandSender {
     public void removePermission(String permission) {
         permissible.removePermission(permission);
     }
+
+    @Override
+    public void clean() {
+
+    }
 }

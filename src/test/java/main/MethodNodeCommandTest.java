@@ -130,6 +130,11 @@ public class MethodNodeCommandTest {
         @Override
         public void removePermission(String permission) {
         }
+
+        @Override
+        public void clean() {
+
+        }
     }
 
     @Test
@@ -310,6 +315,11 @@ public class MethodNodeCommandTest {
             @Override
             public void removePermission(String permission) {
                 permissible.removePermission(permission);
+            }
+
+            @Override
+            public void clean() {
+
             }
         };
         for (int i = 0; i < 10000; i++) {

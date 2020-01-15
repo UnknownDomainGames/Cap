@@ -50,6 +50,11 @@ public class SwingEntity implements Entity {
     }
 
     @Override
+    public void clean() {
+
+    }
+
+    @Override
     public World getWorld() {
         return world;
     }

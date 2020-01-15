@@ -87,6 +87,11 @@ public class ClassNodeCommandTest {
             public void removePermission(String permission) {
                 permissible.removePermission(permission);
             }
+
+            @Override
+            public void clean() {
+
+            }
         };
         SimpleArgumentManager argumentManager = new SimpleArgumentManager();
         argumentManager.appendArgumentAndSetDefaultIfNotExist(new WorldArgument());

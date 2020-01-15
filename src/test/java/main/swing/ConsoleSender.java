@@ -30,4 +30,9 @@ public class ConsoleSender implements CommandSender {
 
     @Override
     public void removePermission(String permission) {}
+
+    @Override
+    public void clean() {
+
+    }
 }
