@@ -15,11 +15,9 @@ import nullengine.command.suggestion.SuggesterManager;
 import nullengine.permission.HashPermissible;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.TestSkippedException;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 
 public class MethodNodeCommandTest {
@@ -31,9 +29,9 @@ public class MethodNodeCommandTest {
     SimpleCommandManager simpleCommandManager = new SimpleCommandManager();
 
     public MethodNodeCommandTest() {
-        MethodAnnotationCommand.getBuilder(simpleCommandManager)
-                .addCommandHandler(this)
-                .register();
+//        MethodAnnotationCommand.getBuilder(simpleCommandManager)
+//                .addCommandHandler(this)
+//                .register();
     }
 
     @Test
@@ -433,6 +431,92 @@ public class MethodNodeCommandTest {
         }
 
     }
+
+    private HashMap<String,Double> bank = new HashMap<>();
+
+    @Test
+    void moneyTest() {
+
+        HashMap<String,TestSender> entityHashMap = new HashMap<>();
+
+        entityHashMap.put("asd",new TestSender("asd",null,null));
+        entityHashMap.put("123",new TestSender("123",null,null));
+        entityHashMap.put("zxc",new TestSender("zxc",null,null));
+
+        BaseCommandManager commandManager = new SimpleCommandManager();
+        commandManager.getLogger().setUseParentHandlers(false);
+
+        ArgumentManager argumentManager = new SimpleArgumentManager();
+        argumentManager.setClassDefaultArgument(new Argument() {
+            @Override
+            public String getName() {
+                return "TestSender";
+            }
+
+            @Override
+            public Class responsibleClass() {
+                return TestSender.class;
+            }
+
+            @Override
+            public Optional parse(String arg) {
+                return Optional.ofNullable(entityHashMap.get(arg));
+            }
+
+            @Override
+            public String toString() {
+                return "class:"+getClass().getName();
+            }
+
+            @Override
+            public Suggester getSuggester() {
+                return null;
+            }
+        });
+
+        NodeAnnotationCommand.METHOD.getBuilder(commandManager)
+                .setArgumentManager(argumentManager)
+                .addCommandHandler(new moneyTest())
+                .register();
+
+        commandManager.execute(testSender,"money");
+        Assertions.assertEquals(message,"0.0");
+
+        commandManager.execute(testSender,"money asd");
+        Assertions.assertEquals(message,"0.0");
+
+        commandManager.execute(testSender,"money set 100");
+        commandManager.execute(testSender,"money");
+        Assertions.assertEquals(message,"100.0");
+    }
+
+    public class moneyTest{
+
+
+
+        @Command("money")
+        public void money(@Sender CommandSender sender) {
+            sender.sendMessage(bank.getOrDefault(sender.getSenderName(),0d)+"");
+        }
+
+        @Command("money")
+        public void money(@Sender CommandSender sender, TestSender who) {
+            sender.sendMessage(bank.getOrDefault(who.getSenderName(),0d)+"");
+        }
+
+        @Command("money")
+        public void setMoney(@Sender CommandSender sender, @Required("set") String s, double many) {
+            bank.put(sender.getSenderName(),many);
+        }
+
+        @Command("money")
+        public void setMoney(@Sender CommandSender sender, @Required("set") String s, TestSender playerEntity, double many) {
+            bank.put(playerEntity.getSenderName(),many);
+        }
+
+    }
+
+
 
 
 }

@@ -151,6 +151,8 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
         ArrayCopy<String> arrayCopy = new ArrayCopy<>(args);
 
+        System.out.println();
+
         for (CommandNode executeNode : filterExecuteNodes) {
             List<CommandNode> nodeList = CommandNodeUtil.getLinkedFromParent2Child(executeNode);
 
@@ -169,6 +171,8 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
                 if (bestNodeCheck(bestResult,bestResultDepth,node,nodeDepth)) {
                     bestResult = node;
+                    //Tip 注释部分用于排插问题
+//                    CommandNodeUtil.showLink(bestResult);
                     bestResultDepth = CommandNodeUtil.getDepthOn(bestResult);
                 }
                 i += node.getRequiredArgsNum();
@@ -178,17 +182,20 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     }
 
     private boolean bestNodeCheck(CommandNode bestNode,int bestNodeDepth,CommandNode checkNode,int checkNodeDepth){
+//        System.out.println(bestNodeDepth+"     "+checkNodeDepth);
         if(bestNode==null)
             return true;
         if(checkNodeDepth>bestNodeDepth)
             return true;
-        if(bestNode.canExecuteCommand()){
-            if(checkNode.weights()>bestNode.weights())
-                return true;
-        }else{
-            if(checkNode.canExecuteCommand())
-                return true;
-            return checkNode.weights()>bestNode.weights();
+        else if(checkNodeDepth==bestNodeDepth){
+            if(bestNode.canExecuteCommand()){
+                if(checkNode.weights()>bestNode.weights())
+                    return true;
+            }else{
+                if(checkNode.canExecuteCommand())
+                    return true;
+                return checkNode.weights()>bestNode.weights();
+            }
         }
         return false;
     }

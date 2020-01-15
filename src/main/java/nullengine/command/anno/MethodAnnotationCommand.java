@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MethodAnnotationCommand extends NodeAnnotationCommand implements Nodeable {
 
@@ -104,6 +105,12 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
 
                     node = branches;
                 }
+
+                //Tip 注释部分用于排插问题
+//                System.out.println("register");
+//                for(CommandNode commandNode : node){
+//                    CommandNodeUtil.showLink(commandNode);
+//                }
 
                 node.forEach(commandNode -> commandNode.setExecutor((objects -> {
                     try {
