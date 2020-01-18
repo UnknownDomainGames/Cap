@@ -569,6 +569,7 @@ public class MethodNodeCommandTest {
         commandManager.execute(testSender,"test 100");
         Assertions.assertEquals(message,"100.0");
 
+        Assertions.assertEquals(commandManager.complete(testSender,"test asd ").toString(),"[123, asd, zxc]");
     }
 
     public class test2{

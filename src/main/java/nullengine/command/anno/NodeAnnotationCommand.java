@@ -64,19 +64,13 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                     return;
                 }
                 node.getExecutor().accept(Collections.EMPTY_LIST);
-                return;
             } else {
                 CommandNode commandNode = parseArgs(sender, args);
                 if (commandNode != null && commandNode.canExecuteCommand()) {
                     execute(commandNode);
                     return;
                 }
-                commandNode = sameCheck(commandNode);
-                if (commandNode == null) {
-                    commandWrongUse(sender, args);
-                    return;
-                }
-                execute(commandNode);
+                commandWrongUse(sender, args);
             }
         } else {
             CommandNode parseResult = parseArgs(sender, args);
@@ -90,27 +84,11 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                     return;
                 }
             } else {
-                parseResult = sameCheck(parseResult);
-                if (parseResult == null) {
-                    commandWrongUse(sender, args);
-                    return;
-                }
+                commandWrongUse(sender, args);
+                return;
             }
             execute(parseResult);
         }
-    }
-
-    private CommandNode sameCheck(CommandNode node) {
-        if (node.getParent() == null)
-            return null;
-        CommandNode parent = node.getParent();
-        for (CommandNode child : parent.getChildren()) {
-            if (child == node)
-                continue;
-            if (child.same(node) && child.canExecuteCommand())
-                return child;
-        }
-        return null;
     }
 
     private void execute(CommandNode node) {
@@ -169,9 +147,9 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
                 int nodeDepth = CommandNodeUtil.getDepthOn(node);
 
-                if (bestNodeCheck(bestResult,bestResultDepth,node,nodeDepth)) {
+                if (bestNodeCheck(bestResult, bestResultDepth, node, nodeDepth)) {
                     bestResult = node;
-                    //Tip 注释部分用于排插问题
+                    //Tip 注释部分用于排查问题
 //                    CommandNodeUtil.showLink(bestResult);
                     bestResultDepth = CommandNodeUtil.getDepthOn(bestResult);
                 }
@@ -181,20 +159,19 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         return bestResult;
     }
 
-    private boolean bestNodeCheck(CommandNode bestNode,int bestNodeDepth,CommandNode checkNode,int checkNodeDepth){
-//        System.out.println(bestNodeDepth+"     "+checkNodeDepth);
-        if(bestNode==null)
+    private boolean bestNodeCheck(CommandNode bestNode, int bestNodeDepth, CommandNode checkNode, int checkNodeDepth) {
+        if (bestNode == null)
             return true;
-        if(checkNodeDepth>bestNodeDepth)
+        if (checkNodeDepth > bestNodeDepth)
             return true;
-        else if(checkNodeDepth==bestNodeDepth){
-            if(bestNode.canExecuteCommand()){
-                if(checkNode.weights()>bestNode.weights())
+        else if (checkNodeDepth == bestNodeDepth) {
+            if (bestNode.canExecuteCommand()) {
+                if (checkNode.weights() > bestNode.weights())
                     return true;
-            }else{
-                if(checkNode.canExecuteCommand())
+            } else {
+                if (checkNode.canExecuteCommand())
                     return true;
-                return checkNode.weights()>bestNode.weights();
+                return checkNode.weights() > bestNode.weights();
             }
         }
         return false;
@@ -227,12 +204,43 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             result = parseArgs(sender, removeLast);
         }
 
+        result = optimizeSuggesterNode(result);
+
         while (result instanceof SenderNode) {
             if (result.getParent() != null) {
                 result = result.getParent();
+                continue;
             }
         }
+
         return result;
+    }
+
+    private CommandNode optimizeSuggesterNode(CommandNode node) {
+        if (node.getChildren().isEmpty()) {
+            List<CommandNode> listWithOutSender = getNodeLinkWithOutSender(CommandNodeUtil.getLinkedFromParent2Child(node));
+            for (CommandNode canExecuteNode : canExecuteNodes) {
+                List<CommandNode> matchList = getNodeLinkWithOutSender(CommandNodeUtil.getLinkedFromParent2Child(canExecuteNode));
+                if(matchList(listWithOutSender,matchList)){
+                    return matchList.get(listWithOutSender.size()-1);
+                }
+            }
+        }
+        return node;
+    }
+
+    private boolean matchList(List<CommandNode> list,List<CommandNode> matchList){
+        if(list.size()>=matchList.size())
+            return false;
+        for (int i = 0; i < list.size(); i++) {
+            if(!list.get(i).same(matchList.get(i)))
+                return false;
+        }
+        return true;
+    }
+
+    private List<CommandNode> getNodeLinkWithOutSender(List<CommandNode> nodeList) {
+        return nodeList.stream().filter(node1 -> !(node1 instanceof SenderNode)).collect(Collectors.toList());
     }
 
     @Override
