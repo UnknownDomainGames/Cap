@@ -67,14 +67,19 @@ public abstract class BaseCommandManager implements CommandManager {
     @Override
     public List<String> complete(CommandSender sender, String command, String... args) {
         Command commandInstance = commands.get(command);
-        if ((args == null || args.length == 0) && commandInstance == null) {
+        if(commandInstance==null){
             return commands.keySet()
                     .stream()
-                    .filter(commandName -> commandName.startsWith(command)).collect(Collectors.toList());
+                    .filter(commandName -> commandName.startsWith(command))
+                    .collect(Collectors.toList());
+        }
+        if (args == null || args.length == 0){
+            return Collections.EMPTY_LIST;
         }
 
-        if (commandInstance == null)
+        if (commandInstance == null){
             return Collections.EMPTY_LIST;
+        }
 
         return commandInstance.suggest(sender, args);
     }

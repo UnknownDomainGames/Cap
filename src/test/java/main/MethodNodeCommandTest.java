@@ -14,6 +14,7 @@ import nullengine.command.suggestion.NamedSuggester;
 import nullengine.command.suggestion.SimpleSuggesterManager;
 import nullengine.command.suggestion.Suggester;
 import nullengine.command.suggestion.SuggesterManager;
+import nullengine.command.util.SuggesterHelper;
 import nullengine.permission.HashPermissible;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -552,7 +553,7 @@ public class MethodNodeCommandTest {
 
             @Override
             public Suggester getSuggester() {
-                return null;
+                return (sender, command, args) -> SuggesterHelper.filterStartWith(new ArrayList<>(entityHashMap.keySet()),args[args.length-1]);
             }
         });
 
@@ -567,6 +568,7 @@ public class MethodNodeCommandTest {
         Assertions.assertEquals(message,"123");
         commandManager.execute(testSender,"test 100");
         Assertions.assertEquals(message,"100.0");
+
     }
 
     public class test2{
