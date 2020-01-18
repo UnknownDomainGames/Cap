@@ -1,8 +1,10 @@
 package main;
 
-import nullengine.command.*;
+import nullengine.command.BaseCommandManager;
+import nullengine.command.CommandException;
+import nullengine.command.CommandSender;
+import nullengine.command.SimpleCommandManager;
 import nullengine.command.anno.*;
-import nullengine.command.anno.Command;
 import nullengine.command.argument.Argument;
 import nullengine.command.argument.ArgumentManager;
 import nullengine.command.argument.SimpleArgumentManager;
@@ -15,7 +17,6 @@ import nullengine.command.suggestion.SuggesterManager;
 import nullengine.permission.HashPermissible;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.opentest4j.TestSkippedException;
 
 import java.util.*;
 
@@ -29,9 +30,9 @@ public class MethodNodeCommandTest {
     SimpleCommandManager simpleCommandManager = new SimpleCommandManager();
 
     public MethodNodeCommandTest() {
-//        MethodAnnotationCommand.getBuilder(simpleCommandManager)
-//                .addCommandHandler(this)
-//                .register();
+        MethodAnnotationCommand.getBuilder(simpleCommandManager)
+                .addCommandHandler(this)
+                .register();
     }
 
     @Test
@@ -564,8 +565,6 @@ public class MethodNodeCommandTest {
         Assertions.assertEquals(message,"asd");
         commandManager.execute(testSender,"test asd 123");
         Assertions.assertEquals(message,"123");
-        commandManager.execute(testSender,"test qwe");
-        Assertions.assertEquals(message,"qwe");
         commandManager.execute(testSender,"test 100");
         Assertions.assertEquals(message,"100.0");
     }
@@ -582,13 +581,8 @@ public class MethodNodeCommandTest {
         }
 
         @Command("test")
-        public void testCommand2(@Sender TestSender sender,double s){
+        public void testCommand2(@Sender TestSender sender,@Sender TestSender sender2,double s){
             message = Double.toString(s);
-        }
-
-        @Command("test")
-        public void testCommand2(@Sender TestSender sender,String s){
-            message = s;
         }
 
 

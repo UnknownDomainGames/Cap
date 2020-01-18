@@ -151,7 +151,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
         ArrayCopy<String> arrayCopy = new ArrayCopy<>(args);
 
-        System.out.println();
+//        System.out.println();
 
         for (CommandNode executeNode : filterExecuteNodes) {
             List<CommandNode> nodeList = CommandNodeUtil.getLinkedFromParent2Child(executeNode);

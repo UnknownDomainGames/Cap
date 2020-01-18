@@ -72,12 +72,7 @@ public class SenderNode extends CommandNode {
 
     @Override
     public int weights() {
-        int wight = 5;
-        for (Class<? extends CommandSender> allowedSender : allowedSenders) {
-            if(!allowedSender.equals(CommandSender.class))
-                wight++;
-        }
-        return wight;
+        return -5;
     }
 
     @Override
