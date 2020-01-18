@@ -492,8 +492,6 @@ public class MethodNodeCommandTest {
 
     public class moneyTest{
 
-
-
         @Command("money")
         public void money(@Sender CommandSender sender) {
             sender.sendMessage(bank.getOrDefault(sender.getSenderName(),0d)+"");
@@ -513,6 +511,86 @@ public class MethodNodeCommandTest {
         public void setMoney(@Sender CommandSender sender, @Required("set") String s, TestSender playerEntity, double many) {
             bank.put(playerEntity.getSenderName(),many);
         }
+
+    }
+
+
+    @Test
+    void test2() {
+
+        HashMap<String,TestSender> entityHashMap = new HashMap<>();
+
+        entityHashMap.put("asd",new TestSender("asd",null,null));
+        entityHashMap.put("123",new TestSender("123",null,null));
+        entityHashMap.put("zxc",new TestSender("zxc",null,null));
+
+        BaseCommandManager commandManager = new SimpleCommandManager();
+        commandManager.getLogger().setUseParentHandlers(false);
+
+        ArgumentManager argumentManager = new SimpleArgumentManager();
+        argumentManager.setClassDefaultArgument(new Argument() {
+            @Override
+            public String getName() {
+                return "TestSender";
+            }
+
+            @Override
+            public Class responsibleClass() {
+                return TestSender.class;
+            }
+
+            @Override
+            public Optional parse(String arg) {
+                return Optional.ofNullable(entityHashMap.get(arg));
+            }
+
+            @Override
+            public String toString() {
+                return "class:"+getClass().getName();
+            }
+
+            @Override
+            public Suggester getSuggester() {
+                return null;
+            }
+        });
+
+        NodeAnnotationCommand.METHOD.getBuilder(commandManager)
+                .setArgumentManager(argumentManager)
+                .addCommandHandler(new test2())
+                .register();
+
+        commandManager.execute(testSender,"test asd");
+        Assertions.assertEquals(message,"asd");
+        commandManager.execute(testSender,"test asd 123");
+        Assertions.assertEquals(message,"123");
+        commandManager.execute(testSender,"test qwe");
+        Assertions.assertEquals(message,"qwe");
+        commandManager.execute(testSender,"test 100");
+        Assertions.assertEquals(message,"100.0");
+    }
+
+    public class test2{
+        @Command("test")
+        public void testCommand1(@Sender TestSender sender,TestSender testSender){
+            message = testSender.getSenderName();
+        }
+
+        @Command("test")
+        public void testCommand2(TestSender sender,TestSender testSender){
+            message = testSender.getSenderName();
+        }
+
+        @Command("test")
+        public void testCommand2(@Sender TestSender sender,double s){
+            message = Double.toString(s);
+        }
+
+        @Command("test")
+        public void testCommand2(@Sender TestSender sender,String s){
+            message = s;
+        }
+
 
     }
 

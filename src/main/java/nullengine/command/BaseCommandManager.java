@@ -19,7 +19,7 @@ public abstract class BaseCommandManager implements CommandManager {
         if (commands.containsKey(command.getName()))
             throw new RuntimeException("Command \"" + command.getName() + "\" already exists");
         commands.put(command.getName(), command);
-        getLogger().info("register "+command.getName());
+        getLogger().info("register command: "+command.getName());
     }
 
     @Override

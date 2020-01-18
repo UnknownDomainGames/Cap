@@ -344,8 +344,19 @@ public class CommandNodeUtil {
             commandNode = commandNode.getParent();
         }
 
-        List<String> list2 = list1.stream().map(node1->node1.getClass().getSimpleName()).collect(Collectors.toList());
+        List<String> list2 = list1.stream().map(CommandNodeUtil::getNodeDescription).collect(Collectors.toList());
         Collections.reverse(list2);
         System.out.println(list2.toString());
+    }
+
+    private static String getNodeDescription(CommandNode node){
+        StringBuilder sb= new StringBuilder();
+        sb.append(node.getClass().getSimpleName());
+        if(node instanceof ArgumentNode){
+            ArgumentNode argumentNode = (ArgumentNode) node;
+            sb.append(":");
+            sb.append(argumentNode.getArgument().getName());
+        }
+        return sb.toString();
     }
 }
