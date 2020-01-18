@@ -155,7 +155,6 @@ public abstract class CommandNode implements Cloneable {
 
     public boolean same(CommandNode node) {
         return node != null &&
-                Objects.equals(needPermission,node.needPermission) &&
                 Objects.equals(suggester,node.suggester) &&
                 Objects.equals(tip,node.tip);
     }

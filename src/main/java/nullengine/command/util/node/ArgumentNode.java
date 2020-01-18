@@ -75,7 +75,10 @@ public class ArgumentNode extends CommandNode {
     @Override
     public boolean same(CommandNode node) {
         if (super.same(node) && node instanceof ArgumentNode) {
-            return ((ArgumentNode) node).argument.equals(argument);
+            Argument argument = ((ArgumentNode) node).argument;
+            if (argument.responsibleClass().equals(this.argument.responsibleClass()) &&
+                    argument.getName().equals(argument.getName()))
+                return true;
         }
         return false;
     }
