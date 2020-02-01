@@ -65,9 +65,13 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 }
                 node.getExecutor().accept(Collections.EMPTY_LIST);
             } else {
-                CommandNode commandNode = parseArgs(sender, args);
-                if (commandNode != null && commandNode.canExecuteCommand()) {
-                    execute(commandNode);
+                CommandNode parseResult = parseArgs(sender, args);
+                if (parseResult != null && parseResult.canExecuteCommand()) {
+                    if (!hasPermission(sender, parseResult.getNeedPermission())) {
+                        permissionNotEnough(sender, parseResult.getNeedPermission().toArray(new String[0]));
+                        return;
+                    }
+                    execute(parseResult);
                     return;
                 }
                 commandWrongUse(sender, args);
@@ -78,13 +82,12 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 commandWrongUse(sender, args);
                 return;
             }
-            if (parseResult.canExecuteCommand()) {
-                if (!hasPermission(sender, parseResult.getNeedPermission())) {
-                    permissionNotEnough(sender, parseResult.getNeedPermission().toArray(new String[0]));
-                    return;
-                }
-            } else {
+            if (!parseResult.canExecuteCommand()){
                 commandWrongUse(sender, args);
+                return;
+            }
+            if (!hasPermission(sender, parseResult.getNeedPermission())) {
+                permissionNotEnough(sender, parseResult.getNeedPermission().toArray(new String[0]));
                 return;
             }
             execute(parseResult);
@@ -221,19 +224,19 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             List<CommandNode> listWithOutSender = getNodeLinkWithOutSender(CommandNodeUtil.getLinkedFromParent2Child(node));
             for (CommandNode canExecuteNode : canExecuteNodes) {
                 List<CommandNode> matchList = getNodeLinkWithOutSender(CommandNodeUtil.getLinkedFromParent2Child(canExecuteNode));
-                if(matchList(listWithOutSender,matchList)){
-                    return matchList.get(listWithOutSender.size()-1);
+                if (matchList(listWithOutSender, matchList)) {
+                    return matchList.get(listWithOutSender.size() - 1);
                 }
             }
         }
         return node;
     }
 
-    private boolean matchList(List<CommandNode> list,List<CommandNode> matchList){
-        if(list.size()>=matchList.size())
+    private boolean matchList(List<CommandNode> list, List<CommandNode> matchList) {
+        if (list.size() >= matchList.size())
             return false;
         for (int i = 0; i < list.size(); i++) {
-            if(!list.get(i).same(matchList.get(i)))
+            if (!list.get(i).same(matchList.get(i)))
                 return false;
         }
         return true;
