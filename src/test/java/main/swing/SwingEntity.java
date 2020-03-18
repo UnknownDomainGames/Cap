@@ -5,6 +5,8 @@ import engine.permission.HashPermissible;
 import main.Entity;
 import main.World;
 
+import javax.annotation.Nonnull;
+
 public class SwingEntity implements Entity {
 
     private static World world = new World("SwingWorld");
@@ -35,13 +37,13 @@ public class SwingEntity implements Entity {
     }
 
     @Override
-    public boolean hasPermission(String permission) {
+    public boolean hasPermission(@Nonnull String permission) {
         return permissible.hasPermission(permission);
     }
 
     @Override
-    public void setPermission(String permission, boolean bool) {
-        permissible.setPermission(permission,bool);
+    public void setPermission(@Nonnull String permission, boolean bool) {
+        permissible.setPermission(permission, bool);
     }
 
     @Override
@@ -50,7 +52,7 @@ public class SwingEntity implements Entity {
     }
 
     @Override
-    public void clean() {
+    public void clearPermission() {
 
     }
 

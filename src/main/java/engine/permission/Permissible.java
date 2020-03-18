@@ -1,12 +1,17 @@
 package engine.permission;
 
+import javax.annotation.Nonnull;
+import java.util.Map;
+
 public interface Permissible {
 
-    boolean hasPermission(String permission);
+    boolean hasPermission(@Nonnull String permission);
 
-    void setPermission(String permission, boolean bool);
+    void setPermission(@Nonnull String permission, boolean bool);
 
     void removePermission(String permission);
 
-    void clean();
+    void clearPermission();
+
+    Map<String, Boolean> toPermissionMap();
 }

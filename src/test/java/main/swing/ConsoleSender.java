@@ -4,8 +4,11 @@ import engine.command.CommandException;
 import engine.command.CommandSender;
 import engine.permission.HashPermissible;
 
+import javax.annotation.Nonnull;
+
 public class ConsoleSender implements CommandSender {
     private HashPermissible permissible = new HashPermissible();
+
     @Override
     public void sendMessage(String message) {
         System.out.println(message);
@@ -22,17 +25,18 @@ public class ConsoleSender implements CommandSender {
     }
 
     @Override
-    public boolean hasPermission(String permission) {
+    public boolean hasPermission(@Nonnull String permission) {
         return true;
     }
 
-    public void setPermission(String permission, boolean bool) {}
+    public void setPermission(@Nonnull String permission, boolean bool) {
+    }
 
     @Override
     public void removePermission(String permission) {}
 
     @Override
-    public void clean() {
+    public void clearPermission() {
 
     }
 }

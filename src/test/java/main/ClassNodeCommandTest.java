@@ -11,6 +11,7 @@ import engine.permission.HashPermissible;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import javax.annotation.Nonnull;
 import java.util.Random;
 
 public class ClassNodeCommandTest {
@@ -74,12 +75,12 @@ public class ClassNodeCommandTest {
             }
 
             @Override
-            public boolean hasPermission(String permission) {
+            public boolean hasPermission(@Nonnull String permission) {
                 return permissible.hasPermission(permission);
             }
 
             @Override
-            public void setPermission(String permission, boolean bool) {
+            public void setPermission(@Nonnull String permission, boolean bool) {
                 permissible.setPermission(permission, bool);
             }
 
@@ -89,7 +90,7 @@ public class ClassNodeCommandTest {
             }
 
             @Override
-            public void clean() {
+            public void clearPermission() {
 
             }
         };

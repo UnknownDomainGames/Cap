@@ -4,6 +4,7 @@ import engine.command.CommandException;
 import engine.command.CommandSender;
 import engine.permission.HashPermissible;
 
+import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
 public class TestSender implements CommandSender {
@@ -39,13 +40,13 @@ public class TestSender implements CommandSender {
     }
 
     @Override
-    public boolean hasPermission(String permission) {
+    public boolean hasPermission(@Nonnull String permission) {
         return permissible.hasPermission(permission);
     }
 
     @Override
-    public void setPermission(String permission, boolean bool) {
-        permissible.setPermission(permission,bool);
+    public void setPermission(@Nonnull String permission, boolean bool) {
+        permissible.setPermission(permission, bool);
     }
 
     @Override
@@ -54,7 +55,7 @@ public class TestSender implements CommandSender {
     }
 
     @Override
-    public void clean() {
+    public void clearPermission() {
 
     }
 }
