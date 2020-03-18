@@ -2,52 +2,54 @@ package engine.command;
 
 import java.util.Arrays;
 
-public class CommandException {
+public final class CommandException {
 
-    private CommandExceptionState state;
+    private final Type type;
+    private final String command;
+    private final CommandSender sender;
+    private final String commandName;
+    private final Command commandInstance;
+    private final String[] args;
+    private final Object message;
 
-    private Throwable exception;
+    public enum Type {
+        COMMAND_NOT_FOUND,
+        COMMAND_WRONG_USAGE,
+        COMMAND_WRONG_SENDER,
+        COMMAND_ILLEGAL_ARGUMENT,
+        PERMISSION_NOT_ENOUGH,
+        COMMAND_RUNTIME,
+        UNKNOWN
+    }
 
-    private String command;
+    public static CommandException commandNotFound(CommandSender sender, CommandResolver.Result command) {
+        return new CommandException(Type.COMMAND_NOT_FOUND, sender, command.getRaw(), command.getName(), null, command.getArgs(), null);
+    }
 
-    private Command commandInstance;
-
-    private String[] args;
-
-    private CommandException(Throwable exception,CommandExceptionState state, String command, Command commandInstance, String[] args) {
-        this.exception = exception;
+    public CommandException(Type type, CommandSender sender, String command, String commandName, Command commandInstance, String[] args, Object message) {
+        this.type = type;
+        this.sender = sender;
         this.command = command;
+        this.commandName = commandName;
         this.commandInstance = commandInstance;
         this.args = args;
-        this.state = state;
+        this.message = message;
     }
 
-    public static CommandException commandNotFound(Throwable throwable,String command){
-        return new CommandException(throwable,CommandExceptionState.COMMAND_NOT_FOUND,command,null,null);
-    }
-
-    public static CommandException exception(Throwable throwable,Command command,String[] args){
-        return new CommandException(throwable,CommandExceptionState.RUNNING,command.getName(),command,args);
-    }
-
-    public static CommandException exception(Throwable throwable,Command command){
-        return new CommandException(throwable,CommandExceptionState.RUNNING,command.getName(),command,null);
-    }
-
-    public static CommandException unknownException(Throwable throwable,Command command){
-        return new CommandException(throwable,CommandExceptionState.UNKNOWN,command.getName(),command,null);
-    }
-
-    public static CommandException unknownException(Throwable throwable,Command command,String[] args){
-        return new CommandException(throwable,CommandExceptionState.UNKNOWN,command.getName(),command,args);
-    }
-
-    public Throwable getException() {
-        return exception;
+    public Type getType() {
+        return type;
     }
 
     public String getCommand() {
         return command;
+    }
+
+    public CommandSender getSender() {
+        return sender;
+    }
+
+    public String getCommandName() {
+        return commandName;
     }
 
     public Command getCommandInstance() {
@@ -58,17 +60,19 @@ public class CommandException {
         return args;
     }
 
-    public CommandExceptionState getState() {
-        return state;
+    public Object getMessage() {
+        return message;
     }
 
     @Override
     public String toString() {
         return "CommandException{" +
-                "exception=" + exception +
+                "type=" + type +
                 ", command='" + command + '\'' +
+                ", sender=" + sender +
                 ", commandInstance=" + commandInstance +
                 ", args=" + Arrays.toString(args) +
+                ", message=" + message +
                 '}';
     }
 }

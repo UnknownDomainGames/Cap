@@ -1,9 +1,6 @@
 package engine.command;
 
-import engine.command.exception.CommandNotFoundException;
-
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public abstract class BaseCommandManager implements CommandManager {
@@ -18,7 +15,6 @@ public abstract class BaseCommandManager implements CommandManager {
         if (commands.containsKey(command.getName()))
             throw new RuntimeException("Command \"" + command.getName() + "\" already exists");
         commands.put(command.getName(), command);
-        getLogger().info("register command: "+command.getName());
     }
 
     @Override
@@ -38,45 +34,45 @@ public abstract class BaseCommandManager implements CommandManager {
 
     @Override
     public void execute(CommandSender sender, String rawCommand) {
-        CommandResolver.Result result = resolver.resolve(rawCommand);
-        execute(sender, result.command, result.args);
+        execute(sender, resolver.resolve(rawCommand));
     }
 
     @Override
     public void execute(CommandSender sender, String command, String... args) {
-        Command commandInstance = commands.get(command);
+        execute(sender, resolver.resolve(command, args));
+    }
+
+    protected void execute(CommandSender sender, CommandResolver.Result command) {
+        Command commandInstance = commands.get(command.getName());
         if (commandInstance == null) {
-            sender.sendCommandError(CommandException.commandNotFound(new CommandNotFoundException(command), command));
+            sender.sendCommandException(CommandException.commandNotFound(sender, command));
             return;
         }
 
-        if (args == null) {
-            args = new String[0];
-        }
-        getLogger().info(sender.getSenderName()+" execute ["+command+"] args: "+ Arrays.toString(args));
-        commandInstance.execute(sender, args);
+        String[] args = command.getArgs();
+        commandInstance.execute(sender, args != null ? args : new String[0]);
     }
 
     @Override
-    public List<String> complete(CommandSender sender, String rawCommand) {
-        CommandResolver.Result result = resolver.resolve(rawCommand);
-        return complete(sender, result.command, result.args);
+    public List<String> complete(CommandSender sender, String command) {
+        CommandResolver.Result result = resolver.resolve(command);
+        return complete(sender, result.getName(), result.getArgs());
     }
 
     @Override
-    public List<String> complete(CommandSender sender, String command, String... args) {
-        Command commandInstance = commands.get(command);
-        if(commandInstance==null){
+    public List<String> complete(CommandSender sender, String commandName, String... args) {
+        Command commandInstance = commands.get(commandName);
+        if (commandInstance == null) {
             return commands.keySet()
                     .stream()
-                    .filter(commandName -> commandName.startsWith(command))
+                    .filter(name -> name.startsWith(commandName))
                     .collect(Collectors.toList());
         }
-        if (args == null || args.length == 0){
+        if (args == null || args.length == 0) {
             return Collections.EMPTY_LIST;
         }
 
-        if (commandInstance == null){
+        if (commandInstance == null) {
             return Collections.EMPTY_LIST;
         }
 
@@ -86,7 +82,7 @@ public abstract class BaseCommandManager implements CommandManager {
     @Override
     public List<String> getTips(CommandSender sender, String rawCommand) {
         CommandResolver.Result result = resolver.resolve(rawCommand);
-        return getTips(sender, result.command, result.args);
+        return getTips(sender, result.getName(), result.getArgs());
     }
 
     @Override
@@ -102,7 +98,7 @@ public abstract class BaseCommandManager implements CommandManager {
     @Override
     public ArgumentCheckResult checkLastArgument(CommandSender sender, String rawCommand) {
         CommandResolver.Result result = this.resolver.resolve(rawCommand);
-        return checkLastArgument(sender, result.command, result.args);
+        return checkLastArgument(sender, result.getName(), result.getArgs());
     }
 
     @Override
@@ -117,6 +113,4 @@ public abstract class BaseCommandManager implements CommandManager {
     public void unregisterCommand(String command) {
         commands.remove(command);
     }
-
-    public abstract Logger getLogger();
 }

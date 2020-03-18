@@ -8,14 +8,14 @@ import java.util.List;
 
 public class DefaultCommandResolver implements CommandResolver {
     @Override
-    public Result resolve(String rawCommand) {
+    public Result resolve(String command) {
         List<String> args = new ArrayList<>();
         boolean quotes = false;
         boolean escape = false;
         StringBuilder sb = new StringBuilder();
 
-        for (int i = 0; i < rawCommand.length(); i++) {
-            char c = rawCommand.charAt(i);
+        for (int i = 0; i < command.length(); i++) {
+            char c = command.charAt(i);
 
             if ((c == ' ' || c == '　') && !quotes) {
                 args.add(sb.toString());
@@ -39,6 +39,11 @@ public class DefaultCommandResolver implements CommandResolver {
         }
         args.add(sb.toString());
         String[] argsArray = args.toArray(new String[0]);
-        return new CommandResolver.Result(argsArray[0], Arrays.copyOfRange(argsArray, 1, argsArray.length));
+        return new CommandResolver.Result(command, argsArray[0], Arrays.copyOfRange(argsArray, 1, argsArray.length));
+    }
+
+    @Override
+    public Result resolve(String commandName, String[] args) {
+        return null;
     }
 }

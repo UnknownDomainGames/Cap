@@ -18,7 +18,7 @@ import java.util.Random;
 public class ClassNodeCommandTest {
 
     SimpleCommandManager simpleCommandManager = new SimpleCommandManager();
-    private TestSender testSender = new TestSender("methodNodeTest", string -> message = string, c -> message = c.getException().getClass().getName());
+    private TestSender testSender = new TestSender("methodNodeTest", string -> message = string, c -> message = c.getThrowable().getClass().getName());
 
     private String message;
 
@@ -71,8 +71,8 @@ public class ClassNodeCommandTest {
             }
 
             @Override
-            public void sendCommandError(CommandException exception) {
-                message = exception.getException().getClass().getName();
+            public void sendCommandException(CommandException exception) {
+                message = exception.getThrowable().getClass().getName();
             }
 
             @Override

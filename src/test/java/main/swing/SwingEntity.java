@@ -28,8 +28,8 @@ public class SwingEntity implements Entity {
     }
 
     @Override
-    public void sendCommandError(CommandException exception) {
-        sendMessage(exception.getException().toString());
+    public void sendCommandException(CommandException exception) {
+        sendMessage(exception.getThrowable().toString());
     }
 
     @Override

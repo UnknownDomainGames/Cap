@@ -21,7 +21,7 @@ public class ConsoleSender implements CommandSender {
     }
 
     @Override
-    public void sendCommandError(CommandException exception) {
+    public void sendCommandException(CommandException exception) {
         System.out.println(exception.toString());
     }
 

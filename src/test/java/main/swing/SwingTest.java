@@ -117,7 +117,7 @@ public class SwingTest {
                     setTips();
                 } else if (e.getKeyChar() == KeyEvent.VK_SPACE) {
                     CommandResolver.Result result = resolve.resolve(text.substring(1));
-                    ArgumentCheckResult argumentCheckResult = commandManager.checkLastArgument(consoleSender,result.command,Arrays.copyOfRange(result.args,0,result.args.length-1));
+                    ArgumentCheckResult argumentCheckResult = commandManager.checkLastArgument(consoleSender, result.name, Arrays.copyOfRange(result.args, 0, result.args.length - 1));
                     if(!argumentCheckResult.isValid()){
                         System.out.println(argumentCheckResult.getHelpMessage());
                     }
@@ -139,9 +139,9 @@ public class SwingTest {
                 String text = textField.getText().substring(1);
                 CommandResolver.Result result = resolve.resolve(text);
                 if (result.args != null && result.args.length != 0) {
-                    List<String> tips = commandManager.getTips(consoleSender, result.command, result.args);
+                    List<String> tips = commandManager.getTips(consoleSender, result.name, result.args);
                     String tipsString = tips.stream().map(str -> "<" + str + "> ").collect(Collectors.joining());
-                    String space = getSpace("/" + result.command + " " + Arrays.stream(Arrays.copyOfRange(result.args, 0, result.args.length - 1)).map(str -> str + " ").collect(Collectors.joining()) + " ");
+                    String space = getSpace("/" + result.name + " " + Arrays.stream(Arrays.copyOfRange(result.args, 0, result.args.length - 1)).map(str -> str + " ").collect(Collectors.joining()) + " ");
                     label.setText(space + tipsString);
                 } else label.setText("");
             }
@@ -184,8 +184,8 @@ public class SwingTest {
                         if (text.startsWith("/")) {
                             CommandResolver.Result result = resolve.resolve(text.substring(1));
                             if (result.args == null || result.args.length == 0) {
-                                if (!completeList.contains(result.command)) {
-                                    completeList = commandManager.complete(consoleSender, result.command, result.args);
+                                if (!completeList.contains(result.name)) {
+                                    completeList = commandManager.complete(consoleSender, result.name, result.args);
                                     System.out.println("suggest: " + completeList.toString());
                                     completeIndex = -1;
                                 }
@@ -196,7 +196,7 @@ public class SwingTest {
                                 setCommand(completeList.get(completeIndex), result.args);
                             } else {
                                 if (!completeList.contains(result.args[result.args.length - 1])) {
-                                    completeList = commandManager.complete(consoleSender, result.command, result.args);
+                                    completeList = commandManager.complete(consoleSender, result.name, result.args);
                                     System.out.println("suggest: " + completeList.toString());
                                     completeIndex = -1;
                                 }
@@ -205,7 +205,7 @@ public class SwingTest {
                                 completeIndex++;
                                 completeIndex %= completeList.size();
                                 result.args[result.args.length - 1] = completeList.get(completeIndex);
-                                setCommand(result.command, result.args);
+                                setCommand(result.name, result.args);
                             }
                         }
                     }

@@ -25,7 +25,7 @@ import java.util.*;
 
 public class MethodNodeCommandTest {
 
-    private TestSender testSender = new TestSender("methodNodeTest", string -> message = string, commandException -> message = commandException.getException().getClass().getName());
+    private TestSender testSender = new TestSender("methodNodeTest", string -> message = string, commandException -> message = commandException.getThrowable().getClass().getName());
 
     public String message;
 
@@ -115,7 +115,7 @@ public class MethodNodeCommandTest {
         }
 
         @Override
-        public void sendCommandError(CommandException exception) {
+        public void sendCommandException(CommandException exception) {
 
         }
 
@@ -304,7 +304,7 @@ public class MethodNodeCommandTest {
             }
 
             @Override
-            public void sendCommandError(CommandException exception) {
+            public void sendCommandException(CommandException exception) {
                 System.out.println(exception.toString());
             }
 
