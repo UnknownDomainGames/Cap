@@ -18,7 +18,7 @@ public final class CommandException {
         COMMAND_WRONG_SENDER,
         COMMAND_ILLEGAL_ARGUMENT,
         PERMISSION_NOT_ENOUGH,
-        COMMAND_RUNTIME,
+        COMMAND_RUNTIME_EXCEPTION,
         UNKNOWN
     }
 
