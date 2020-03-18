@@ -5,14 +5,10 @@ import engine.command.CommandSender;
 import engine.permission.HashPermissible;
 
 import javax.annotation.Nonnull;
+import java.util.Map;
 
 public class ConsoleSender implements CommandSender {
     private HashPermissible permissible = new HashPermissible();
-
-    @Override
-    public void sendMessage(String message) {
-        System.out.println(message);
-    }
 
     @Override
     public String getSenderName() {
@@ -20,7 +16,12 @@ public class ConsoleSender implements CommandSender {
     }
 
     @Override
-    public void handleException(CommandException exception) {
+    public void sendMessage(String message) {
+        System.out.println(message);
+    }
+
+    @Override
+    public void sendCommandError(CommandException exception) {
         System.out.println(exception.toString());
     }
 
@@ -29,14 +30,23 @@ public class ConsoleSender implements CommandSender {
         return true;
     }
 
+    @Override
     public void setPermission(@Nonnull String permission, boolean bool) {
+        throw new UnsupportedOperationException("Cannot set permission to console");
     }
 
     @Override
-    public void removePermission(String permission) {}
+    public void removePermission(String permission) {
+        throw new UnsupportedOperationException("Cannot remove permission to console");
+    }
 
     @Override
     public void clearPermission() {
+        throw new UnsupportedOperationException("Cannot clear permission to console");
+    }
 
+    @Override
+    public Map<String, Boolean> toPermissionMap() {
+        return Map.of();
     }
 }

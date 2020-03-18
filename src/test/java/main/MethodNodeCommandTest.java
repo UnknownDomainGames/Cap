@@ -115,7 +115,7 @@ public class MethodNodeCommandTest {
         }
 
         @Override
-        public void handleException(CommandException exception) {
+        public void sendCommandError(CommandException exception) {
 
         }
 
@@ -135,6 +135,11 @@ public class MethodNodeCommandTest {
         @Override
         public void clearPermission() {
 
+        }
+
+        @Override
+        public Map<String, Boolean> toPermissionMap() {
+            return null;
         }
     }
 
@@ -299,7 +304,7 @@ public class MethodNodeCommandTest {
             }
 
             @Override
-            public void handleException(CommandException exception) {
+            public void sendCommandError(CommandException exception) {
                 System.out.println(exception.toString());
             }
 
@@ -320,7 +325,12 @@ public class MethodNodeCommandTest {
 
             @Override
             public void clearPermission() {
+                permissible.clearPermission();
+            }
 
+            @Override
+            public Map<String, Boolean> toPermissionMap() {
+                return permissible.toPermissionMap();
             }
         };
         for (int i = 0; i < 10000; i++) {
@@ -408,7 +418,7 @@ public class MethodNodeCommandTest {
                     String text = Double.toHexString(random.nextDouble());
                     commandManager.execute(testSender, "command a " + text);
                     Assertions.assertEquals(message, testSender.getSenderName() + "a" + text);
-                }else{
+                } else {
                     commandManager.execute(testSender, "command");
                     Assertions.assertEquals(message, testSender.getSenderName());
                 }
@@ -435,16 +445,16 @@ public class MethodNodeCommandTest {
 
     }
 
-    private HashMap<String,Double> bank = new HashMap<>();
+    private HashMap<String, Double> bank = new HashMap<>();
 
     @Test
     void moneyTest() {
 
-        HashMap<String,TestSender> entityHashMap = new HashMap<>();
+        HashMap<String, TestSender> entityHashMap = new HashMap<>();
 
-        entityHashMap.put("asd",new TestSender("asd",null,null));
-        entityHashMap.put("123",new TestSender("123",null,null));
-        entityHashMap.put("zxc",new TestSender("zxc",null,null));
+        entityHashMap.put("asd", new TestSender("asd", null, null));
+        entityHashMap.put("123", new TestSender("123", null, null));
+        entityHashMap.put("zxc", new TestSender("zxc", null, null));
 
         BaseCommandManager commandManager = new SimpleCommandManager();
         commandManager.getLogger().setUseParentHandlers(false);
@@ -468,7 +478,7 @@ public class MethodNodeCommandTest {
 
             @Override
             public String toString() {
-                return "class:"+getClass().getName();
+                return "class:" + getClass().getName();
             }
 
             @Override
@@ -482,37 +492,37 @@ public class MethodNodeCommandTest {
                 .addCommandHandler(new moneyTest())
                 .register();
 
-        commandManager.execute(testSender,"money");
-        Assertions.assertEquals(message,"0.0");
+        commandManager.execute(testSender, "money");
+        Assertions.assertEquals(message, "0.0");
 
-        commandManager.execute(testSender,"money asd");
-        Assertions.assertEquals(message,"0.0");
+        commandManager.execute(testSender, "money asd");
+        Assertions.assertEquals(message, "0.0");
 
-        commandManager.execute(testSender,"money set 100");
-        commandManager.execute(testSender,"money");
-        Assertions.assertEquals(message,"100.0");
+        commandManager.execute(testSender, "money set 100");
+        commandManager.execute(testSender, "money");
+        Assertions.assertEquals(message, "100.0");
     }
 
-    public class moneyTest{
+    public class moneyTest {
 
         @Command("money")
         public void money(@Sender CommandSender sender) {
-            sender.sendMessage(bank.getOrDefault(sender.getSenderName(),0d)+"");
+            sender.sendMessage(bank.getOrDefault(sender.getSenderName(), 0d) + "");
         }
 
         @Command("money")
         public void money(@Sender CommandSender sender, TestSender who) {
-            sender.sendMessage(bank.getOrDefault(who.getSenderName(),0d)+"");
+            sender.sendMessage(bank.getOrDefault(who.getSenderName(), 0d) + "");
         }
 
         @Command("money")
         public void setMoney(@Sender CommandSender sender, @Required("set") String s, double many) {
-            bank.put(sender.getSenderName(),many);
+            bank.put(sender.getSenderName(), many);
         }
 
         @Command("money")
         public void setMoney(@Sender CommandSender sender, @Required("set") String s, TestSender playerEntity, double many) {
-            bank.put(playerEntity.getSenderName(),many);
+            bank.put(playerEntity.getSenderName(), many);
         }
 
     }
@@ -521,11 +531,11 @@ public class MethodNodeCommandTest {
     @Test
     void test2() {
 
-        HashMap<String,TestSender> entityHashMap = new HashMap<>();
+        HashMap<String, TestSender> entityHashMap = new HashMap<>();
 
-        entityHashMap.put("asd",new TestSender("asd",null,null));
-        entityHashMap.put("123",new TestSender("123",null,null));
-        entityHashMap.put("zxc",new TestSender("zxc",null,null));
+        entityHashMap.put("asd", new TestSender("asd", null, null));
+        entityHashMap.put("123", new TestSender("123", null, null));
+        entityHashMap.put("zxc", new TestSender("zxc", null, null));
 
         BaseCommandManager commandManager = new SimpleCommandManager();
         commandManager.getLogger().setUseParentHandlers(false);
@@ -549,12 +559,12 @@ public class MethodNodeCommandTest {
 
             @Override
             public String toString() {
-                return "class:"+getClass().getName();
+                return "class:" + getClass().getName();
             }
 
             @Override
             public Suggester getSuggester() {
-                return (sender, command, args) -> SuggesterHelper.filterStartWith(new ArrayList<>(entityHashMap.keySet()),args[args.length-1]);
+                return (sender, command, args) -> SuggesterHelper.filterStartWith(new ArrayList<>(entityHashMap.keySet()), args[args.length - 1]);
             }
         });
 
@@ -563,36 +573,34 @@ public class MethodNodeCommandTest {
                 .addCommandHandler(new test2())
                 .register();
 
-        commandManager.execute(testSender,"test asd");
-        Assertions.assertEquals(message,"asd");
-        commandManager.execute(testSender,"test asd 123");
-        Assertions.assertEquals(message,"123");
-        commandManager.execute(testSender,"test 100");
-        Assertions.assertEquals(message,"100.0");
+        commandManager.execute(testSender, "test asd");
+        Assertions.assertEquals(message, "asd");
+        commandManager.execute(testSender, "test asd 123");
+        Assertions.assertEquals(message, "123");
+        commandManager.execute(testSender, "test 100");
+        Assertions.assertEquals(message, "100.0");
 
-        Assertions.assertEquals(commandManager.complete(testSender,"test asd ").toString(),"[123, asd, zxc]");
+        Assertions.assertEquals(commandManager.complete(testSender, "test asd ").toString(), "[123, asd, zxc]");
     }
 
-    public class test2{
+    public class test2 {
         @Command("test")
-        public void testCommand1(@Sender TestSender sender,TestSender testSender){
+        public void testCommand1(@Sender TestSender sender, TestSender testSender) {
             message = testSender.getSenderName();
         }
 
         @Command("test")
-        public void testCommand2(TestSender sender,TestSender testSender){
+        public void testCommand2(TestSender sender, TestSender testSender) {
             message = testSender.getSenderName();
         }
 
         @Command("test")
-        public void testCommand2(@Sender TestSender sender,@Sender TestSender sender2,double s){
+        public void testCommand2(@Sender TestSender sender, @Sender TestSender sender2, double s) {
             message = Double.toString(s);
         }
 
 
     }
-
-
 
 
 }

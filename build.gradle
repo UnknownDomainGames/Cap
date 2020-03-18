@@ -15,6 +15,10 @@ repositories {
     mavenCentral()
 }
 
+test {
+    useJUnitPlatform()
+}
+
 dependencies {
     compile 'com.google.guava:guava:27.1-jre'
     compile 'org.apache.commons:commons-lang3:3.8.1'

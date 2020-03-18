@@ -46,7 +46,7 @@ public abstract class BaseCommandManager implements CommandManager {
     public void execute(CommandSender sender, String command, String... args) {
         Command commandInstance = commands.get(command);
         if (commandInstance == null) {
-            sender.handleException(CommandException.commandNotFound(new CommandNotFoundException(command), command));
+            sender.sendCommandError(CommandException.commandNotFound(new CommandNotFoundException(command), command));
             return;
         }
 

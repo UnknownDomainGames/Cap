@@ -12,12 +12,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nonnull;
+import java.util.Map;
 import java.util.Random;
 
 public class ClassNodeCommandTest {
 
     SimpleCommandManager simpleCommandManager = new SimpleCommandManager();
-    private TestSender testSender = new TestSender("methodNodeTest", string -> message = string,c->message=c.getException().getClass().getName());
+    private TestSender testSender = new TestSender("methodNodeTest", string -> message = string, c -> message = c.getException().getClass().getName());
 
     private String message;
 
@@ -70,7 +71,7 @@ public class ClassNodeCommandTest {
             }
 
             @Override
-            public void handleException(CommandException exception) {
+            public void sendCommandError(CommandException exception) {
                 message = exception.getException().getClass().getName();
             }
 
@@ -91,7 +92,12 @@ public class ClassNodeCommandTest {
 
             @Override
             public void clearPermission() {
+                permissible.clearPermission();
+            }
 
+            @Override
+            public Map<String, Boolean> toPermissionMap() {
+                return permissible.toPermissionMap();
             }
         };
         SimpleArgumentManager argumentManager = new SimpleArgumentManager();
@@ -107,25 +113,25 @@ public class ClassNodeCommandTest {
                 .setArgumentManager(argumentManager)
                 .addProvider(new LocationProvider())
                 .caseCommand("test", new Runnable() {
-            @Sender
-            public CommandSender sender;
+                    @Sender
+                    public CommandSender sender;
 
-            public Location location;
+                    public Location location;
 
-            public Random random;
+                    public Random random;
 
-            @Ignore
-            public int i = 123;
+                    @Ignore
+                    public int i = 123;
 
-            public String text;
+                    public String text;
 
-            @Override
-            @Permission("test")
-            public void run() {
-                sender.sendMessage(sender.getSenderName() + location + random.nextInt() + text);
-            }
+                    @Override
+                    @Permission("test")
+                    public void run() {
+                        sender.sendMessage(sender.getSenderName() + location + random.nextInt() + text);
+                    }
 
-        }).register();
+                }).register();
 
         int seed = 12356;
         World world = new World("abc");

@@ -5,6 +5,7 @@ import engine.command.CommandSender;
 import engine.permission.HashPermissible;
 
 import javax.annotation.Nonnull;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class TestSender implements CommandSender {
@@ -17,7 +18,7 @@ public class TestSender implements CommandSender {
 
     private Consumer<CommandException> commandExceptionConsumer;
 
-    public TestSender(String name, Consumer<String> sendConsumer,Consumer<CommandException> commandExceptionConsumer) {
+    public TestSender(String name, Consumer<String> sendConsumer, Consumer<CommandException> commandExceptionConsumer) {
         this.name = name;
         this.sendConsumer = sendConsumer;
         this.commandExceptionConsumer = commandExceptionConsumer;
@@ -34,7 +35,7 @@ public class TestSender implements CommandSender {
     }
 
     @Override
-    public void handleException(CommandException exception) {
+    public void sendCommandError(CommandException exception) {
         exception.getException().printStackTrace();
         commandExceptionConsumer.accept(exception);
     }
@@ -56,6 +57,11 @@ public class TestSender implements CommandSender {
 
     @Override
     public void clearPermission() {
+        permissible.clearPermission();
+    }
 
+    @Override
+    public Map<String, Boolean> toPermissionMap() {
+        return permissible.toPermissionMap();
     }
 }

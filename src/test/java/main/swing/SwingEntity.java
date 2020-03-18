@@ -6,6 +6,7 @@ import main.Entity;
 import main.World;
 
 import javax.annotation.Nonnull;
+import java.util.Map;
 
 public class SwingEntity implements Entity {
 
@@ -17,7 +18,7 @@ public class SwingEntity implements Entity {
         this.name = name;
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
 
@@ -27,13 +28,13 @@ public class SwingEntity implements Entity {
     }
 
     @Override
-    public void handleException(CommandException exception) {
+    public void sendCommandError(CommandException exception) {
         sendMessage(exception.getException().toString());
     }
 
     @Override
     public void sendMessage(String message) {
-        System.out.println(name+" receive message:"+message);
+        System.out.println(name + " receive message:" + message);
     }
 
     @Override
@@ -53,7 +54,12 @@ public class SwingEntity implements Entity {
 
     @Override
     public void clearPermission() {
+        permissible.clearPermission();
+    }
 
+    @Override
+    public Map<String, Boolean> toPermissionMap() {
+        return permissible.toPermissionMap();
     }
 
     @Override
