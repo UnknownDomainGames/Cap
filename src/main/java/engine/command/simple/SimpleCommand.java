@@ -4,7 +4,6 @@ import engine.command.ArgumentCheckResult;
 import engine.command.Command;
 import engine.command.CommandSender;
 
-import java.util.Collections;
 import java.util.List;
 
 public class SimpleCommand extends Command {
@@ -34,7 +33,7 @@ public class SimpleCommand extends Command {
     @Override
     public List<String> suggest(CommandSender sender, String[] args) {
         if (completer == null) {
-            return Collections.EMPTY_LIST;
+            return List.of();
         }
 
         return completer.suggest(sender, this, args);
@@ -43,7 +42,7 @@ public class SimpleCommand extends Command {
     @Override
     public List<String> getTips(CommandSender sender, String[] args) {
         if(tips==null)
-            return Collections.EMPTY_LIST;
+            return List.of();
         return tips.getTips(sender,args);
     }
 

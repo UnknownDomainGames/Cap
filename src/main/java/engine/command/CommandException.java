@@ -5,8 +5,8 @@ import java.util.Arrays;
 public final class CommandException {
 
     private final Type type;
-    private final String command;
     private final CommandSender sender;
+    private final String command;
     private final String commandName;
     private final Command commandInstance;
     private final String[] args;
@@ -68,8 +68,9 @@ public final class CommandException {
     public String toString() {
         return "CommandException{" +
                 "type=" + type +
-                ", command='" + command + '\'' +
                 ", sender=" + sender +
+                ", command='" + command + '\'' +
+                ", commandName='" + commandName + '\'' +
                 ", commandInstance=" + commandInstance +
                 ", args=" + Arrays.toString(args) +
                 ", message=" + message +

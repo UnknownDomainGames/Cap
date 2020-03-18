@@ -4,7 +4,6 @@ import engine.command.CommandSender;
 import engine.command.argument.Argument;
 import engine.command.suggestion.Suggester;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,7 +44,7 @@ public class EmptyArgumentNode extends ArgumentNode {
 
     @Override
     public List<Object> collect() {
-        return Collections.emptyList();
+        return List.of();
     }
 
     @Override

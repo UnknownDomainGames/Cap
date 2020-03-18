@@ -1,6 +1,5 @@
 package engine.command.argument.base;
 
-import com.google.common.collect.Lists;
 import engine.command.argument.Argument;
 import engine.command.suggestion.Suggester;
 
@@ -40,7 +39,7 @@ public class BooleanArgument extends Argument {
     @Override
     public Suggester getSuggester() {
         return (sender, command, args) -> {
-            List<String> completeSet = Lists.newArrayList("true", "false");
+            List<String> completeSet = List.of("true", "false");
             if (args != null && !args[args.length - 1].isEmpty()){
                 return completeSet.stream().filter(completeName -> completeName.startsWith(args[args.length - 1])).collect(Collectors.toList());
             }

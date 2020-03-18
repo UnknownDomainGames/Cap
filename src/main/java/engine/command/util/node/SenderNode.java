@@ -5,7 +5,7 @@ import engine.command.suggestion.Suggester;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 public class SenderNode extends CommandNode {
 
@@ -66,10 +66,10 @@ public class SenderNode extends CommandNode {
 
     @Override
     public Suggester getSuggester() {
-        return (sender, command, args) -> allowedSender(sender)?getChildren()
+        return (sender, command, args) -> allowedSender(sender) ? getChildren()
                 .stream()
                 .map(node -> node.getSuggester().suggest(sender, command, args))
-                .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll): Collections.EMPTY_LIST;
+                .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll) : List.of();
     }
 
     @Override

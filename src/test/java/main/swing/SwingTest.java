@@ -117,7 +117,7 @@ public class SwingTest {
                     setTips();
                 } else if (e.getKeyChar() == KeyEvent.VK_SPACE) {
                     CommandParser.Result result = resolve.parse(text.substring(1));
-                    ArgumentCheckResult argumentCheckResult = commandManager.checkLastArgument(consoleSender, result.name, Arrays.copyOfRange(result.args, 0, result.args.length - 1));
+                    ArgumentCheckResult argumentCheckResult = commandManager.checkLastArgument(consoleSender, result.getName(), Arrays.copyOfRange(result.getArgs(), 0, result.getArgs().length - 1));
                     if(!argumentCheckResult.isValid()){
                         System.out.println(argumentCheckResult.getHelpMessage());
                     }
@@ -138,10 +138,10 @@ public class SwingTest {
                 }
                 String text = textField.getText().substring(1);
                 CommandParser.Result result = resolve.parse(text);
-                if (result.args != null && result.args.length != 0) {
-                    List<String> tips = commandManager.getTips(consoleSender, result.name, result.args);
+                if (result.getName() != null && result.getArgs().length != 0) {
+                    List<String> tips = commandManager.getTips(consoleSender, result.getName(), result.getArgs());
                     String tipsString = tips.stream().map(str -> "<" + str + "> ").collect(Collectors.joining());
-                    String space = getSpace("/" + result.name + " " + Arrays.stream(Arrays.copyOfRange(result.args, 0, result.args.length - 1)).map(str -> str + " ").collect(Collectors.joining()) + " ");
+                    String space = getSpace("/" + result.getName() + " " + Arrays.stream(Arrays.copyOfRange(result.getArgs(), 0, result.getArgs().length - 1)).map(str -> str + " ").collect(Collectors.joining()) + " ");
                     label.setText(space + tipsString);
                 } else label.setText("");
             }
@@ -183,9 +183,9 @@ public class SwingTest {
                         String text = textField.getText();
                         if (text.startsWith("/")) {
                             CommandParser.Result result = resolve.parse(text.substring(1));
-                            if (result.args == null || result.args.length == 0) {
-                                if (!completeList.contains(result.name)) {
-                                    completeList = commandManager.complete(consoleSender, result.name, result.args);
+                            if (result.getArgs() == null || result.getArgs().length == 0) {
+                                if (!completeList.contains(result.getName())) {
+                                    completeList = commandManager.complete(consoleSender, result.getName(), result.getArgs());
                                     System.out.println("suggest: " + completeList.toString());
                                     completeIndex = -1;
                                 }
@@ -193,10 +193,10 @@ public class SwingTest {
                                     return;
                                 completeIndex++;
                                 completeIndex %= completeList.size();
-                                setCommand(completeList.get(completeIndex), result.args);
+                                setCommand(completeList.get(completeIndex), result.getArgs());
                             } else {
-                                if (!completeList.contains(result.args[result.args.length - 1])) {
-                                    completeList = commandManager.complete(consoleSender, result.name, result.args);
+                                if (!completeList.contains(result.getArgs()[result.getArgs().length - 1])) {
+                                    completeList = commandManager.complete(consoleSender, result.getName(), result.getArgs());
                                     System.out.println("suggest: " + completeList.toString());
                                     completeIndex = -1;
                                 }
@@ -204,8 +204,8 @@ public class SwingTest {
                                     return;
                                 completeIndex++;
                                 completeIndex %= completeList.size();
-                                result.args[result.args.length - 1] = completeList.get(completeIndex);
-                                setCommand(result.name, result.args);
+                                result.getArgs()[result.getArgs().length - 1] = completeList.get(completeIndex);
+                                setCommand(result.getName(), result.getArgs());
                             }
                         }
                     }

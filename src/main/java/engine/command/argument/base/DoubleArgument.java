@@ -1,9 +1,9 @@
 package engine.command.argument.base;
 
-import com.google.common.collect.Lists;
 import engine.command.argument.Argument;
 import engine.command.suggestion.Suggester;
 
+import java.util.List;
 import java.util.Optional;
 
 public class DoubleArgument extends Argument {
@@ -28,6 +28,6 @@ public class DoubleArgument extends Argument {
 
     @Override
     public Suggester getSuggester() {
-        return (sender, command, args) -> Lists.newArrayList("[double]");
+        return (sender, command, args) -> List.of("[double]");
     }
 }

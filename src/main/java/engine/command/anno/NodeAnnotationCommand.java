@@ -59,7 +59,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                     permissionNotEnough(sender, args, node.getNeedPermission().toArray(String[]::new));
                     return;
                 }
-                node.getExecutor().accept(Collections.emptyList());
+                node.getExecutor().accept(List.of());
             } else {
                 CommandNode parseResult = parseArgs(sender, args);
                 if (parseResult != null && parseResult.canExecuteCommand()) {
@@ -182,7 +182,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     public List<String> suggest(CommandSender sender, String[] args) {
         CommandNode result = suggestParse(sender, args);
         if (result == null)
-            return Collections.emptyList();
+            return List.of();
         Set<String> list = new HashSet<>();
         for (CommandNode child : result.getChildren()) {
             if (child.getSuggester() != null) {
@@ -248,9 +248,9 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     public List<String> getTips(CommandSender sender, String[] args) {
         CommandNode result = suggestParse(sender, args);
         if (result == null)
-            return Collections.emptyList();
+            return List.of();
         if (CommandNodeUtil.getRequiredArgsAmountFromParent2Child(result) != args.length - 1 || result == null || result.getChildren().isEmpty()) {
-            return Collections.emptyList();
+            return List.of();
         }
         List<CommandNode> nodes = CommandNodeUtil.getShortestPath(result);
         List<String> tips = nodes.stream()

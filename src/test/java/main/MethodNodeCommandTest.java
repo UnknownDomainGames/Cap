@@ -8,8 +8,6 @@ import engine.command.anno.*;
 import engine.command.argument.Argument;
 import engine.command.argument.ArgumentManager;
 import engine.command.argument.SimpleArgumentManager;
-import engine.command.exception.CommandWrongUseException;
-import engine.command.exception.PermissionNotEnoughException;
 import engine.command.suggestion.NamedSuggester;
 import engine.command.suggestion.SimpleSuggesterManager;
 import engine.command.suggestion.Suggester;
@@ -25,7 +23,7 @@ import java.util.*;
 
 public class MethodNodeCommandTest {
 
-    private TestSender testSender = new TestSender("methodNodeTest", string -> message = string, commandException -> message = commandException.getThrowable().getClass().getName());
+    private TestSender testSender = new TestSender("methodNodeTest", string -> message = string, commandException -> message = commandException.getType().name());
 
     public String message;
 
@@ -60,7 +58,7 @@ public class MethodNodeCommandTest {
         testSender.removePermission("op");
         engine.command.Command command = simpleCommandManager.getCommand("permission").get();
         command.execute(testSender, new String[0]);
-        Assertions.assertEquals(message, PermissionNotEnoughException.class.getName());
+        Assertions.assertEquals(CommandException.Type.PERMISSION_NOT_ENOUGH.name(), message);
         testSender.setPermission("permission", true);
         Assertions.assertDoesNotThrow(() -> command.execute(testSender, new String[0]));
         testSender.setPermission("permission", false);
@@ -68,7 +66,7 @@ public class MethodNodeCommandTest {
         Assertions.assertDoesNotThrow(() -> command.execute(testSender, new String[0]));
         testSender.removePermission("permission.use");
         testSender.removePermission("permission");
-        Assertions.assertEquals(message, "p");
+        Assertions.assertEquals("p", message);
     }
 
     @Command(value = "permission")
@@ -82,12 +80,12 @@ public class MethodNodeCommandTest {
         engine.command.Command command = simpleCommandManager.getCommand("sender").get();
         Sender1 sender1 = new Sender1();
         command.execute(sender1, new String[0]);
-        Assertions.assertEquals(message, sender1.getSenderName());
+        Assertions.assertEquals(sender1.getSenderName(), message);
         Sender2 sender2 = new Sender2();
         command.execute(sender2, new String[0]);
-        Assertions.assertEquals(message, sender2.getSenderName());
+        Assertions.assertEquals(sender2.getSenderName(), message);
         command.execute(testSender, new String[0]);
-        Assertions.assertEquals(message, CommandWrongUseException.class.getName());
+        Assertions.assertEquals(CommandException.Type.COMMAND_WRONG_USAGE.name(), message);
     }
 
     @Command("sender")
@@ -250,12 +248,12 @@ public class MethodNodeCommandTest {
         engine.command.Command command = simpleCommandManager.getCommand("required").get();
 
         command.execute(testSender, new String[]{"c"});
-        Assertions.assertEquals(message, CommandWrongUseException.class.getName());
+        Assertions.assertEquals(CommandException.Type.COMMAND_WRONG_USAGE.name(), message);
 
         command.execute(testSender, new String[]{"a"});
-        Assertions.assertEquals(message, "a");
+        Assertions.assertEquals("a", message);
         command.execute(testSender, new String[]{"b"});
-        Assertions.assertEquals(message, "b");
+        Assertions.assertEquals("b", message);
     }
 
     @Command("required")
@@ -335,9 +333,6 @@ public class MethodNodeCommandTest {
         };
         for (int i = 0; i < 10000; i++) {
             BaseCommandManager commandManager = new SimpleCommandManager();
-
-            commandManager.getLogger().setUseParentHandlers(false);
-
             ArgumentManager argumentManager = new SimpleArgumentManager();
             argumentManager.setClassDefaultArgument(new WorldArgument());
 
@@ -400,8 +395,6 @@ public class MethodNodeCommandTest {
         Random random = new Random(System.currentTimeMillis());
         for (int i = 0; i < 1000; i++) {
             BaseCommandManager commandManager = new SimpleCommandManager();
-            commandManager.getLogger().setUseParentHandlers(false);
-
             ArgumentManager argumentManager = new SimpleArgumentManager();
             argumentManager.setClassDefaultArgument(new WorldArgument());
 
@@ -457,8 +450,6 @@ public class MethodNodeCommandTest {
         entityHashMap.put("zxc", new TestSender("zxc", null, null));
 
         BaseCommandManager commandManager = new SimpleCommandManager();
-        commandManager.getLogger().setUseParentHandlers(false);
-
         ArgumentManager argumentManager = new SimpleArgumentManager();
         argumentManager.setClassDefaultArgument(new Argument() {
             @Override
@@ -538,8 +529,6 @@ public class MethodNodeCommandTest {
         entityHashMap.put("zxc", new TestSender("zxc", null, null));
 
         BaseCommandManager commandManager = new SimpleCommandManager();
-        commandManager.getLogger().setUseParentHandlers(false);
-
         ArgumentManager argumentManager = new SimpleArgumentManager();
         argumentManager.setClassDefaultArgument(new Argument() {
             @Override

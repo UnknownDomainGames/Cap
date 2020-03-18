@@ -36,7 +36,7 @@ public class TestSender implements CommandSender {
 
     @Override
     public void sendCommandException(CommandException exception) {
-        exception.getThrowable().printStackTrace();
+        System.out.println(exception);
         commandExceptionConsumer.accept(exception);
     }
 

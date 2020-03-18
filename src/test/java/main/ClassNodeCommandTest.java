@@ -6,7 +6,6 @@ import engine.command.CommandSender;
 import engine.command.SimpleCommandManager;
 import engine.command.anno.*;
 import engine.command.argument.SimpleArgumentManager;
-import engine.command.exception.PermissionNotEnoughException;
 import engine.permission.HashPermissible;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,7 @@ import java.util.Random;
 public class ClassNodeCommandTest {
 
     SimpleCommandManager simpleCommandManager = new SimpleCommandManager();
-    private TestSender testSender = new TestSender("methodNodeTest", string -> message = string, c -> message = c.getThrowable().getClass().getName());
+    private TestSender testSender = new TestSender("methodNodeTest", string -> message = string, c -> message = c.getType().name());
 
     private String message;
 
@@ -72,7 +71,7 @@ public class ClassNodeCommandTest {
 
             @Override
             public void sendCommandException(CommandException exception) {
-                message = exception.getThrowable().getClass().getName();
+                message = exception.getType().name();
             }
 
             @Override
@@ -142,7 +141,7 @@ public class ClassNodeCommandTest {
         Command command = simpleCommandManager.getCommand("test").get();
 
         command.execute(entitySender, new String[]{"1", "2", "3", Integer.valueOf(seed).toString(), text});
-        Assertions.assertEquals(message, PermissionNotEnoughException.class.getName());
+        Assertions.assertEquals(CommandException.Type.PERMISSION_NOT_ENOUGH.name(), message);
 
         entitySender.setPermission("test", true);
 

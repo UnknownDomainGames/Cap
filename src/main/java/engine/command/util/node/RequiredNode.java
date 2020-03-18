@@ -1,9 +1,9 @@
 package engine.command.util.node;
 
-import com.google.common.collect.Lists;
 import engine.command.CommandSender;
 import engine.command.suggestion.Suggester;
 
+import java.util.List;
 import java.util.Objects;
 
 public class RequiredNode extends CommandNode {
@@ -43,7 +43,7 @@ public class RequiredNode extends CommandNode {
 
     @Override
     public Suggester getSuggester() {
-        return (sender, command, args) -> Lists.newArrayList(require);
+        return (sender, command, args) -> List.of(require);
     }
 
     @Override

@@ -29,7 +29,7 @@ public class SwingEntity implements Entity {
 
     @Override
     public void sendCommandException(CommandException exception) {
-        sendMessage(exception.getThrowable().toString());
+        sendMessage(exception.toString());
     }
 
     @Override

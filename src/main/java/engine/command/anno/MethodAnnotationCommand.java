@@ -1,6 +1,5 @@
 package engine.command.anno;
 
-import com.google.common.collect.Lists;
 import engine.command.Command;
 import engine.command.CommandManager;
 import engine.command.argument.ArgumentManager;
@@ -89,7 +88,7 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
                     nodeable = new MethodAnnotationCommand(commandAnnotation.value(), commandAnnotation.desc(), commandAnnotation.helpMessage());
                 }
 
-                List<CommandNode> node = Lists.newArrayList(nodeable.getNode());
+                List<CommandNode> node = List.of(nodeable.getNode());
 
                 for (Parameter parameter : method.getParameters()) {
                     List<CommandNode> children = annotationUtil.parseParameter(parameter);

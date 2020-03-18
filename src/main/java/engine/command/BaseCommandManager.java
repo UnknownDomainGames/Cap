@@ -6,9 +6,9 @@ import java.util.stream.Collectors;
 public abstract class BaseCommandManager implements CommandManager {
 
     private final Map<String, Command> commands = new HashMap<>();
-    private final CommandParser resolver = createCommandResolver();
+    private final CommandParser resolver = createCommandParser();
 
-    protected abstract CommandParser createCommandResolver();
+    protected abstract CommandParser createCommandParser();
 
     @Override
     public void registerCommand(Command command) {
@@ -23,23 +23,23 @@ public abstract class BaseCommandManager implements CommandManager {
     }
 
     @Override
-    public Optional<Command> getCommand(String command) {
-        return Optional.ofNullable(commands.get(command));
+    public Optional<Command> getCommand(String commandName) {
+        return Optional.ofNullable(commands.get(commandName));
     }
 
     @Override
-    public boolean hasCommand(String command) {
-        return commands.containsKey(command);
+    public boolean hasCommand(String commandName) {
+        return commands.containsKey(commandName);
     }
 
     @Override
-    public void execute(CommandSender sender, String rawCommand) {
-        execute(sender, resolver.parse(rawCommand));
+    public void execute(CommandSender sender, String command) {
+        execute(sender, resolver.parse(command));
     }
 
     @Override
-    public void execute(CommandSender sender, String command, String... args) {
-        execute(sender, resolver.parse(command, args));
+    public void execute(CommandSender sender, String commandName, String... args) {
+        execute(sender, resolver.parse(commandName, args));
     }
 
     protected void execute(CommandSender sender, CommandParser.Result command) {
@@ -69,29 +69,29 @@ public abstract class BaseCommandManager implements CommandManager {
                     .collect(Collectors.toList());
         }
         if (args == null || args.length == 0) {
-            return Collections.EMPTY_LIST;
+            return List.of();
         }
 
         if (commandInstance == null) {
-            return Collections.EMPTY_LIST;
+            return List.of();
         }
 
         return commandInstance.suggest(sender, args);
     }
 
     @Override
-    public List<String> getTips(CommandSender sender, String rawCommand) {
-        CommandParser.Result result = resolver.parse(rawCommand);
+    public List<String> getTips(CommandSender sender, String command) {
+        CommandParser.Result result = resolver.parse(command);
         return getTips(sender, result.getName(), result.getArgs());
     }
 
     @Override
-    public List<String> getTips(CommandSender sender, String command, String... args) {
-        if (command == null || command.isEmpty())
-            return Collections.EMPTY_LIST;
-        Command commandInstance = commands.get(command);
+    public List<String> getTips(CommandSender sender, String commandName, String... args) {
+        if (commandName == null || commandName.isEmpty())
+            return List.of();
+        Command commandInstance = commands.get(commandName);
         if (commandInstance == null)
-            return Collections.EMPTY_LIST;
+            return List.of();
         return commandInstance.getTips(sender, args);
     }
 
