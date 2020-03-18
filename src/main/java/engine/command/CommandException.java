@@ -22,7 +22,7 @@ public final class CommandException {
         UNKNOWN
     }
 
-    public static CommandException commandNotFound(CommandSender sender, CommandResolver.Result command) {
+    public static CommandException commandNotFound(CommandSender sender, CommandParser.Result command) {
         return new CommandException(Type.COMMAND_NOT_FOUND, sender, command.getRaw(), command.getName(), null, command.getArgs(), null);
     }
 

@@ -29,7 +29,7 @@ public class SwingTest {
     private ConsoleSender consoleSender = new ConsoleSender();
     private EntityManager entityManager = new EntityManager();
 
-    private CommandResolver resolve;
+    private CommandParser resolve;
 
     public SwingTest() {
         INSTANCE = this;
@@ -66,7 +66,7 @@ public class SwingTest {
         try {
             Field field = BaseCommandManager.class.getDeclaredField("resolver");
             field.setAccessible(true);
-            resolve = (CommandResolver) field.get(commandManager);
+            resolve = (CommandParser) field.get(commandManager);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -116,7 +116,7 @@ public class SwingTest {
                     textField.setText("");
                     setTips();
                 } else if (e.getKeyChar() == KeyEvent.VK_SPACE) {
-                    CommandResolver.Result result = resolve.resolve(text.substring(1));
+                    CommandParser.Result result = resolve.parse(text.substring(1));
                     ArgumentCheckResult argumentCheckResult = commandManager.checkLastArgument(consoleSender, result.name, Arrays.copyOfRange(result.args, 0, result.args.length - 1));
                     if(!argumentCheckResult.isValid()){
                         System.out.println(argumentCheckResult.getHelpMessage());
@@ -137,7 +137,7 @@ public class SwingTest {
                     return;
                 }
                 String text = textField.getText().substring(1);
-                CommandResolver.Result result = resolve.resolve(text);
+                CommandParser.Result result = resolve.parse(text);
                 if (result.args != null && result.args.length != 0) {
                     List<String> tips = commandManager.getTips(consoleSender, result.name, result.args);
                     String tipsString = tips.stream().map(str -> "<" + str + "> ").collect(Collectors.joining());
@@ -182,7 +182,7 @@ public class SwingTest {
 
                         String text = textField.getText();
                         if (text.startsWith("/")) {
-                            CommandResolver.Result result = resolve.resolve(text.substring(1));
+                            CommandParser.Result result = resolve.parse(text.substring(1));
                             if (result.args == null || result.args.length == 0) {
                                 if (!completeList.contains(result.name)) {
                                     completeList = commandManager.complete(consoleSender, result.name, result.args);

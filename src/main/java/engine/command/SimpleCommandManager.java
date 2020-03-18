@@ -1,6 +1,6 @@
 package engine.command;
 
-import engine.command.impl.DefaultCommandResolver;
+import engine.command.impl.DefaultCommandParser;
 
 import java.util.logging.Logger;
 
@@ -14,8 +14,8 @@ public class SimpleCommandManager extends BaseCommandManager {
     }
 
     @Override
-    protected CommandResolver createCommandResolver() {
-        return new DefaultCommandResolver();
+    protected CommandParser createCommandResolver() {
+        return new DefaultCommandParser();
     }
 
 }

@@ -6,9 +6,9 @@ import java.util.stream.Collectors;
 public abstract class BaseCommandManager implements CommandManager {
 
     private final Map<String, Command> commands = new HashMap<>();
-    private final CommandResolver resolver = createCommandResolver();
+    private final CommandParser resolver = createCommandResolver();
 
-    protected abstract CommandResolver createCommandResolver();
+    protected abstract CommandParser createCommandResolver();
 
     @Override
     public void registerCommand(Command command) {
@@ -34,15 +34,15 @@ public abstract class BaseCommandManager implements CommandManager {
 
     @Override
     public void execute(CommandSender sender, String rawCommand) {
-        execute(sender, resolver.resolve(rawCommand));
+        execute(sender, resolver.parse(rawCommand));
     }
 
     @Override
     public void execute(CommandSender sender, String command, String... args) {
-        execute(sender, resolver.resolve(command, args));
+        execute(sender, resolver.parse(command, args));
     }
 
-    protected void execute(CommandSender sender, CommandResolver.Result command) {
+    protected void execute(CommandSender sender, CommandParser.Result command) {
         Command commandInstance = commands.get(command.getName());
         if (commandInstance == null) {
             sender.sendCommandException(CommandException.commandNotFound(sender, command));
@@ -55,7 +55,7 @@ public abstract class BaseCommandManager implements CommandManager {
 
     @Override
     public List<String> complete(CommandSender sender, String command) {
-        CommandResolver.Result result = resolver.resolve(command);
+        CommandParser.Result result = resolver.parse(command);
         return complete(sender, result.getName(), result.getArgs());
     }
 
@@ -81,7 +81,7 @@ public abstract class BaseCommandManager implements CommandManager {
 
     @Override
     public List<String> getTips(CommandSender sender, String rawCommand) {
-        CommandResolver.Result result = resolver.resolve(rawCommand);
+        CommandParser.Result result = resolver.parse(rawCommand);
         return getTips(sender, result.getName(), result.getArgs());
     }
 
@@ -97,7 +97,7 @@ public abstract class BaseCommandManager implements CommandManager {
 
     @Override
     public ArgumentCheckResult checkLastArgument(CommandSender sender, String rawCommand) {
-        CommandResolver.Result result = this.resolver.resolve(rawCommand);
+        CommandParser.Result result = this.resolver.parse(rawCommand);
         return checkLastArgument(sender, result.getName(), result.getArgs());
     }
 

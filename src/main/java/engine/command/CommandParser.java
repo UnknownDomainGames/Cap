@@ -1,10 +1,10 @@
 package engine.command;
 
-public interface CommandResolver {
+public interface CommandParser {
 
-    Result resolve(String command);
+    Result parse(String command);
 
-    Result resolve(String commandName, String[] args);
+    Result parse(String commandName, String[] args);
 
     final class Result {
         private final String raw;

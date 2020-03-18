@@ -1,14 +1,14 @@
 package engine.command.impl;
 
-import engine.command.CommandResolver;
+import engine.command.CommandParser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class DefaultCommandResolver implements CommandResolver {
+public class DefaultCommandParser implements CommandParser {
     @Override
-    public Result resolve(String command) {
+    public Result parse(String command) {
         List<String> args = new ArrayList<>();
         boolean quotes = false;
         boolean escape = false;
@@ -39,11 +39,11 @@ public class DefaultCommandResolver implements CommandResolver {
         }
         args.add(sb.toString());
         String[] argsArray = args.toArray(new String[0]);
-        return new CommandResolver.Result(command, argsArray[0], Arrays.copyOfRange(argsArray, 1, argsArray.length));
+        return new CommandParser.Result(command, argsArray[0], Arrays.copyOfRange(argsArray, 1, argsArray.length));
     }
 
     @Override
-    public Result resolve(String commandName, String[] args) {
+    public Result parse(String commandName, String[] args) {
         return null;
     }
 }
