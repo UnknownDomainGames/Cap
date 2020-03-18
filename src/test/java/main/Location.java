@@ -1,7 +1,5 @@
 package main;
 
-import nullengine.command.anno.Tip;
-
 import java.util.Objects;
 
 public class Location {

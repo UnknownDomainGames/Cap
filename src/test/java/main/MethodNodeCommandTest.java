@@ -1,21 +1,21 @@
 package main;
 
-import nullengine.command.BaseCommandManager;
-import nullengine.command.CommandException;
-import nullengine.command.CommandSender;
-import nullengine.command.SimpleCommandManager;
-import nullengine.command.anno.*;
-import nullengine.command.argument.Argument;
-import nullengine.command.argument.ArgumentManager;
-import nullengine.command.argument.SimpleArgumentManager;
-import nullengine.command.exception.CommandWrongUseException;
-import nullengine.command.exception.PermissionNotEnoughException;
-import nullengine.command.suggestion.NamedSuggester;
-import nullengine.command.suggestion.SimpleSuggesterManager;
-import nullengine.command.suggestion.Suggester;
-import nullengine.command.suggestion.SuggesterManager;
-import nullengine.command.util.SuggesterHelper;
-import nullengine.permission.HashPermissible;
+import engine.command.BaseCommandManager;
+import engine.command.CommandException;
+import engine.command.CommandSender;
+import engine.command.SimpleCommandManager;
+import engine.command.anno.*;
+import engine.command.argument.Argument;
+import engine.command.argument.ArgumentManager;
+import engine.command.argument.SimpleArgumentManager;
+import engine.command.exception.CommandWrongUseException;
+import engine.command.exception.PermissionNotEnoughException;
+import engine.command.suggestion.NamedSuggester;
+import engine.command.suggestion.SimpleSuggesterManager;
+import engine.command.suggestion.Suggester;
+import engine.command.suggestion.SuggesterManager;
+import engine.command.util.SuggesterHelper;
+import engine.permission.HashPermissible;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +38,7 @@ public class MethodNodeCommandTest {
 
     @Test
     public void commandAttributeTest() {
-        nullengine.command.Command command = simpleCommandManager.getCommand("command").get();
+        engine.command.Command command = simpleCommandManager.getCommand("command").get();
 
         Assertions.assertEquals(command.getDescription(), "desc");
         Assertions.assertEquals(command.getHelpMessage(), "helpMessage");
@@ -57,7 +57,7 @@ public class MethodNodeCommandTest {
         testSender.removePermission("permission.use");
         testSender.removePermission("permission");
         testSender.removePermission("op");
-        nullengine.command.Command command = simpleCommandManager.getCommand("permission").get();
+        engine.command.Command command = simpleCommandManager.getCommand("permission").get();
         command.execute(testSender, new String[0]);
         Assertions.assertEquals(message, PermissionNotEnoughException.class.getName());
         testSender.setPermission("permission", true);
@@ -78,7 +78,7 @@ public class MethodNodeCommandTest {
 
     @Test
     public void senderTest() {
-        nullengine.command.Command command = simpleCommandManager.getCommand("sender").get();
+        engine.command.Command command = simpleCommandManager.getCommand("sender").get();
         Sender1 sender1 = new Sender1();
         command.execute(sender1, new String[0]);
         Assertions.assertEquals(message, sender1.getSenderName());
@@ -235,13 +235,13 @@ public class MethodNodeCommandTest {
 
     public class SuggesterTestClass {
         @Command("suggest")
-        public void suggest(@nullengine.command.anno.Suggester("suggestTest") String a) {
+        public void suggest(@engine.command.anno.Suggester("suggestTest") String a) {
         }
     }
 
     @Test
     public void requiredTest() throws Exception {
-        nullengine.command.Command command = simpleCommandManager.getCommand("required").get();
+        engine.command.Command command = simpleCommandManager.getCommand("required").get();
 
         command.execute(testSender, new String[]{"c"});
         Assertions.assertEquals(message, CommandWrongUseException.class.getName());

@@ -1,13 +1,13 @@
 package main;
 
-import nullengine.command.Command;
-import nullengine.command.CommandException;
-import nullengine.command.CommandSender;
-import nullengine.command.SimpleCommandManager;
-import nullengine.command.anno.*;
-import nullengine.command.argument.SimpleArgumentManager;
-import nullengine.command.exception.PermissionNotEnoughException;
-import nullengine.permission.HashPermissible;
+import engine.command.Command;
+import engine.command.CommandException;
+import engine.command.CommandSender;
+import engine.command.SimpleCommandManager;
+import engine.command.anno.*;
+import engine.command.argument.SimpleArgumentManager;
+import engine.command.exception.PermissionNotEnoughException;
+import engine.permission.HashPermissible;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

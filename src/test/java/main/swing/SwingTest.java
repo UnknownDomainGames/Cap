@@ -1,13 +1,13 @@
 package main.swing;
 
+import engine.command.*;
+import engine.command.anno.MethodAnnotationCommand;
+import engine.command.argument.ArgumentManager;
+import engine.command.argument.SimpleArgumentManager;
+import engine.command.suggestion.SimpleSuggesterManager;
+import engine.command.suggestion.SuggesterManager;
 import main.LocationProvider;
 import main.WorldArgument;
-import nullengine.command.*;
-import nullengine.command.anno.MethodAnnotationCommand;
-import nullengine.command.argument.ArgumentManager;
-import nullengine.command.argument.SimpleArgumentManager;
-import nullengine.command.suggestion.SimpleSuggesterManager;
-import nullengine.command.suggestion.SuggesterManager;
 
 import javax.swing.*;
 import java.awt.*;

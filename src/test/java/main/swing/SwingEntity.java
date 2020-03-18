@@ -1,9 +1,9 @@
 package main.swing;
 
+import engine.command.CommandException;
+import engine.permission.HashPermissible;
 import main.Entity;
 import main.World;
-import nullengine.command.CommandException;
-import nullengine.permission.HashPermissible;
 
 public class SwingEntity implements Entity {
 

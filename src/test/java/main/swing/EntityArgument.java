@@ -1,7 +1,7 @@
 package main.swing;
 
-import nullengine.command.argument.Argument;
-import nullengine.command.suggestion.Suggester;
+import engine.command.argument.Argument;
+import engine.command.suggestion.Suggester;
 
 import java.util.List;
 import java.util.Optional;

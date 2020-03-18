@@ -1,8 +1,8 @@
 package main.swing;
 
-import nullengine.command.CommandException;
-import nullengine.command.CommandSender;
-import nullengine.permission.HashPermissible;
+import engine.command.CommandException;
+import engine.command.CommandSender;
+import engine.permission.HashPermissible;
 
 public class ConsoleSender implements CommandSender {
     private HashPermissible permissible = new HashPermissible();

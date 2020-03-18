@@ -1,11 +1,11 @@
 package main.swing;
 
+import engine.command.CommandSender;
+import engine.command.anno.Command;
+import engine.command.anno.Permission;
+import engine.command.anno.Sender;
+import engine.command.anno.Tip;
 import main.Location;
-import nullengine.command.CommandSender;
-import nullengine.command.anno.Command;
-import nullengine.command.anno.Permission;
-import nullengine.command.anno.Sender;
-import nullengine.command.anno.Tip;
 
 public class MethodCommand {
 

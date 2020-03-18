@@ -1,6 +1,6 @@
 package main;
 
-import nullengine.command.CommandSender;
+import engine.command.CommandSender;
 
 public interface Entity extends CommandSender {
     World getWorld();

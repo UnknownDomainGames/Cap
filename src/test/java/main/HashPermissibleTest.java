@@ -1,7 +1,7 @@
 package main;
 
-import nullengine.permission.HashPermissible;
-import nullengine.permission.Permissible;
+import engine.permission.HashPermissible;
+import engine.permission.Permissible;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
