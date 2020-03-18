@@ -39,11 +39,6 @@ public class DefaultCommandParser implements CommandParser {
         }
         args.add(sb.toString());
         String[] argsArray = args.toArray(new String[0]);
-        return new CommandParser.Result(command, argsArray[0], Arrays.copyOfRange(argsArray, 1, argsArray.length));
-    }
-
-    @Override
-    public Result parse(String commandName, String[] args) {
-        return null;
+        return new CommandParser.Result(argsArray[0], Arrays.copyOfRange(argsArray, 1, argsArray.length));
     }
 }

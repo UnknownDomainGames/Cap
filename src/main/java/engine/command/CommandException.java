@@ -6,9 +6,8 @@ public final class CommandException {
 
     private final Type type;
     private final CommandSender sender;
-    private final String command;
     private final String commandName;
-    private final Command commandInstance;
+    private final Command command;
     private final String[] args;
     private final Object message;
 
@@ -22,26 +21,34 @@ public final class CommandException {
         UNKNOWN
     }
 
-    public static CommandException commandNotFound(CommandSender sender, CommandParser.Result command) {
-        return new CommandException(Type.COMMAND_NOT_FOUND, sender, command.getRaw(), command.getName(), null, command.getArgs(), null);
+    public CommandException(Type type, CommandSender sender, Command command, String[] args) {
+        this(type, sender, command, args, null);
     }
 
-    public CommandException(Type type, CommandSender sender, String command, String commandName, Command commandInstance, String[] args, Object message) {
+    public CommandException(Type type, CommandSender sender, Command command, String[] args, Object message) {
         this.type = type;
         this.sender = sender;
+        this.commandName = command.getName();
         this.command = command;
+        this.args = args;
+        this.message = message;
+    }
+
+    public CommandException(Type type, CommandSender sender, String commandName, String[] args) {
+        this(type, sender, commandName, args, null);
+    }
+
+    public CommandException(Type type, CommandSender sender, String commandName, String[] args, Object message) {
+        this.type = type;
+        this.sender = sender;
         this.commandName = commandName;
-        this.commandInstance = commandInstance;
+        this.command = null;
         this.args = args;
         this.message = message;
     }
 
     public Type getType() {
         return type;
-    }
-
-    public String getCommand() {
-        return command;
     }
 
     public CommandSender getSender() {
@@ -52,8 +59,8 @@ public final class CommandException {
         return commandName;
     }
 
-    public Command getCommandInstance() {
-        return commandInstance;
+    public Command getCommand() {
+        return command;
     }
 
     public String[] getArgs() {
@@ -69,9 +76,8 @@ public final class CommandException {
         return "CommandException{" +
                 "type=" + type +
                 ", sender=" + sender +
-                ", command='" + command + '\'' +
                 ", commandName='" + commandName + '\'' +
-                ", commandInstance=" + commandInstance +
+                ", commandInstance=" + command +
                 ", args=" + Arrays.toString(args) +
                 ", message=" + message +
                 '}';

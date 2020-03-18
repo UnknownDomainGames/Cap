@@ -10,7 +10,6 @@ public class SimpleCommand extends Command {
 
     private CommandExecutor executor;
     private CommandSuggester completer;
-    private CommandUncaughtExceptionHandler uncaughtExceptionHandler;
     private CommandArgumentChecker argumentChecker;
     private CommandTips tips;
 
@@ -41,15 +40,15 @@ public class SimpleCommand extends Command {
 
     @Override
     public List<String> getTips(CommandSender sender, String[] args) {
-        if(tips==null)
+        if (tips == null)
             return List.of();
-        return tips.getTips(sender,args);
+        return tips.getTips(sender, args);
     }
 
     @Override
     public ArgumentCheckResult checkLastArgument(CommandSender sender, String[] args) {
-        if(argumentChecker!=null){
-            return argumentChecker.checkArguments(sender,args);
+        if (argumentChecker != null) {
+            return argumentChecker.checkArguments(sender, args);
         }
         return ArgumentCheckResult.Valid();
     }
@@ -60,10 +59,6 @@ public class SimpleCommand extends Command {
 
     public void setCompleter(CommandSuggester completer) {
         this.completer = completer;
-    }
-
-    public void setUncaughtExceptionHandler(CommandUncaughtExceptionHandler uncaughtExceptionHandler) {
-        this.uncaughtExceptionHandler = uncaughtExceptionHandler;
     }
 
     public void setArgumentChecker(CommandArgumentChecker argumentChecker) {

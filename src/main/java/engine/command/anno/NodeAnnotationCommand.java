@@ -98,12 +98,12 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
     private void permissionNotEnough(CommandSender sender, String[] args, String[] requiredPermissions) {
         sender.sendCommandException(
-                new CommandException(CommandException.Type.PERMISSION_NOT_ENOUGH, sender, null, getName(), this, args, requiredPermissions));
+                new CommandException(CommandException.Type.PERMISSION_NOT_ENOUGH, sender, this, args, requiredPermissions));
     }
 
     private void commandWrongUsage(CommandSender sender, String[] args) {
         sender.sendCommandException(
-                new CommandException(CommandException.Type.COMMAND_WRONG_USAGE, sender, null, getName(), this, args, null));
+                new CommandException(CommandException.Type.COMMAND_WRONG_USAGE, sender, this, args, null));
     }
 
     private boolean hasPermission(Permissible permissible, Collection<String> needPermission) {

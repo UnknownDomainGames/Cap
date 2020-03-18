@@ -34,23 +34,18 @@ public abstract class BaseCommandManager implements CommandManager {
 
     @Override
     public void execute(CommandSender sender, String command) {
-        execute(sender, resolver.parse(command));
+        CommandParser.Result parsedCommand = resolver.parse(command);
+        execute(sender, parsedCommand.getName(), parsedCommand.getArgs());
     }
 
     @Override
     public void execute(CommandSender sender, String name, String... args) {
-        execute(sender, resolver.parse(name, args));
-    }
-
-    protected void execute(CommandSender sender, CommandParser.Result command) {
-        Command commandInstance = commands.get(command.getName());
-        if (commandInstance == null) {
-            sender.sendCommandException(CommandException.commandNotFound(sender, command));
+        Command command = commands.get(name);
+        if (command == null) {
+            sender.sendCommandException(new CommandException(CommandException.Type.COMMAND_NOT_FOUND, sender, name, args));
             return;
         }
-
-        String[] args = command.getArgs();
-        commandInstance.execute(sender, args != null ? args : new String[0]);
+        command.execute(sender, args != null ? args : new String[0]);
     }
 
     @Override
@@ -61,22 +56,19 @@ public abstract class BaseCommandManager implements CommandManager {
 
     @Override
     public List<String> complete(CommandSender sender, String commandName, String... args) {
-        Command commandInstance = commands.get(commandName);
-        if (commandInstance == null) {
+        Command command = commands.get(commandName);
+        if (command == null) {
             return commands.keySet()
                     .stream()
                     .filter(name -> name.startsWith(commandName))
                     .collect(Collectors.toList());
         }
+
         if (args == null || args.length == 0) {
             return List.of();
         }
 
-        if (commandInstance == null) {
-            return List.of();
-        }
-
-        return commandInstance.suggest(sender, args);
+        return command.suggest(sender, args);
     }
 
     @Override
