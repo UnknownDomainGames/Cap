@@ -1,9 +1,13 @@
 package main.swing;
 
-import engine.command.*;
+import engine.command.ArgumentCheckResult;
+import engine.command.BaseCommandManager;
+import engine.command.CommandManager;
+import engine.command.CommandParser;
 import engine.command.anno.MethodAnnotationCommand;
 import engine.command.argument.ArgumentManager;
 import engine.command.argument.SimpleArgumentManager;
+import engine.command.impl.SimpleCommandManager;
 import engine.command.suggestion.SimpleSuggesterManager;
 import engine.command.suggestion.SuggesterManager;
 import main.LocationProvider;

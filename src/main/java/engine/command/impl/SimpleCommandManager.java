@@ -1,6 +1,7 @@
-package engine.command;
+package engine.command.impl;
 
-import engine.command.impl.DefaultCommandParser;
+import engine.command.BaseCommandManager;
+import engine.command.CommandParser;
 
 public class SimpleCommandManager extends BaseCommandManager {
 
