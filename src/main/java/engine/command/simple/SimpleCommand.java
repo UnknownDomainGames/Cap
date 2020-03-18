@@ -24,32 +24,24 @@ public class SimpleCommand extends Command {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        if (sender != null) {
-            executor.execute(sender, this, args);
-        }
+        executor.execute(sender, this, args);
     }
 
     @Override
     public List<String> suggest(CommandSender sender, String[] args) {
-        if (completer == null) {
-            return List.of();
-        }
-
+        if (completer == null) return List.of();
         return completer.suggest(sender, this, args);
     }
 
     @Override
     public List<String> getTips(CommandSender sender, String[] args) {
-        if (tips == null)
-            return List.of();
+        if (tips == null) return List.of();
         return tips.getTips(sender, args);
     }
 
     @Override
     public ArgumentCheckResult checkLastArgument(CommandSender sender, String[] args) {
-        if (argumentChecker != null) {
-            return argumentChecker.checkArguments(sender, args);
-        }
+        if (argumentChecker != null) return argumentChecker.checkArguments(sender, args);
         return ArgumentCheckResult.Valid();
     }
 
@@ -63,5 +55,9 @@ public class SimpleCommand extends Command {
 
     public void setArgumentChecker(CommandArgumentChecker argumentChecker) {
         this.argumentChecker = argumentChecker;
+    }
+
+    public void setTips(CommandTips tips) {
+        this.tips = tips;
     }
 }
