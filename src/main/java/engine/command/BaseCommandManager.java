@@ -18,18 +18,18 @@ public abstract class BaseCommandManager implements CommandManager {
     }
 
     @Override
-    public Collection<Command> registerCommands() {
+    public Collection<Command> registeredCommands() {
         return commands.values();
     }
 
     @Override
-    public Optional<Command> getCommand(String commandName) {
-        return Optional.ofNullable(commands.get(commandName));
+    public Optional<Command> getCommand(String name) {
+        return Optional.ofNullable(commands.get(name));
     }
 
     @Override
-    public boolean hasCommand(String commandName) {
-        return commands.containsKey(commandName);
+    public boolean hasCommand(String name) {
+        return commands.containsKey(name);
     }
 
     @Override
@@ -38,8 +38,8 @@ public abstract class BaseCommandManager implements CommandManager {
     }
 
     @Override
-    public void execute(CommandSender sender, String commandName, String... args) {
-        execute(sender, resolver.parse(commandName, args));
+    public void execute(CommandSender sender, String name, String... args) {
+        execute(sender, resolver.parse(name, args));
     }
 
     protected void execute(CommandSender sender, CommandParser.Result command) {
@@ -86,31 +86,31 @@ public abstract class BaseCommandManager implements CommandManager {
     }
 
     @Override
-    public List<String> getTips(CommandSender sender, String commandName, String... args) {
-        if (commandName == null || commandName.isEmpty())
+    public List<String> getTips(CommandSender sender, String name, String... args) {
+        if (name == null || name.isEmpty())
             return List.of();
-        Command commandInstance = commands.get(commandName);
+        Command commandInstance = commands.get(name);
         if (commandInstance == null)
             return List.of();
         return commandInstance.getTips(sender, args);
     }
 
     @Override
-    public ArgumentCheckResult checkLastArgument(CommandSender sender, String rawCommand) {
-        CommandParser.Result result = this.resolver.parse(rawCommand);
+    public ArgumentCheckResult checkLastArgument(CommandSender sender, String command) {
+        CommandParser.Result result = this.resolver.parse(command);
         return checkLastArgument(sender, result.getName(), result.getArgs());
     }
 
     @Override
-    public ArgumentCheckResult checkLastArgument(CommandSender sender, String command, String... args) {
-        Command command1 = commands.get(command);
+    public ArgumentCheckResult checkLastArgument(CommandSender sender, String name, String... args) {
+        Command command1 = commands.get(name);
         if (command1 == null)
-            return ArgumentCheckResult.Error("/" + command + "  command not found");
+            return ArgumentCheckResult.Error("/" + name + "  command not found");
         return command1.checkLastArgument(sender, args);
     }
 
     @Override
-    public void unregisterCommand(String command) {
-        commands.remove(command);
+    public void unregisterCommand(String name) {
+        commands.remove(name);
     }
 }
