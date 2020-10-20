@@ -62,8 +62,9 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
     }
 
     public void removeChild(CommandNode commandNode) {
-        this.children.remove(commandNode);
-        commandNode.setParent(null);
+        if (this.children.remove(commandNode)) {
+            commandNode.setParent(null);
+        }
     }
 
     @Override
