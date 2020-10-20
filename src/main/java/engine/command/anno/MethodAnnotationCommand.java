@@ -1,12 +1,12 @@
-package engine.command.anno;
+package nullengine.command.anno;
 
-import engine.command.Command;
-import engine.command.CommandManager;
-import engine.command.argument.ArgumentManager;
-import engine.command.suggestion.SuggesterManager;
-import engine.command.util.CommandNodeUtil;
-import engine.command.util.node.CommandNode;
-import engine.command.util.node.Nodeable;
+import nullengine.command.Command;
+import nullengine.command.CommandManager;
+import nullengine.command.argument.ArgumentManager;
+import nullengine.command.suggestion.SuggesterManager;
+import nullengine.command.util.CommandNodeUtil;
+import nullengine.command.util.node.CommandNode;
+import nullengine.command.util.node.Nodeable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -23,7 +23,7 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
         return new AnnotationCommandBuilder(commandManager);
     }
 
-    public static class AnnotationCommandBuilder extends NodeBuilder{
+    public static class AnnotationCommandBuilder extends NodeBuilder {
 
         private Set<Object> commandHandler = new HashSet<>();
 
@@ -39,7 +39,7 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
             return (AnnotationCommandBuilder) super.setSuggesterManager(suggesterManager);
         }
 
-        public AnnotationCommandBuilder addProvider(Object object){
+        public AnnotationCommandBuilder addProvider(Object object) {
             return (AnnotationCommandBuilder) super.addProvider(object);
         }
 
@@ -60,13 +60,13 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
 
             CommandNodeUtil annotationUtil = CommandNodeUtil.getMethodUtil(argumentManager, suggesterManager);
 
-            providerList.forEach(object->annotationUtil.addProvider(object));
+            providerList.forEach(object -> annotationUtil.addProvider(object));
 
             for (Method method : o.getClass().getMethods()) {
 
-                engine.command.anno.Command commandAnnotation = method.getAnnotation(engine.command.anno.Command.class);
+                nullengine.command.anno.Command commandAnnotation = method.getAnnotation(nullengine.command.anno.Command.class);
 
-                if (commandAnnotation == null){
+                if (commandAnnotation == null) {
                     continue;
                 }
 
@@ -84,34 +84,33 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
 
                 Nodeable nodeable = (Nodeable) command;
 
-                if (nodeable == null){
+                if (nodeable == null) {
                     nodeable = new MethodAnnotationCommand(commandAnnotation.value(), commandAnnotation.desc(), commandAnnotation.helpMessage());
                 }
 
-                List<CommandNode> node = List.of(nodeable.getNode());
+
+                List<CommandNode> nodes = null;
 
                 for (Parameter parameter : method.getParameters()) {
                     List<CommandNode> children = annotationUtil.parseParameter(parameter);
-                    ArrayList<CommandNode> branches = new ArrayList<>();
-                    for (CommandNode parent : node){
-                        for (CommandNode child : children){
-                            CommandNode topCloneChild = CommandNodeUtil.getTopParent(child).clone();
-                            parent.addChild(topCloneChild);
-                            branches.addAll(CommandNodeUtil.getAllBottomNode(topCloneChild));
-                        }
+                    if (nodes == null) {
+                        nodes = children;
+                        continue;
                     }
-
-                    node = branches;
+                    ArrayList<CommandNode> branches = new ArrayList<>();
+                    for (CommandNode parent : nodes) {
+                        CommandNode child = children.stream().findAny().get();
+                        CommandNode topCloneChild = CommandNodeUtil.getTopParent(child).clone();
+                        parent.addChild(topCloneChild);
+                        branches.addAll(CommandNodeUtil.getAllBottomNode(topCloneChild));
+                    }
+                    nodes = branches;
                 }
 
                 //Tip 注释部分用于排插问题
 
-                System.out.println("register " + commandAnnotation.value());
-                for(CommandNode commandNode : node){
-                    CommandNodeUtil.showLink(commandNode);
-                }
 
-                node.forEach(commandNode -> commandNode.setExecutor((objects -> {
+                nodes.forEach(commandNode -> commandNode.setExecutor((objects -> {
                     try {
                         method.invoke(o, objects.toArray());
                     } catch (IllegalAccessException e) {
@@ -123,11 +122,19 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
 
                 Permission permission = method.getAnnotation(Permission.class);
                 if (permission != null) {
-                    node.forEach(commandNode ->
+                    nodes.forEach(commandNode ->
                             commandNode.setNeedPermission(new HashSet<>(Arrays.asList(permission.value()))));
                 }
 
-                if (nodeable instanceof NodeAnnotationCommand){
+                CommandNode mainNode = nodeable.getNode();
+
+                mainNode.addChild(CommandNodeUtil.getTopParent(nodes.stream().findAny().get()));
+
+                for (CommandNode commandNode : nodes) {
+                    CommandNodeUtil.showLink(commandNode);
+                }
+
+                if (nodeable instanceof NodeAnnotationCommand) {
                     ((NodeAnnotationCommand) nodeable).flush();
                 }
                 list.add((Command) nodeable);

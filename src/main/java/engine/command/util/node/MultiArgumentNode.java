@@ -59,7 +59,7 @@ public class MultiArgumentNode extends CommandNode {
 
     @Override
     protected Object parseArgs(CommandSender sender, StringArgs args) {
-        return commandNode.parseArgs(sender,args);
+        return commandNode.parseArgs(sender, args);
     }
 
 
@@ -76,17 +76,6 @@ public class MultiArgumentNode extends CommandNode {
     @Override
     public boolean hasTip() {
         return commandNode.hasTip();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        MultiArgumentNode that = (MultiArgumentNode) o;
-        return argsNum == that.argsNum &&
-                Objects.equals(commandNode, that.commandNode) &&
-                Objects.equals(instanceFunction, that.instanceFunction);
     }
 
     private class MultiInstance {
@@ -118,7 +107,8 @@ public class MultiArgumentNode extends CommandNode {
         if (super.same(node) && node instanceof MultiArgumentNode) {
             MultiArgumentNode multiArgumentNode = (MultiArgumentNode) node;
             return argsNum == multiArgumentNode.argsNum &&
-                    commandNode.same(multiArgumentNode.commandNode);
+                    commandNode.same(multiArgumentNode.commandNode) &&
+                    instanceFunction.equals(multiArgumentNode.instanceFunction);
         }
         return false;
     }

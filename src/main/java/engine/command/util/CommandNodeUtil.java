@@ -351,7 +351,7 @@ public class CommandNodeUtil {
         System.out.println(list2.toString());
     }
 
-    private static String getNodeDescription(CommandNode node) {
+    public static String getNodeDescription(CommandNode node) {
         StringBuilder sb = new StringBuilder();
         sb.append(node.getClass().getSimpleName());
         sb.append("(" + Integer.toHexString(node.hashCode()) + ")");

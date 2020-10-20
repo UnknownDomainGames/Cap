@@ -38,15 +38,6 @@ public class SenderNode extends CommandNode {
         return false;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        SenderNode that = (SenderNode) o;
-        return Arrays.equals(allowedSenders, that.allowedSenders);
-    }
-
     public Class<? extends CommandSender>[] getAllowedSenders() {
         return allowedSenders;
     }
