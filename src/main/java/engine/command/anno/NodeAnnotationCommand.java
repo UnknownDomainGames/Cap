@@ -142,11 +142,11 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 if (i + node.getRequiredArgsNum() > args.length) {
                     break;
                 }
-                boolean success = node.parse(sender, this.getName(), arrayCopy.copyOfRange(i, i + node.getRequiredArgsNum()));
+//                boolean success = node.parse(sender, this.getName(), arrayCopy.copyOfRange(i, i + node.getRequiredArgsNum()));
 
-                if (!success) {
-                    break;
-                }
+//                if (!success) {
+//                    break;
+//                }
 
                 int nodeDepth = CommandNodeUtil.getDepthOn(node);
 
@@ -268,9 +268,9 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         }
         int index = args.length;
         for (CommandNode node : getNodesOnArgumentIndex(index)) {
-            if (node.parse(sender, this.getName(), args[index - 1])) {
-                return ArgumentCheckResult.Valid();
-            }
+//            if (node.parse(sender, this.getName(), args[index - 1])) {
+//                return ArgumentCheckResult.Valid();
+//            }
         }
         return ArgumentCheckResult.Error("/" + this.getName() + " " + formatArgs(args) + " <- wrong");
     }

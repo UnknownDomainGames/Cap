@@ -1,13 +1,13 @@
-package engine.command.util;
+package nullengine.command.util;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import engine.command.anno.*;
-import engine.command.argument.Argument;
-import engine.command.argument.ArgumentManager;
-import engine.command.suggestion.SuggesterManager;
-import engine.command.util.node.*;
+import nullengine.command.anno.*;
+import nullengine.command.argument.Argument;
+import nullengine.command.argument.ArgumentManager;
+import nullengine.command.suggestion.SuggesterManager;
+import nullengine.command.util.node.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -114,7 +114,7 @@ public class CommandNodeUtil {
                         .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll));
             }
         }
-        List<CommandNode> nodeList = handleArgument(engine.command.util.ClassUtil.packing(clazz));
+        List<CommandNode> nodeList = handleArgument(nullengine.command.util.ClassUtil.packing(clazz));
         if (!nodeList.isEmpty()) {
             return nodeList;
         }
@@ -177,7 +177,7 @@ public class CommandNodeUtil {
             for (CommandNode parent : nodes) {
                 for (CommandNode child : children) {
                     CommandNode clone = CommandNodeUtil.getTopParent(child).clone();
-                    cloneChildren.addAll(getAllLeafNode(clone));
+                    cloneChildren.addAll(getAllBottomNode(clone));
                     parent.addChild(clone);
                 }
             }
@@ -185,7 +185,7 @@ public class CommandNodeUtil {
         }
         for (int i = 0; i < nodes.size(); i++) {
             CommandNode node = nodes.get(i);
-            MultiArgumentNode multiArgumentNode = new MultiArgumentNode(node, constructFunction, CommandNodeUtil.getDepth(node));
+            MultiArgumentNode multiArgumentNode = new MultiArgumentNode(node, constructFunction, CommandNodeUtil.getDepthOn(node));
             if (node.getParent() != null) {
                 CommandNode parent = node.getParent();
                 parent.removeChild(node);
@@ -220,7 +220,7 @@ public class CommandNodeUtil {
      * @param node
      * @return
      */
-    public static int getRequiredArgsSumFromParent2Child(CommandNode node) {
+    public static int getRequiredArgsAmountFromParent2Child(CommandNode node) {
         int i = 0;
         while (true) {
             if (node == null) {
@@ -243,7 +243,7 @@ public class CommandNodeUtil {
         }
     }
 
-    public static int getDepth(CommandNode node) {
+    public static int getDepthOn(CommandNode node) {
         if (node == null)
             return 0;
         int i = 0;
@@ -252,6 +252,10 @@ public class CommandNodeUtil {
             node = node.getParent();
         }
         return i;
+    }
+
+    public static int getDepth(CommandNode node) {
+        return getAllBottomNode(node).stream().mapToInt(CommandNodeUtil::getDepthOn).max().getAsInt();
     }
 
     public static List<CommandNode> getLinkedFromParent2Child(CommandNode child) {
@@ -267,7 +271,7 @@ public class CommandNodeUtil {
         }
     }
 
-    public static Collection<? extends CommandNode> getAllLeafNode(CommandNode clone) {
+    public static Collection<? extends CommandNode> getAllBottomNode(CommandNode clone) {
         ArrayList<CommandNode> list = new ArrayList<>();
         List<CommandNode> arrayList = new LinkedList<>();
         arrayList.add(clone);
@@ -347,7 +351,7 @@ public class CommandNodeUtil {
         System.out.println(list2.toString());
     }
 
-    public static String getNodeDescription(CommandNode node) {
+    private static String getNodeDescription(CommandNode node) {
         StringBuilder sb = new StringBuilder();
         sb.append(node.getClass().getSimpleName());
         sb.append("(" + Integer.toHexString(node.hashCode()) + ")");
