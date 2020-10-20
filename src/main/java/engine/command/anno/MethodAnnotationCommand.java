@@ -106,10 +106,10 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
 
                 //Tip 注释部分用于排插问题
 
-//                System.out.println("register " + commandAnnotation.value());
-//                for(CommandNode commandNode : node){
-//                    CommandNodeUtil.showLink(commandNode);
-//                }
+                System.out.println("register " + commandAnnotation.value());
+                for(CommandNode commandNode : node){
+                    CommandNodeUtil.showLink(commandNode);
+                }
 
                 node.forEach(commandNode -> commandNode.setExecutor((objects -> {
                     try {

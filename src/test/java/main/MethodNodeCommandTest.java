@@ -1,29 +1,30 @@
 package main;
 
-import engine.command.BaseCommandManager;
-import engine.command.CommandException;
-import engine.command.CommandSender;
-import engine.command.anno.*;
-import engine.command.argument.Argument;
-import engine.command.argument.ArgumentManager;
-import engine.command.argument.SimpleArgumentManager;
-import engine.command.impl.SimpleCommandManager;
-import engine.command.suggestion.NamedSuggester;
-import engine.command.suggestion.SimpleSuggesterManager;
-import engine.command.suggestion.Suggester;
-import engine.command.suggestion.SuggesterManager;
-import engine.command.util.SuggesterHelper;
-import engine.permission.HashPermissible;
+import nullengine.command.BaseCommandManager;
+import nullengine.command.CommandException;
+import nullengine.command.CommandSender;
+import nullengine.command.SimpleCommandManager;
+import nullengine.command.anno.*;
+import nullengine.command.argument.Argument;
+import nullengine.command.argument.ArgumentManager;
+import nullengine.command.argument.SimpleArgumentManager;
+import nullengine.command.exception.CommandWrongUseException;
+import nullengine.command.exception.PermissionNotEnoughException;
+import nullengine.command.suggestion.NamedSuggester;
+import nullengine.command.suggestion.SimpleSuggesterManager;
+import nullengine.command.suggestion.Suggester;
+import nullengine.command.suggestion.SuggesterManager;
+import nullengine.command.util.SuggesterHelper;
+import nullengine.permission.HashPermissible;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 
 
 public class MethodNodeCommandTest {
 
-    private TestSender testSender = new TestSender("methodNodeTest", string -> message = string, commandException -> message = commandException.getType().name());
+    private TestSender testSender = new TestSender("methodNodeTest", string -> message = string, commandException -> message = commandException.getException().getClass().getName());
 
     public String message;
 
@@ -37,7 +38,7 @@ public class MethodNodeCommandTest {
 
     @Test
     public void commandAttributeTest() {
-        engine.command.Command command = simpleCommandManager.getCommand("command").get();
+        nullengine.command.Command command = simpleCommandManager.getCommand("command").get();
 
         Assertions.assertEquals(command.getDescription(), "desc");
         Assertions.assertEquals(command.getHelpMessage(), "helpMessage");
@@ -56,9 +57,9 @@ public class MethodNodeCommandTest {
         testSender.removePermission("permission.use");
         testSender.removePermission("permission");
         testSender.removePermission("op");
-        engine.command.Command command = simpleCommandManager.getCommand("permission").get();
+        nullengine.command.Command command = simpleCommandManager.getCommand("permission").get();
         command.execute(testSender, new String[0]);
-        Assertions.assertEquals(CommandException.Type.PERMISSION_NOT_ENOUGH.name(), message);
+        Assertions.assertEquals(message, PermissionNotEnoughException.class.getName());
         testSender.setPermission("permission", true);
         Assertions.assertDoesNotThrow(() -> command.execute(testSender, new String[0]));
         testSender.setPermission("permission", false);
@@ -66,7 +67,7 @@ public class MethodNodeCommandTest {
         Assertions.assertDoesNotThrow(() -> command.execute(testSender, new String[0]));
         testSender.removePermission("permission.use");
         testSender.removePermission("permission");
-        Assertions.assertEquals("p", message);
+        Assertions.assertEquals(message, "p");
     }
 
     @Command(value = "permission")
@@ -77,15 +78,15 @@ public class MethodNodeCommandTest {
 
     @Test
     public void senderTest() {
-        engine.command.Command command = simpleCommandManager.getCommand("sender").get();
+        nullengine.command.Command command = simpleCommandManager.getCommand("sender").get();
         Sender1 sender1 = new Sender1();
         command.execute(sender1, new String[0]);
-        Assertions.assertEquals(sender1.getSenderName(), message);
+        Assertions.assertEquals(message, sender1.getSenderName());
         Sender2 sender2 = new Sender2();
         command.execute(sender2, new String[0]);
-        Assertions.assertEquals(sender2.getSenderName(), message);
+        Assertions.assertEquals(message, sender2.getSenderName());
         command.execute(testSender, new String[0]);
-        Assertions.assertEquals(CommandException.Type.COMMAND_WRONG_USAGE.name(), message);
+        Assertions.assertEquals(message, CommandWrongUseException.class.getName());
     }
 
     @Command("sender")
@@ -113,17 +114,17 @@ public class MethodNodeCommandTest {
         }
 
         @Override
-        public void sendCommandException(CommandException exception) {
+        public void handleException(CommandException exception) {
 
         }
 
         @Override
-        public boolean hasPermission(@Nonnull String permission) {
+        public boolean hasPermission(String permission) {
             return true;
         }
 
         @Override
-        public void setPermission(@Nonnull String permission, boolean bool) {
+        public void setPermission(String permission, boolean bool) {
         }
 
         @Override
@@ -131,13 +132,8 @@ public class MethodNodeCommandTest {
         }
 
         @Override
-        public void clearPermission() {
+        public void clean() {
 
-        }
-
-        @Override
-        public Map<String, Boolean> toPermissionMap() {
-            return null;
         }
     }
 
@@ -239,21 +235,21 @@ public class MethodNodeCommandTest {
 
     public class SuggesterTestClass {
         @Command("suggest")
-        public void suggest(@engine.command.anno.Suggester("suggestTest") String a) {
+        public void suggest(@nullengine.command.anno.Suggester("suggestTest") String a) {
         }
     }
 
     @Test
     public void requiredTest() throws Exception {
-        engine.command.Command command = simpleCommandManager.getCommand("required").get();
+        nullengine.command.Command command = simpleCommandManager.getCommand("required").get();
 
         command.execute(testSender, new String[]{"c"});
-        Assertions.assertEquals(CommandException.Type.COMMAND_WRONG_USAGE.name(), message);
+        Assertions.assertEquals(message, CommandWrongUseException.class.getName());
 
         command.execute(testSender, new String[]{"a"});
-        Assertions.assertEquals("a", message);
+        Assertions.assertEquals(message, "a");
         command.execute(testSender, new String[]{"b"});
-        Assertions.assertEquals("b", message);
+        Assertions.assertEquals(message, "b");
     }
 
     @Command("required")
@@ -302,17 +298,17 @@ public class MethodNodeCommandTest {
             }
 
             @Override
-            public void sendCommandException(CommandException exception) {
+            public void handleException(CommandException exception) {
                 System.out.println(exception.toString());
             }
 
             @Override
-            public boolean hasPermission(@Nonnull String permission) {
+            public boolean hasPermission(String permission) {
                 return permissible.hasPermission(permission);
             }
 
             @Override
-            public void setPermission(@Nonnull String permission, boolean bool) {
+            public void setPermission(String permission, boolean bool) {
                 permissible.setPermission(permission, bool);
             }
 
@@ -322,17 +318,15 @@ public class MethodNodeCommandTest {
             }
 
             @Override
-            public void clearPermission() {
-                permissible.clearPermission();
-            }
+            public void clean() {
 
-            @Override
-            public Map<String, Boolean> toPermissionMap() {
-                return permissible.toPermissionMap();
             }
         };
         for (int i = 0; i < 10000; i++) {
             BaseCommandManager commandManager = new SimpleCommandManager();
+
+            commandManager.getLogger().setUseParentHandlers(false);
+
             ArgumentManager argumentManager = new SimpleArgumentManager();
             argumentManager.setClassDefaultArgument(new WorldArgument());
 
@@ -392,31 +386,16 @@ public class MethodNodeCommandTest {
 
     @Test
     void commandTest1() {
-        Random random = new Random(System.currentTimeMillis());
-        for (int i = 0; i < 1000; i++) {
-            BaseCommandManager commandManager = new SimpleCommandManager();
-            ArgumentManager argumentManager = new SimpleArgumentManager();
-            argumentManager.setClassDefaultArgument(new WorldArgument());
+        BaseCommandManager commandManager = new SimpleCommandManager();
+        commandManager.getLogger().setUseParentHandlers(false);
 
-            NodeAnnotationCommand.METHOD.getBuilder(commandManager)
-                    .setArgumentManager(argumentManager)
-                    .addCommandHandler(new CommandTest())
-                    .register();
+        ArgumentManager argumentManager = new SimpleArgumentManager();
+        argumentManager.setClassDefaultArgument(new WorldArgument());
 
-            for (int j = 0; j < 100; j++) {
-                if (random.nextInt() % 3 == 0) {
-                    commandManager.execute(testSender, "command a");
-                    Assertions.assertEquals(message, testSender.getSenderName() + "a");
-                } else if (random.nextInt() % 7 == 0) {
-                    String text = Double.toHexString(random.nextDouble());
-                    commandManager.execute(testSender, "command a " + text);
-                    Assertions.assertEquals(message, testSender.getSenderName() + "a" + text);
-                } else {
-                    commandManager.execute(testSender, "command");
-                    Assertions.assertEquals(message, testSender.getSenderName());
-                }
-            }
-        }
+        NodeAnnotationCommand.METHOD.getBuilder(commandManager)
+                .setArgumentManager(argumentManager)
+                .addCommandHandler(new CommandTest())
+                .register();
     }
 
     public class CommandTest {
@@ -450,6 +429,8 @@ public class MethodNodeCommandTest {
         entityHashMap.put("zxc", new TestSender("zxc", null, null));
 
         BaseCommandManager commandManager = new SimpleCommandManager();
+        commandManager.getLogger().setUseParentHandlers(false);
+
         ArgumentManager argumentManager = new SimpleArgumentManager();
         argumentManager.setClassDefaultArgument(new Argument() {
             @Override
@@ -529,6 +510,8 @@ public class MethodNodeCommandTest {
         entityHashMap.put("zxc", new TestSender("zxc", null, null));
 
         BaseCommandManager commandManager = new SimpleCommandManager();
+        commandManager.getLogger().setUseParentHandlers(false);
+
         ArgumentManager argumentManager = new SimpleArgumentManager();
         argumentManager.setClassDefaultArgument(new Argument() {
             @Override

@@ -89,11 +89,6 @@ public class MultiArgumentNode extends CommandNode {
                 Objects.equals(instanceFunction, that.instanceFunction);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), commandNode, instanceFunction, argsNum);
-    }
-
     private class MultiInstance {
         public final CommandNode parent;
         public final Object instance;

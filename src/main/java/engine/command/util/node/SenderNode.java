@@ -47,11 +47,8 @@ public class SenderNode extends CommandNode {
         return Arrays.equals(allowedSenders, that.allowedSenders);
     }
 
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + Arrays.hashCode(allowedSenders);
-        return result;
+    public Class<? extends CommandSender>[] getAllowedSenders() {
+        return allowedSenders;
     }
 
     @Override

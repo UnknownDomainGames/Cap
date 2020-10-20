@@ -38,13 +38,12 @@ public class RequiredNode extends CommandNode {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), require);
-    }
-
-    @Override
     public Suggester getSuggester() {
         return (sender, command, args) -> Lists.newArrayList(require);
+    }
+
+    public String getRequire() {
+        return require;
     }
 
     @Override

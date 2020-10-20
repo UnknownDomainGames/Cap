@@ -124,7 +124,7 @@ public class CommandNodeUtil {
         if (!nodeList.isEmpty()) {
             return nodeList;
         }
-        if(clazz.isEnum()){
+        if (clazz.isEnum()) {
             return handleEnum(clazz);
         }
 
@@ -336,12 +336,12 @@ public class CommandNodeUtil {
         }
     }
 
-    public static void showLink(CommandNode commandNode){
+    public static void showLink(CommandNode commandNode) {
 
         ArrayList<CommandNode> list1 = new ArrayList<>();
 
         list1.add(commandNode);
-        while(commandNode.getParent()!=null){
+        while (commandNode.getParent() != null) {
             list1.add(commandNode.getParent());
             commandNode = commandNode.getParent();
         }
@@ -351,13 +351,22 @@ public class CommandNodeUtil {
         System.out.println(list2.toString());
     }
 
-    private static String getNodeDescription(CommandNode node){
-        StringBuilder sb= new StringBuilder();
+    private static String getNodeDescription(CommandNode node) {
+        StringBuilder sb = new StringBuilder();
         sb.append(node.getClass().getSimpleName());
-        if(node instanceof ArgumentNode){
+        sb.append("(" + Integer.toHexString(node.hashCode()) + ")");
+        if (node instanceof ArgumentNode) {
             ArgumentNode argumentNode = (ArgumentNode) node;
             sb.append(":");
             sb.append(argumentNode.getArgument().getName());
+        } else if (node instanceof SenderNode) {
+            SenderNode senderNode = (SenderNode) node;
+            sb.append(":");
+            sb.append(Arrays.stream(senderNode.getAllowedSenders()).map(Class::getSimpleName).collect(Collectors.toList()));
+        } else if (node instanceof RequiredNode) {
+            RequiredNode requiredNode = (RequiredNode) node;
+            sb.append(":");
+            sb.append(requiredNode.getRequire());
         }
         return sb.toString();
     }
