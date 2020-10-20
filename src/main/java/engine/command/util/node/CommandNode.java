@@ -6,7 +6,7 @@ import nullengine.command.suggestion.Suggester;
 import java.util.*;
 import java.util.function.Consumer;
 
-public abstract class CommandNode implements Cloneable {
+public abstract class CommandNode implements Cloneable, Comparable<CommandNode> {
 
     private CommandNode parent;
 
@@ -154,8 +154,13 @@ public abstract class CommandNode implements Cloneable {
 
     public boolean same(CommandNode node) {
         return node != null &&
-                Objects.equals(suggester,node.suggester) &&
-                Objects.equals(tip,node.tip);
+                Objects.equals(suggester, node.suggester) &&
+                Objects.equals(tip, node.tip);
+    }
+
+    @Override
+    public int compareTo(CommandNode o) {
+        return o.priority() - priority();
     }
 
     public abstract int priority();
