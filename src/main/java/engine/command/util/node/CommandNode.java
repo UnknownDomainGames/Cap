@@ -2,10 +2,12 @@ package nullengine.command.util.node;
 
 import nullengine.command.CommandSender;
 import nullengine.command.suggestion.Suggester;
+import nullengine.command.util.CommandNodeUtil;
 import nullengine.command.util.StringArgs;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public abstract class CommandNode implements Cloneable, Comparable<CommandNode> {
 
@@ -13,7 +15,7 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
 
     private Consumer<List<Object>> executor;
 
-    private TreeSet<CommandNode> children = new TreeSet<>();
+    private List<CommandNode> children = new ArrayList<>();
 
     private Set<String> needPermission = new HashSet();
 
@@ -57,25 +59,39 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
     }
 
     public void addChild(CommandNode commandNode) {
+        if (commandNode.executor != null) {
+            add(commandNode);
+            return;
+        }
+        CommandNode node = matchChild(commandNode);
+        if (node == null) {
+            add(commandNode);
+        } else {
+            for (CommandNode child : commandNode.getChildren()) {
+                node.addChild(child);
+            }
+        }
+    }
+
+    private void add(CommandNode commandNode) {
         commandNode.setParent(this);
         this.children.add(commandNode);
+        Collections.sort(children);
+//        System.out.println("sort: " + children.stream().map(CommandNodeUtil::getNodeDescription).collect(Collectors.toList()));
+    }
+
+    private CommandNode matchChild(CommandNode commandNode) {
+        for (CommandNode child : children) {
+            if (child.executor == null && child.same(commandNode))
+                return child;
+        }
+        return null;
     }
 
     public void removeChild(CommandNode commandNode) {
         if (this.children.remove(commandNode)) {
             commandNode.setParent(null);
         }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        CommandNode node = (CommandNode) o;
-        return Objects.equals(needPermission, node.needPermission) &&
-                Objects.equals(suggester, node.suggester) &&
-                Objects.equals(tip, node.tip) &&
-                Objects.equals(executor, node.executor);
     }
 
     public boolean canExecuteCommand() {
@@ -130,7 +146,7 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
-        node.children = new TreeSet<>();
+        node.children = new ArrayList<>();
         for (CommandNode child : children) {
             node.addChild(child.clone());
         }
@@ -138,7 +154,7 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
     }
 
     public boolean same(CommandNode node) {
-        return node != null &&
+        return node != null && node instanceof CommandNode &&
                 Objects.equals(suggester, node.suggester);
     }
 
