@@ -2,6 +2,7 @@ package nullengine.command.util.node;
 
 import nullengine.command.CommandSender;
 import nullengine.command.suggestion.Suggester;
+import nullengine.command.util.StringArgs;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -25,8 +26,8 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
     public CommandNode() {
     }
 
-    public boolean parse(CommandSender sender, String command, String... arg) {
-        Object result = parseArgs(sender, command, arg);
+    public boolean parse(CommandSender sender, StringArgs args) {
+        Object result = parseArgs(sender, args);
         if (result != null) {
             parseResult = result;
             return true;
@@ -45,7 +46,7 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
 
     public abstract int getRequiredArgsNum();
 
-    protected abstract Object parseArgs(CommandSender sender, String command, String... args);
+    protected abstract Object parseArgs(CommandSender sender, StringArgs args);
 
     public CommandNode getParent() {
         return parent;

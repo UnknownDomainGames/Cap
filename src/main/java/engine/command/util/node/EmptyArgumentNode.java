@@ -38,10 +38,6 @@ public class EmptyArgumentNode extends ArgumentNode {
         return 0;
     }
 
-    public boolean parse(CommandSender sender, String command, String... arg) {
-        return true;
-    }
-
     @Override
     public List<Object> collect() {
         return List.of();

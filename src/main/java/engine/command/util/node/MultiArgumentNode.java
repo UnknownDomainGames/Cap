@@ -1,6 +1,7 @@
-package engine.command.util.node;
+package nullengine.command.util.node;
 
-import engine.command.CommandSender;
+import nullengine.command.CommandSender;
+import nullengine.command.util.StringArgs;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,8 +58,8 @@ public class MultiArgumentNode extends CommandNode {
     }
 
     @Override
-    protected Object parseArgs(CommandSender sender, String command, String... args) {
-        return commandNode.parseArgs(sender, command, args);
+    protected Object parseArgs(CommandSender sender, StringArgs args) {
+        return commandNode.parseArgs(sender,args);
     }
 
 

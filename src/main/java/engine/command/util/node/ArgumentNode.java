@@ -1,8 +1,9 @@
-package engine.command.util.node;
+package nullengine.command.util.node;
 
-import engine.command.CommandSender;
-import engine.command.argument.Argument;
-import engine.command.suggestion.Suggester;
+import nullengine.command.CommandSender;
+import nullengine.command.argument.Argument;
+import nullengine.command.suggestion.Suggester;
+import nullengine.command.util.StringArgs;
 
 import java.util.Objects;
 
@@ -23,11 +24,12 @@ public class ArgumentNode extends CommandNode {
     }
 
     @Override
-    public Object parseArgs(CommandSender sender, String command, String... args) {
-        if (args[0].isEmpty()) {
+    public Object parseArgs(CommandSender sender, StringArgs args) {
+        String next = args.next();
+        if (next.isEmpty()) {
             return null;
         }
-        return argument.parse(args[0]).orElse(null);
+        return argument.parse(next).orElse(null);
     }
 
     @Override

@@ -1,11 +1,12 @@
-package engine.command.util.node;
+package nullengine.command.util.node;
 
-import engine.command.CommandSender;
-import engine.command.suggestion.Suggester;
+import nullengine.command.CommandSender;
+import nullengine.command.suggestion.Suggester;
+import nullengine.command.util.StringArgs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collections;
 
 public class SenderNode extends CommandNode {
 
@@ -21,16 +22,16 @@ public class SenderNode extends CommandNode {
     }
 
     @Override
-    public Object parseArgs(CommandSender sender, String command, String... args) {
-        if (allowedSender(sender)){
+    public Object parseArgs(CommandSender sender, StringArgs args) {
+        if (allowedSender(sender)) {
             return sender;
         }
         return null;
     }
 
     public boolean allowedSender(CommandSender sender) {
-        for (Class clazz : allowedSenders){
-            if (clazz.isAssignableFrom(sender.getClass())){
+        for (Class clazz : allowedSenders) {
+            if (clazz.isAssignableFrom(sender.getClass())) {
                 return true;
             }
         }
@@ -69,7 +70,7 @@ public class SenderNode extends CommandNode {
         return (sender, command, args) -> allowedSender(sender) ? getChildren()
                 .stream()
                 .map(node -> node.getSuggester().suggest(sender, command, args))
-                .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll) : List.of();
+                .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll) : Collections.EMPTY_LIST;
     }
 
     @Override
@@ -80,7 +81,7 @@ public class SenderNode extends CommandNode {
     @Override
     public boolean same(CommandNode node) {
         if (super.same(node) && node instanceof SenderNode) {
-            return Arrays.equals(((SenderNode) node).allowedSenders,allowedSenders);
+            return Arrays.equals(((SenderNode) node).allowedSenders, allowedSenders);
         }
         return false;
     }

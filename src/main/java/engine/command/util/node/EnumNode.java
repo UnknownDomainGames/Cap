@@ -1,12 +1,14 @@
-package engine.command.util.node;
+package nullengine.command.util.node;
 
-import engine.command.CommandSender;
-import engine.command.suggestion.Suggester;
-import engine.command.util.SuggesterHelper;
+import nullengine.command.CommandSender;
+import nullengine.command.suggestion.Suggester;
+import nullengine.command.util.StringArgs;
+import nullengine.command.util.SuggesterHelper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -38,8 +40,8 @@ public class EnumNode extends CommandNode {
     }
 
     @Override
-    protected Object parseArgs(CommandSender sender, String command, String... args) {
-        String name = args[0];
+    protected Object parseArgs(CommandSender sender, StringArgs args) {
+        String name = args.next();
         if (!enumNames.contains(name)) {
             return null;
         }
