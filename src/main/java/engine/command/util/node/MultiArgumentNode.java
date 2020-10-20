@@ -113,8 +113,8 @@ public class MultiArgumentNode extends CommandNode {
     }
 
     @Override
-    public int weights() {
-        return commandNode.weights();
+    public int priority() {
+        return commandNode.priority();
     }
 
     @Override

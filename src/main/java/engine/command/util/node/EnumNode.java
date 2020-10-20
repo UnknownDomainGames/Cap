@@ -65,7 +65,7 @@ public class EnumNode extends CommandNode {
     }
 
     @Override
-    public int weights() {
+    public int priority() {
         return 2;
     }
 

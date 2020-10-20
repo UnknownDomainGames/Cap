@@ -68,7 +68,7 @@ public class ArgumentNode extends CommandNode {
     }
 
     @Override
-    public int weights() {
+    public int priority() {
         return 0 + (argument.getName().equals("String") ? -1 : 0) + (argument.responsibleClass().equals(String.class) ? -1 : 0);
     }
 

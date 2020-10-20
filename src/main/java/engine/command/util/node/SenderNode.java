@@ -73,7 +73,7 @@ public class SenderNode extends CommandNode {
     }
 
     @Override
-    public int weights() {
+    public int priority() {
         return -5;
     }
 

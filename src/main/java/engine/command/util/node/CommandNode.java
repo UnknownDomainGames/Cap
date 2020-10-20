@@ -1,7 +1,7 @@
-package engine.command.util.node;
+package nullengine.command.util.node;
 
-import engine.command.CommandSender;
-import engine.command.suggestion.Suggester;
+import nullengine.command.CommandSender;
+import nullengine.command.suggestion.Suggester;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -62,7 +62,7 @@ public abstract class CommandNode implements Cloneable {
     }
 
     private void sortChildrenList() {
-        Collections.sort(children, Comparator.comparingInt(CommandNode::weights));
+        Collections.sort(children, Comparator.comparingInt(CommandNode::priority));
         Collections.reverse(children);
     }
 
@@ -158,5 +158,5 @@ public abstract class CommandNode implements Cloneable {
                 Objects.equals(tip,node.tip);
     }
 
-    public abstract int weights();
+    public abstract int priority();
 }
