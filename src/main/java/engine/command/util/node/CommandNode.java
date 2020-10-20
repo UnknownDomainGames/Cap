@@ -12,7 +12,7 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
 
     private Consumer<List<Object>> executor;
 
-    private LinkedList<CommandNode> children = new LinkedList<>();
+    private TreeSet<CommandNode> children = new TreeSet<>();
 
     private Set<String> needPermission = new HashSet();
 
@@ -58,12 +58,6 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
     public void addChild(CommandNode commandNode) {
         commandNode.setParent(this);
         this.children.add(commandNode);
-        sortChildrenList();
-    }
-
-    private void sortChildrenList() {
-        Collections.sort(children, Comparator.comparingInt(CommandNode::priority));
-        Collections.reverse(children);
     }
 
     public void removeChild(CommandNode commandNode) {
@@ -76,10 +70,10 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CommandNode node = (CommandNode) o;
-        return Objects.equals(children, node.children) &&
-                Objects.equals(needPermission, node.needPermission) &&
+        return Objects.equals(needPermission, node.needPermission) &&
                 Objects.equals(suggester, node.suggester) &&
-                Objects.equals(tip, node.tip);
+                Objects.equals(tip, node.tip) &&
+                Objects.equals(executor, node.executor);
     }
 
     @Override
@@ -139,16 +133,10 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
-        node.children = new LinkedList<>();
+        node.children = new TreeSet<>();
         for (CommandNode child : children) {
             node.addChild(child.clone());
         }
-        return node;
-    }
-
-    public CommandNode cloneWithoutParent() {
-        CommandNode node = clone();
-        node.setParent(null);
         return node;
     }
 
