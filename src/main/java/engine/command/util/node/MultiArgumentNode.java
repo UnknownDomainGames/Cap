@@ -6,6 +6,7 @@ import nullengine.command.util.StringArgs;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class MultiArgumentNode extends CommandNode {
@@ -58,8 +59,9 @@ public class MultiArgumentNode extends CommandNode {
 
     @Override
     protected Object parseArgs(CommandSender sender, StringArgs args) {
-        return commandNode.parseArgs(sender, args);
+        return commandNode.parseArgs(sender,args);
     }
+
 
     @Override
     public String getTip() {
@@ -74,6 +76,22 @@ public class MultiArgumentNode extends CommandNode {
     @Override
     public boolean hasTip() {
         return commandNode.hasTip();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        MultiArgumentNode that = (MultiArgumentNode) o;
+        return argsNum == that.argsNum &&
+                Objects.equals(commandNode, that.commandNode) &&
+                Objects.equals(instanceFunction, that.instanceFunction);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), commandNode, instanceFunction, argsNum);
     }
 
     private class MultiInstance {
@@ -105,8 +123,7 @@ public class MultiArgumentNode extends CommandNode {
         if (super.same(node) && node instanceof MultiArgumentNode) {
             MultiArgumentNode multiArgumentNode = (MultiArgumentNode) node;
             return argsNum == multiArgumentNode.argsNum &&
-                    commandNode.same(multiArgumentNode.commandNode) &&
-                    instanceFunction.equals(multiArgumentNode.instanceFunction);
+                    commandNode.same(multiArgumentNode.commandNode);
         }
         return false;
     }

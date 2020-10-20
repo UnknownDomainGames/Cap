@@ -33,6 +33,20 @@ public class ArgumentNode extends CommandNode {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        ArgumentNode that = (ArgumentNode) o;
+        return Objects.equals(argument, that.argument);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), argument);
+    }
+
+    @Override
     public String toString() {
         return "ArgumentNode{" +
                 "argument=" + argument +
@@ -63,7 +77,10 @@ public class ArgumentNode extends CommandNode {
     @Override
     public boolean same(CommandNode node) {
         if (super.same(node) && node instanceof ArgumentNode) {
-            return argument.equals(((ArgumentNode) node).argument);
+            Argument argument = ((ArgumentNode) node).argument;
+            if (argument.responsibleClass().equals(this.argument.responsibleClass()) &&
+                    argument.getName().equals(argument.getName()))
+                return true;
         }
         return false;
     }

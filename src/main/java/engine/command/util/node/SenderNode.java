@@ -38,8 +38,20 @@ public class SenderNode extends CommandNode {
         return false;
     }
 
-    public Class<? extends CommandSender>[] getAllowedSenders() {
-        return allowedSenders;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        SenderNode that = (SenderNode) o;
+        return Arrays.equals(allowedSenders, that.allowedSenders);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + Arrays.hashCode(allowedSenders);
+        return result;
     }
 
     @Override
@@ -55,7 +67,10 @@ public class SenderNode extends CommandNode {
 
     @Override
     public Suggester getSuggester() {
-        return (sender, command, args) -> Collections.EMPTY_LIST;
+        return (sender, command, args) -> allowedSender(sender) ? getChildren()
+                .stream()
+                .map(node -> node.getSuggester().suggest(sender, command, args))
+                .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll) : Collections.EMPTY_LIST;
     }
 
     @Override
