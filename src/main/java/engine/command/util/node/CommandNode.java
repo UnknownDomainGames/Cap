@@ -2,18 +2,17 @@ package nullengine.command.util.node;
 
 import nullengine.command.CommandSender;
 import nullengine.command.suggestion.Suggester;
-import nullengine.command.util.StringArgs;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-public abstract class CommandNode implements Cloneable, Comparable<CommandNode> {
+public abstract class CommandNode implements Cloneable {
 
     private CommandNode parent;
 
     private Consumer<List<Object>> executor;
 
-    private List<CommandNode> children = new ArrayList<>();
+    private LinkedList<CommandNode> children = new LinkedList<>();
 
     private Set<String> needPermission = new HashSet();
 
@@ -26,8 +25,8 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
     public CommandNode() {
     }
 
-    public boolean parse(CommandSender sender, StringArgs args) {
-        Object result = parseArgs(sender, args);
+    public boolean parse(CommandSender sender, String command, String... arg) {
+        Object result = parseArgs(sender, command, arg);
         if (result != null) {
             parseResult = result;
             return true;
@@ -46,7 +45,7 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
 
     public abstract int getRequiredArgsNum();
 
-    protected abstract Object parseArgs(CommandSender sender, StringArgs args);
+    protected abstract Object parseArgs(CommandSender sender, String command, String... args);
 
     public CommandNode getParent() {
         return parent;
@@ -57,43 +56,35 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
     }
 
     public void addChild(CommandNode commandNode) {
-        if (commandNode.executor != null) {
-            for (CommandNode child : children) {
-                if (child.same(commandNode) && commandNode.executor.equals(child.executor))
-                    return;
-            }
-            add(commandNode);
-            return;
-        }
-        CommandNode node = matchChild(commandNode);
-        if (node == null) {
-            add(commandNode);
-        } else {
-            for (CommandNode child : commandNode.getChildren()) {
-                node.addChild(child);
-            }
-        }
-    }
-
-    private void add(CommandNode commandNode) {
         commandNode.setParent(this);
         this.children.add(commandNode);
-        Collections.sort(children);
-//        System.out.println("sort: " + children.stream().map(CommandNodeUtil::getNodeDescription).collect(Collectors.toList()));
+        sortChildrenList();
     }
 
-    private CommandNode matchChild(CommandNode commandNode) {
-        for (CommandNode child : children) {
-            if (child.executor == null && child.same(commandNode))
-                return child;
-        }
-        return null;
+    private void sortChildrenList() {
+        Collections.sort(children, Comparator.comparingInt(CommandNode::priority));
+        Collections.reverse(children);
     }
 
     public void removeChild(CommandNode commandNode) {
-        if (this.children.remove(commandNode)) {
-            commandNode.setParent(null);
-        }
+        this.children.remove(commandNode);
+        commandNode.setParent(null);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CommandNode node = (CommandNode) o;
+        return Objects.equals(children, node.children) &&
+                Objects.equals(needPermission, node.needPermission) &&
+                Objects.equals(suggester, node.suggester) &&
+                Objects.equals(tip, node.tip);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(needPermission, suggester, tip);
     }
 
     public boolean canExecuteCommand() {
@@ -148,21 +139,23 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
-        node.children = new ArrayList<>();
+        node.children = new LinkedList<>();
         for (CommandNode child : children) {
             node.addChild(child.clone());
         }
         return node;
     }
 
-    public boolean same(CommandNode node) {
-        return node != null && node instanceof CommandNode &&
-                Objects.equals(suggester, node.suggester);
+    public CommandNode cloneWithoutParent() {
+        CommandNode node = clone();
+        node.setParent(null);
+        return node;
     }
 
-    @Override
-    public int compareTo(CommandNode o) {
-        return o.priority() - priority();
+    public boolean same(CommandNode node) {
+        return node != null &&
+                Objects.equals(suggester,node.suggester) &&
+                Objects.equals(tip,node.tip);
     }
 
     public abstract int priority();
