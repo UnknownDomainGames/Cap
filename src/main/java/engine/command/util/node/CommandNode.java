@@ -142,8 +142,7 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
 
     public boolean same(CommandNode node) {
         return node != null &&
-                Objects.equals(suggester, node.suggester) &&
-                Objects.equals(tip, node.tip);
+                Objects.equals(suggester, node.suggester);
     }
 
     @Override
