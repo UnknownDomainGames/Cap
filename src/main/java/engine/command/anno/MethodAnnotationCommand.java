@@ -97,18 +97,19 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
                         nodes = children;
                         continue;
                     }
-                    ArrayList<CommandNode> branches = new ArrayList<>();
-                    for (CommandNode parent : nodes) {
-                        CommandNode child = children.stream().findAny().get();
-                        CommandNode topCloneChild = CommandNodeUtil.getTopParent(child).clone();
-                        parent.addChild(topCloneChild);
-                        branches.addAll(CommandNodeUtil.getAllBottomNode(topCloneChild));
+                    TreeSet<CommandNode> topNodes = new TreeSet<>();
+                    for (CommandNode child : children) {
+                        topNodes.add(CommandNodeUtil.getTopParent(child));
                     }
-                    nodes = branches;
+                    List<CommandNode> branchNodes = new ArrayList<>();
+                    for (CommandNode parent : nodes) {
+                        for (CommandNode topNode : topNodes) {
+                            parent.addChild(topNode);
+                            branchNodes.addAll(CommandNodeUtil.getAllBottomNode(topNode));
+                        }
+                    }
+                    nodes = branchNodes;
                 }
-
-                //Tip 注释部分用于排插问题
-
 
                 nodes.forEach(commandNode -> commandNode.setExecutor((objects -> {
                     try {

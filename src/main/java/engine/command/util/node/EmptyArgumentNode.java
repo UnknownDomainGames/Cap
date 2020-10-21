@@ -3,6 +3,7 @@ package nullengine.command.util.node;
 import nullengine.command.CommandSender;
 import nullengine.command.argument.Argument;
 import nullengine.command.suggestion.Suggester;
+import nullengine.command.util.StringArgs;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,6 +38,11 @@ public class EmptyArgumentNode extends ArgumentNode {
     @Override
     public int getRequiredArgsNum() {
         return 0;
+    }
+
+    @Override
+    public boolean parse(CommandSender sender, StringArgs args) {
+        return true;
     }
 
     @Override

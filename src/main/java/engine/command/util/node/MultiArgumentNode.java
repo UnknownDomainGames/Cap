@@ -6,7 +6,6 @@ import nullengine.command.util.StringArgs;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 
 public class MultiArgumentNode extends CommandNode {
@@ -62,6 +61,10 @@ public class MultiArgumentNode extends CommandNode {
         return commandNode.parseArgs(sender, args);
     }
 
+    @Override
+    public int hashCode() {
+        return super.hashCode() + argsNum * 7 + commandNode.hashCode();
+    }
 
     @Override
     public String getTip() {
