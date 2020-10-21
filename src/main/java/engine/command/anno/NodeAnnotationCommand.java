@@ -124,11 +124,13 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
         HashSet<CommandNode> results = new HashSet<>();
 
+        //解析递归从根Node开始
         parse(node, sender, stringArgs, results);
 
         CommandNode bestResult = null;
         int bestNodeDepth = 0;
 
+        //筛选最佳结果
         for (CommandNode result : results) {
             int depth = CommandNodeUtil.getDepth(result);
             if (bestNodeCheck(bestResult, bestNodeDepth, result, depth)) {
@@ -141,17 +143,24 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     }
 
     private void parse(CommandNode node, CommandSender sender, StringArgs stringArgs, Set<CommandNode> result) {
+        //如果当前的Args指针+Node需要的指针小于等于Args的长度，并且Node解析成功
         if (stringArgs.getIndex() + node.getRequiredArgsNum() <= stringArgs.getLength() && node.parse(sender, stringArgs)) {
+            //所有叶子节点都是可执行节点，如果不是那肯定是构建树时出了问题
+            //假如Node能执行命令，则必然是叶子节点，直接加入待选结果
             if (node.canExecuteCommand()) {
                 result.add(node);
             } else {
+                //保存当前指针
                 int index = stringArgs.getIndex();
                 for (CommandNode child : node.getChildren()) {
+                    //子节点递归解析
                     parse(child, sender, stringArgs, result);
+                    //重设指针
                     stringArgs.setIndex(index);
                 }
             }
         } else {
+            //假如不满足条件，则直接将父Node加入待选结果
             result.add(node.getParent());
         }
     }
@@ -159,9 +168,11 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     private boolean bestNodeCheck(CommandNode bestNode, int bestNodeDepth, CommandNode checkNode, int checkNodeDepth) {
         if (bestNode == null)
             return true;
+        //假如检查的节点的深度比最佳节点的深度深
         if (checkNodeDepth > bestNodeDepth)
             return true;
         else if (checkNodeDepth == bestNodeDepth) {
+            //假如最佳节点不能执行命令，但检查节点可以
             if (!bestNode.canExecuteCommand() && checkNode.canExecuteCommand()) {
                 return true;
             }
