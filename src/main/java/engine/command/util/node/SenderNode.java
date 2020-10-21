@@ -43,6 +43,13 @@ public class SenderNode extends CommandNode {
     }
 
     @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + Arrays.hashCode(allowedSenders);
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "SenderNode{" +
                 "allowedSender=" + Arrays.toString(allowedSenders) +

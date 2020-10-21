@@ -33,6 +33,11 @@ public class ArgumentNode extends CommandNode {
     }
 
     @Override
+    public int hashCode() {
+        return super.hashCode() ^ Objects.hash(argument);
+    }
+
+    @Override
     public String toString() {
         return "ArgumentNode{" +
                 "argument=" + argument +
