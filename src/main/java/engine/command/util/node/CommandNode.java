@@ -2,12 +2,10 @@ package nullengine.command.util.node;
 
 import nullengine.command.CommandSender;
 import nullengine.command.suggestion.Suggester;
-import nullengine.command.util.CommandNodeUtil;
 import nullengine.command.util.StringArgs;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public abstract class CommandNode implements Cloneable, Comparable<CommandNode> {
 
@@ -92,6 +90,11 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
         if (this.children.remove(commandNode)) {
             commandNode.setParent(null);
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(needPermission, suggester, tip) + (executor == null ? 7 : 53);
     }
 
     public boolean canExecuteCommand() {

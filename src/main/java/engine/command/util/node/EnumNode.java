@@ -7,10 +7,7 @@ import nullengine.command.util.SuggesterHelper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class EnumNode extends CommandNode {
 
@@ -37,6 +34,11 @@ public class EnumNode extends CommandNode {
     @Override
     public int getRequiredArgsNum() {
         return 1;
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode() ^ Objects.hashCode(enumClass);
     }
 
     @Override

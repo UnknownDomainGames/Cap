@@ -185,7 +185,7 @@ public class CommandNodeUtil {
         }
         for (int i = 0; i < nodes.size(); i++) {
             CommandNode node = nodes.get(i);
-            MultiArgumentNode multiArgumentNode = new MultiArgumentNode(node, constructFunction, CommandNodeUtil.getDepthOn(node));
+            MultiArgumentNode multiArgumentNode = new MultiArgumentNode(node, constructFunction, CommandNodeUtil.getDepth(node));
             if (node.getParent() != null) {
                 CommandNode parent = node.getParent();
                 parent.removeChild(node);
@@ -220,7 +220,7 @@ public class CommandNodeUtil {
      * @param node
      * @return
      */
-    public static int getRequiredArgsAmountFromParent2Child(CommandNode node) {
+    public static int getRequiredArgsSumFromParent2Child(CommandNode node) {
         int i = 0;
         while (true) {
             if (node == null) {
@@ -243,7 +243,7 @@ public class CommandNodeUtil {
         }
     }
 
-    public static int getDepthOn(CommandNode node) {
+    public static int getDepth(CommandNode node) {
         if (node == null)
             return 0;
         int i = 0;
@@ -252,10 +252,6 @@ public class CommandNodeUtil {
             node = node.getParent();
         }
         return i;
-    }
-
-    public static int getDepth(CommandNode node) {
-        return getAllBottomNode(node).stream().mapToInt(CommandNodeUtil::getDepthOn).max().getAsInt();
     }
 
     public static List<CommandNode> getLinkedFromParent2Child(CommandNode child) {

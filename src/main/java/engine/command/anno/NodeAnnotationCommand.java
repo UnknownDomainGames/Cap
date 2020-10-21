@@ -1,7 +1,7 @@
 package nullengine.command.anno;
 
-import nullengine.command.*;
 import nullengine.command.Command;
+import nullengine.command.*;
 import nullengine.command.argument.ArgumentManager;
 import nullengine.command.argument.SimpleArgumentManager;
 import nullengine.command.exception.CommandWrongUseException;
@@ -9,6 +9,7 @@ import nullengine.command.exception.PermissionNotEnoughException;
 import nullengine.command.suggestion.SimpleSuggesterManager;
 import nullengine.command.suggestion.SuggesterManager;
 import nullengine.command.util.CommandNodeUtil;
+import nullengine.command.util.StringArgs;
 import nullengine.command.util.SuggesterHelper;
 import nullengine.command.util.node.CommandNode;
 import nullengine.command.util.node.EmptyArgumentNode;
@@ -50,7 +51,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             nodes.addAll(node.getChildren());
         }
 
-        Collections.sort(canExecuteNodes, Comparator.comparingInt(CommandNode::priority));
+        Collections.sort(canExecuteNodes);
 
     }
 
@@ -78,11 +79,11 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             }
         } else {
             CommandNode parseResult = parseArgs(sender, args);
-            if (CommandNodeUtil.getRequiredArgsAmountFromParent2Child(parseResult) != args.length) {
+            if (CommandNodeUtil.getRequiredArgsSumFromParent2Child(parseResult) != args.length) {
                 commandWrongUse(sender, args);
                 return;
             }
-            if (!parseResult.canExecuteCommand()){
+            if (!parseResult.canExecuteCommand()) {
                 commandWrongUse(sender, args);
                 return;
             }
@@ -119,47 +120,40 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
     private CommandNode parseArgs(CommandSender sender, String[] args) {
 
-        ArrayList<CommandNode> filterExecuteNodes = new ArrayList<>();
+        StringArgs stringArgs = new StringArgs(args);
 
-        for (CommandNode executeNode : canExecuteNodes) {
-            if (CommandNodeUtil.getRequiredArgsAmountFromParent2Child(executeNode) >= args.length) {
-                filterExecuteNodes.add(executeNode);
-            }
-        }
+        HashSet<CommandNode> results = new HashSet<>();
+
+        parse(node, sender, stringArgs, results);
 
         CommandNode bestResult = null;
-        int bestResultDepth = 0;
+        int bestNodeDepth = 0;
 
-        ArrayCopy<String> arrayCopy = new ArrayCopy<>(args);
-
-//        System.out.println();
-
-        for (CommandNode executeNode : filterExecuteNodes) {
-            List<CommandNode> nodeList = CommandNodeUtil.getLinkedFromParent2Child(executeNode);
-
-            int i = 0;
-            for (CommandNode node : nodeList) {
-                if (i + node.getRequiredArgsNum() > args.length) {
-                    break;
-                }
-//                boolean success = node.parse(sender, this.getName(), arrayCopy.copyOfRange(i, i + node.getRequiredArgsNum()));
-
-//                if (!success) {
-//                    break;
-//                }
-
-                int nodeDepth = CommandNodeUtil.getDepthOn(node);
-
-                if (bestNodeCheck(bestResult, bestResultDepth, node, nodeDepth)) {
-                    bestResult = node;
-                    //Tip 注释部分用于排查问题
-//                    CommandNodeUtil.showLink(bestResult);
-                    bestResultDepth = CommandNodeUtil.getDepthOn(bestResult);
-                }
-                i += node.getRequiredArgsNum();
+        for (CommandNode result : results) {
+            int depth = CommandNodeUtil.getDepth(result);
+            if (bestNodeCheck(bestResult, bestNodeDepth, result, depth)) {
+                bestResult = result;
+                bestNodeDepth = depth;
             }
         }
+
         return bestResult;
+    }
+
+    private void parse(CommandNode node, CommandSender sender, StringArgs stringArgs, Set<CommandNode> result) {
+        if (stringArgs.getIndex() + node.getRequiredArgsNum() <= stringArgs.getLength() && node.parse(sender, stringArgs)) {
+            if (node.canExecuteCommand()) {
+                result.add(node);
+            } else {
+                int index = stringArgs.getIndex();
+                for (CommandNode child : node.getChildren()) {
+                    parse(child, sender, stringArgs, result);
+                    stringArgs.setIndex(index);
+                }
+            }
+        } else {
+            result.add(node.getParent());
+        }
     }
 
     private boolean bestNodeCheck(CommandNode bestNode, int bestNodeDepth, CommandNode checkNode, int checkNodeDepth) {
@@ -168,14 +162,10 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         if (checkNodeDepth > bestNodeDepth)
             return true;
         else if (checkNodeDepth == bestNodeDepth) {
-            if (bestNode.canExecuteCommand()) {
-                if (checkNode.priority() > bestNode.priority())
-                    return true;
-            } else {
-                if (checkNode.canExecuteCommand())
-                    return true;
-                return checkNode.priority() > bestNode.priority();
+            if (!bestNode.canExecuteCommand() && checkNode.canExecuteCommand()) {
+                return true;
             }
+            return checkNode.priority() > bestNode.priority();
         }
         return false;
     }
@@ -251,7 +241,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         CommandNode result = suggestParse(sender, args);
         if (result == null)
             return Collections.EMPTY_LIST;
-        if (CommandNodeUtil.getRequiredArgsAmountFromParent2Child(result) != args.length - 1 || result == null || result.getChildren().isEmpty()) {
+        if (CommandNodeUtil.getRequiredArgsSumFromParent2Child(result) != args.length - 1 || result == null || result.getChildren().isEmpty()) {
             return Collections.EMPTY_LIST;
         }
         List<CommandNode> nodes = CommandNodeUtil.getShortestPath(result);
@@ -285,7 +275,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                         .getLinkedFromParent2Child(node1)
                         .stream()
                         .filter(node2 -> node2.getRequiredArgsNum() > 0)
-                        .filter(node2 -> CommandNodeUtil.getRequiredArgsAmountFromParent2Child(node2) == index)
+                        .filter(node2 -> CommandNodeUtil.getRequiredArgsSumFromParent2Child(node2) == index)
                         .findFirst().orElse(null)
                 ).filter(Objects::nonNull)
                 .collect(Collectors.toList());

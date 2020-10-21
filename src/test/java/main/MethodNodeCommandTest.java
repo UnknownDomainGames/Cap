@@ -14,11 +14,16 @@ import nullengine.command.suggestion.NamedSuggester;
 import nullengine.command.suggestion.SimpleSuggesterManager;
 import nullengine.command.suggestion.Suggester;
 import nullengine.command.suggestion.SuggesterManager;
+import nullengine.command.util.CommandNodeUtil;
+import nullengine.command.util.StringArgs;
 import nullengine.command.util.SuggesterHelper;
+import nullengine.command.util.node.CommandNode;
 import nullengine.permission.HashPermissible;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 
@@ -396,6 +401,27 @@ public class MethodNodeCommandTest {
                 .setArgumentManager(argumentManager)
                 .addCommandHandler(new CommandTest())
                 .register();
+        NodeAnnotationCommand command = (NodeAnnotationCommand) commandManager.getCommand("command").get();
+        try {
+            Method parseArgsMethod = NodeAnnotationCommand.class.getDeclaredMethod("parseArgs", CommandSender.class, String[].class);
+            parseArgsMethod.setAccessible(true);
+            try {
+                Object invoke = parseArgsMethod.invoke(command, testSender, new String[]{"a","asd"});
+                if(invoke==null){
+                    System.out.println("null");
+                }else{
+                    System.out.println(CommandNodeUtil.getNodeDescription((CommandNode) invoke));
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     public class CommandTest {
