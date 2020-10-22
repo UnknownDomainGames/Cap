@@ -134,9 +134,6 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
                     mainNode.addChild(clone);
                 }
 
-                if (nodeable instanceof NodeAnnotationCommand) {
-                    ((NodeAnnotationCommand) nodeable).flush();
-                }
                 list.add((Command) nodeable);
             }
 
