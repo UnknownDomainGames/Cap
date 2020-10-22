@@ -35,7 +35,7 @@ public class MethodNodeCommandTest {
     SimpleCommandManager simpleCommandManager = new SimpleCommandManager();
 
     public MethodNodeCommandTest() {
-   /*     MethodAnnotationCommand.getBuilder(simpleCommandManager)
+      /*  MethodAnnotationCommand.getBuilder(simpleCommandManager)
                 .addCommandHandler(this)
                 .register();*/
     }
@@ -348,12 +348,21 @@ public class MethodNodeCommandTest {
         Assertions.assertEquals(message, 12 + new Location(commandWorld, 1, 2, 3).toString() + "hello world" + new Location(testEntity.getWorld(), 4, 5, 6).toString());
         commandManager.execute(testEntity, "location 13 commandWorld 1 2 3 \"hello world\" commandWorld 4 5 6");
         Assertions.assertEquals(message, 13 + new Location(commandWorld, 1, 2, 3).toString() + "hello world" + new Location(commandWorld, 4, 5, 6).toString());
+        commandManager.execute(testEntity, "location 14 commandWorld 1 2 3");
+        Assertions.assertEquals(message, 14 + new Location(commandWorld, 1, 2, 3).toString());
+        commandManager.execute(testEntity, "location 15 1 2 3");
+        Assertions.assertEquals(message, 15 + new Location(testEntity.getWorld(), 1, 2, 3).toString());
     }
 
     public class ProvideTest {
         @Command("location")
         public void location(int i, Location location, String b, Location location2) {
             message = i + location.toString() + b + location2.toString();
+        }
+
+        @Command("location")
+        public void location(int i, Location location) {
+            message = i + location.toString();
         }
     }
 
@@ -494,15 +503,6 @@ public class MethodNodeCommandTest {
         commandManager.execute(testSender, "money set 100");
         commandManager.execute(testSender, "money");
         Assertions.assertEquals(message, "100.0");
-
-        long l = System.currentTimeMillis();
-        int times = 1000000;
-        for (int i = 0; i < times; i++) {
-            commandManager.execute(testSender, "money set " + i);
-        }
-        long l1 = System.currentTimeMillis() - l;
-        System.out.println("time: " + (System.currentTimeMillis() - l) + " ms");
-        System.out.println("avg: " + (l1 / (double) times) + " ms");
     }
 
     public class moneyTest {

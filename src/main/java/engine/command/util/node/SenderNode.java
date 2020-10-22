@@ -55,10 +55,7 @@ public class SenderNode extends CommandNode {
 
     @Override
     public Suggester getSuggester() {
-        return (sender, command, args) -> allowedSender(sender) ? getChildren()
-                .stream()
-                .map(node -> node.getSuggester().suggest(sender, command, args))
-                .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll) : Collections.EMPTY_LIST;
+        return (sender, command, args) -> Collections.EMPTY_LIST;
     }
 
     @Override
