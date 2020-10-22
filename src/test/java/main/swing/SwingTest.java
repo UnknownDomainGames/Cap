@@ -67,6 +67,7 @@ public class SwingTest {
                 .addCommandHandler(new MethodCommand())
                 .register();
 
+
         try {
             Field field = BaseCommandManager.class.getDeclaredField("resolver");
             field.setAccessible(true);
