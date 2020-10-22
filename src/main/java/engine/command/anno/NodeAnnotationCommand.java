@@ -186,9 +186,11 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         HashSet<CommandNode> results = new HashSet<>();
         parse(node, sender, stringArgs, results);
         HashSet<String> suggests = new HashSet<>();
-        for (CommandNode child : results.stream().filter(node1 -> leafNodePermissionEnough(sender, node1)).collect(Collectors.toList())) {
-            if (child.getSuggester() != null) {
-                suggests.addAll(child.getSuggester().suggest(sender, getName(), args));
+        for (CommandNode node : results.stream().filter(node1 -> leafNodePermissionEnough(sender, node1)).collect(Collectors.toList())) {
+            for (CommandNode child : node.getChildren()) {
+                if (child.getSuggester() != null) {
+                    suggests.addAll(child.getSuggester().suggest(sender, getName(), args));
+                }
             }
         }
         return SuggesterHelper.filterStartWith(new ArrayList<>(suggests), args[args.length - 1]);

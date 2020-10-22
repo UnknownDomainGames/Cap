@@ -60,7 +60,7 @@ public class EnumNode extends CommandNode {
     }
 
     public Suggester getSuggester() {
-        return (sender, command, args) -> SuggesterHelper.filterStartWith(enumNames,args[args.length-1]);
+        return (sender, command, args) -> enumNames;
     }
 
     @Override
