@@ -92,7 +92,7 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
                         for (CommandNode child : fieldNodes) {
                             CommandNode topCloneChild = CommandNodeUtil.getTopParent(child).clone();
                             node.addChild(topCloneChild);
-                            branches.addAll(CommandNodeUtil.getAllBottomNode(topCloneChild));
+                            branches.addAll(CommandNodeUtil.getAllLeafNode(topCloneChild));
                         }
                     }
                     nodeList = branches;

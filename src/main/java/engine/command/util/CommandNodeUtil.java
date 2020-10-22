@@ -177,7 +177,7 @@ public class CommandNodeUtil {
             for (CommandNode parent : nodes) {
                 for (CommandNode child : children) {
                     CommandNode clone = CommandNodeUtil.getTopParent(child).clone();
-                    cloneChildren.addAll(getAllBottomNode(clone));
+                    cloneChildren.addAll(getAllLeafNode(clone));
                     parent.addChild(clone);
                 }
             }
@@ -267,7 +267,7 @@ public class CommandNodeUtil {
         }
     }
 
-    public static Collection<? extends CommandNode> getAllBottomNode(CommandNode clone) {
+    public static Collection<? extends CommandNode> getAllLeafNode(CommandNode clone) {
         ArrayList<CommandNode> list = new ArrayList<>();
         List<CommandNode> arrayList = new LinkedList<>();
         arrayList.add(clone);

@@ -105,7 +105,7 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
                     for (CommandNode parent : nodes) {
                         for (CommandNode topNode : topNodes) {
                             parent.addChild(topNode);
-                            branchNodes.addAll(CommandNodeUtil.getAllBottomNode(topNode));
+                            branchNodes.addAll(CommandNodeUtil.getAllLeafNode(topNode));
                         }
                     }
                     nodes = branchNodes;
