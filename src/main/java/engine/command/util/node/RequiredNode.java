@@ -45,11 +45,6 @@ public class RequiredNode extends CommandNode {
     }
 
     @Override
-    public int hashCode() {
-        return super.hashCode() ^ Objects.hash(require);
-    }
-
-    @Override
     public int priority() {
         return 10;
     }

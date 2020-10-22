@@ -15,7 +15,6 @@ import nullengine.command.suggestion.SimpleSuggesterManager;
 import nullengine.command.suggestion.Suggester;
 import nullengine.command.suggestion.SuggesterManager;
 import nullengine.command.util.CommandNodeUtil;
-import nullengine.command.util.StringArgs;
 import nullengine.command.util.SuggesterHelper;
 import nullengine.command.util.node.CommandNode;
 import nullengine.permission.HashPermissible;
@@ -327,30 +326,28 @@ public class MethodNodeCommandTest {
 
             }
         };
-        for (int i = 0; i < 10000; i++) {
-            BaseCommandManager commandManager = new SimpleCommandManager();
+        BaseCommandManager commandManager = new SimpleCommandManager();
 
-            commandManager.getLogger().setUseParentHandlers(false);
+        commandManager.getLogger().setUseParentHandlers(false);
 
-            ArgumentManager argumentManager = new SimpleArgumentManager();
-            argumentManager.setClassDefaultArgument(new WorldArgument());
+        ArgumentManager argumentManager = new SimpleArgumentManager();
+        argumentManager.setClassDefaultArgument(new WorldArgument());
 
-            NodeAnnotationCommand.METHOD.getBuilder(commandManager)
-                    .setArgumentManager(argumentManager)
-                    .addProvider(new LocationProvider())
-                    .addCommandHandler(new ProvideTest())
-                    .register();
+        NodeAnnotationCommand.METHOD.getBuilder(commandManager)
+                .setArgumentManager(argumentManager)
+                .addProvider(new LocationProvider())
+                .addCommandHandler(new ProvideTest())
+                .register();
 
 
-            World commandWorld = new World("commandWorld");
+        World commandWorld = new World("commandWorld");
 
-            commandManager.execute(testEntity, "location 11 1 2 3 \"hello world\" commandWorld 4 5 6");
-            Assertions.assertEquals(message, 11 + new Location(testEntity.getWorld(), 1, 2, 3).toString() + "hello world" + new Location(commandWorld, 4, 5, 6).toString());
-            commandManager.execute(testEntity, "location 12 commandWorld 1 2 3 \"hello world\" 4 5 6");
-            Assertions.assertEquals(message, 12 + new Location(commandWorld, 1, 2, 3).toString() + "hello world" + new Location(testEntity.getWorld(), 4, 5, 6).toString());
-            commandManager.execute(testEntity, "location 13 commandWorld 1 2 3 \"hello world\" commandWorld 4 5 6");
-            Assertions.assertEquals(message, 13 + new Location(commandWorld, 1, 2, 3).toString() + "hello world" + new Location(commandWorld, 4, 5, 6).toString());
-        }
+        commandManager.execute(testEntity, "location 11 1 2 3 \"hello world\" commandWorld 4 5 6");
+        Assertions.assertEquals(message, 11 + new Location(testEntity.getWorld(), 1, 2, 3).toString() + "hello world" + new Location(commandWorld, 4, 5, 6).toString());
+        commandManager.execute(testEntity, "location 12 commandWorld 1 2 3 \"hello world\" 4 5 6");
+        Assertions.assertEquals(message, 12 + new Location(commandWorld, 1, 2, 3).toString() + "hello world" + new Location(testEntity.getWorld(), 4, 5, 6).toString());
+        commandManager.execute(testEntity, "location 13 commandWorld 1 2 3 \"hello world\" commandWorld 4 5 6");
+        Assertions.assertEquals(message, 13 + new Location(commandWorld, 1, 2, 3).toString() + "hello world" + new Location(commandWorld, 4, 5, 6).toString());
     }
 
     public class ProvideTest {
@@ -406,10 +403,10 @@ public class MethodNodeCommandTest {
             Method parseArgsMethod = NodeAnnotationCommand.class.getDeclaredMethod("parseArgs", CommandSender.class, String[].class);
             parseArgsMethod.setAccessible(true);
             try {
-                Object invoke = parseArgsMethod.invoke(command, testSender, new String[]{"a","asd"});
-                if(invoke==null){
+                Object invoke = parseArgsMethod.invoke(command, testSender, new String[]{"a", "asd"});
+                if (invoke == null) {
                     System.out.println("null");
-                }else{
+                } else {
                     System.out.println(CommandNodeUtil.getNodeDescription((CommandNode) invoke));
                 }
             } catch (IllegalAccessException e) {
@@ -420,7 +417,6 @@ public class MethodNodeCommandTest {
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
-
 
     }
 
@@ -489,7 +485,6 @@ public class MethodNodeCommandTest {
                 .setArgumentManager(argumentManager)
                 .addCommandHandler(new moneyTest())
                 .register();
-/*
         commandManager.execute(testSender, "money");
         Assertions.assertEquals(message, "0.0");
 
@@ -498,7 +493,16 @@ public class MethodNodeCommandTest {
 
         commandManager.execute(testSender, "money set 100");
         commandManager.execute(testSender, "money");
-        Assertions.assertEquals(message, "100.0");*/
+        Assertions.assertEquals(message, "100.0");
+
+        long l = System.currentTimeMillis();
+        int times = 1000000;
+        for (int i = 0; i < times; i++) {
+            commandManager.execute(testSender, "money set " + i);
+        }
+        long l1 = System.currentTimeMillis() - l;
+        System.out.println("time: " + (System.currentTimeMillis() - l) + " ms");
+        System.out.println("avg: " + (l1 / (double) times) + " ms");
     }
 
     public class moneyTest {

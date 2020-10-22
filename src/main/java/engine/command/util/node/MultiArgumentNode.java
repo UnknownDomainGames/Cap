@@ -62,11 +62,6 @@ public class MultiArgumentNode extends CommandNode {
     }
 
     @Override
-    public int hashCode() {
-        return super.hashCode() + argsNum * 7 + commandNode.hashCode();
-    }
-
-    @Override
     public String getTip() {
         return commandNode.getTip();
     }
