@@ -205,67 +205,29 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         return false;
     }
 
-    protected CommandNode suggestParse(CommandSender sender, String[] args) {
-        String[] removeLast = args;
-        if (args != null && args.length > 0) {
-            removeLast = Arrays.copyOfRange(args, 0, args.length - 1);
-        }
+    @Override
+    public List<String> getTips(CommandSender sender, String[] args) {
+        StringArgs stringArgs = new StringArgs(Arrays.copyOfRange(args, 0, args.length - 1));
+        HashSet<CommandNode> results = new HashSet<>();
+        parse(node, sender, stringArgs, results);
 
-        CommandNode result;
-        if (removeLast.length == 0) {
-            result = node;
-        } else {
-            result = parseArgs(sender, removeLast);
-        }
+        CommandNode nearestNode = null;
+        int nearestDepth = Integer.MAX_VALUE;
 
-        result = optimizeSuggesterNode(result);
-
-        while (result instanceof SenderNode) {
-            if (result.getParent() != null) {
-                result = result.getParent();
-                continue;
-            }
-        }
-
-        return result;
-    }
-
-    private CommandNode optimizeSuggesterNode(CommandNode node) {
-        if (node.getChildren().isEmpty()) {
-            List<CommandNode> listWithOutSender = getNodeLinkWithOutSender(CommandNodeUtil.getLinkedFromParent2Child(node));
-            for (CommandNode canExecuteNode : canExecuteNodes) {
-                List<CommandNode> matchList = getNodeLinkWithOutSender(CommandNodeUtil.getLinkedFromParent2Child(canExecuteNode));
-                if (matchList(listWithOutSender, matchList)) {
-                    return matchList.get(listWithOutSender.size() - 1);
+        for (CommandNode result : results) {
+            for (CommandNode child : result.getChildren()) {
+                int depth = CommandNodeUtil.getDepth(child);
+                if (depth < nearestDepth) {
+                    nearestNode = result;
+                    nearestDepth = depth;
                 }
             }
         }
-        return node;
-    }
 
-    private boolean matchList(List<CommandNode> list, List<CommandNode> matchList) {
-        if (list.size() >= matchList.size())
-            return false;
-        for (int i = 0; i < list.size(); i++) {
-            if (!list.get(i).same(matchList.get(i)))
-                return false;
-        }
-        return true;
-    }
-
-    private List<CommandNode> getNodeLinkWithOutSender(List<CommandNode> nodeList) {
-        return nodeList.stream().filter(node1 -> !(node1 instanceof SenderNode)).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<String> getTips(CommandSender sender, String[] args) {
-        CommandNode result = suggestParse(sender, args);
-        if (result == null)
-            return Collections.EMPTY_LIST;
-        if (CommandNodeUtil.getRequiredArgsSumFromParent2Child(result) != args.length - 1 || result == null || result.getChildren().isEmpty()) {
+        if (nearestNode == null || nearestNode.getChildren().isEmpty()) {
             return Collections.EMPTY_LIST;
         }
-        List<CommandNode> nodes = CommandNodeUtil.getShortestPath(result);
+        List<CommandNode> nodes = CommandNodeUtil.getShortestPath(nearestNode);
         List<String> tips = nodes.stream()
                 .filter(node1 -> !(node1 instanceof SenderNode)).map(node -> node.hasTip() ? node.getTip() : "")
                 .collect(Collectors.toList());
