@@ -159,6 +159,8 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             else if (bestNode.canExecuteCommand() && checkNode.canExecuteCommand()) {
                 return CommandNodeUtil.getLinkedFromParent2Child(checkNode).stream().mapToInt(CommandNode::priority).sum() >
                         CommandNodeUtil.getLinkedFromParent2Child(bestNode).stream().mapToInt(CommandNode::priority).sum();
+            } else if (bestNode.canExecuteCommand() && !checkNode.canExecuteCommand()) {
+                return false;
             }
             return checkNode.priority() > bestNode.priority();
         }
