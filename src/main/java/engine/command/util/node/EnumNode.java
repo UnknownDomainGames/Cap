@@ -1,13 +1,15 @@
-package nullengine.command.util.node;
+package engine.command.util.node;
 
-import nullengine.command.CommandSender;
-import nullengine.command.suggestion.Suggester;
-import nullengine.command.util.StringArgs;
-import nullengine.command.util.SuggesterHelper;
+import engine.command.CommandSender;
+import engine.command.suggestion.Suggester;
+import engine.command.util.StringArgs;
+import engine.command.util.SuggesterHelper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class EnumNode extends CommandNode {
 

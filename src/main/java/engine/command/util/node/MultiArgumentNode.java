@@ -1,11 +1,12 @@
-package nullengine.command.util.node;
+package engine.command.util.node;
 
-import nullengine.command.CommandSender;
-import nullengine.command.util.StringArgs;
+import engine.command.CommandSender;
+import engine.command.util.StringArgs;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class MultiArgumentNode extends CommandNode {
@@ -60,6 +61,7 @@ public class MultiArgumentNode extends CommandNode {
     protected Object parseArgs(CommandSender sender, StringArgs args) {
         return commandNode.parseArgs(sender, args);
     }
+
 
     @Override
     public String getTip() {

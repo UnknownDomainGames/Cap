@@ -1,4 +1,4 @@
-package nullengine.command.util;
+package engine.command.util;
 
 public class StringArgs {
 

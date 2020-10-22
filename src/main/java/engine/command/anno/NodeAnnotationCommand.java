@@ -1,21 +1,19 @@
-package nullengine.command.anno;
+package engine.command.anno;
 
-import nullengine.command.Command;
-import nullengine.command.*;
-import nullengine.command.argument.ArgumentManager;
-import nullengine.command.argument.SimpleArgumentManager;
-import nullengine.command.exception.CommandWrongUseException;
-import nullengine.command.exception.PermissionNotEnoughException;
-import nullengine.command.suggestion.SimpleSuggesterManager;
-import nullengine.command.suggestion.SuggesterManager;
-import nullengine.command.util.CommandNodeUtil;
-import nullengine.command.util.StringArgs;
-import nullengine.command.util.SuggesterHelper;
-import nullengine.command.util.node.CommandNode;
-import nullengine.command.util.node.EmptyArgumentNode;
-import nullengine.command.util.node.Nodeable;
-import nullengine.command.util.node.SenderNode;
-import nullengine.permission.Permissible;
+import engine.command.Command;
+import engine.command.*;
+import engine.command.argument.ArgumentManager;
+import engine.command.argument.SimpleArgumentManager;
+import engine.command.suggestion.SimpleSuggesterManager;
+import engine.command.suggestion.SuggesterManager;
+import engine.command.util.CommandNodeUtil;
+import engine.command.util.StringArgs;
+import engine.command.util.SuggesterHelper;
+import engine.command.util.node.CommandNode;
+import engine.command.util.node.EmptyArgumentNode;
+import engine.command.util.node.Nodeable;
+import engine.command.util.node.SenderNode;
+import engine.permission.Permissible;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,34 +39,34 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         if (args == null || args.length == 0) {
             if (node.canExecuteCommand()) {
                 if (!hasPermission(sender, node.getNeedPermission())) {
-                    permissionNotEnough(sender, node.getNeedPermission().toArray(new String[0]));
+                    permissionNotEnough(sender, args, node.getNeedPermission().toArray(String[]::new));
                     return;
                 }
-                node.getExecutor().accept(Collections.EMPTY_LIST);
+                node.getExecutor().accept(List.of());
             } else {
                 CommandNode parseResult = parseArgs(sender, args);
                 if (parseResult != null && parseResult.canExecuteCommand()) {
                     if (!hasPermission(sender, parseResult.getNeedPermission())) {
-                        permissionNotEnough(sender, parseResult.getNeedPermission().toArray(new String[0]));
+                        permissionNotEnough(sender, args, parseResult.getNeedPermission().toArray(String[]::new));
                         return;
                     }
                     execute(parseResult);
                     return;
                 }
-                commandWrongUse(sender, args);
+                commandWrongUsage(sender, args);
             }
         } else {
             CommandNode parseResult = parseArgs(sender, args);
             if (CommandNodeUtil.getRequiredArgsSumFromParent2Child(parseResult) != args.length) {
-                commandWrongUse(sender, args);
+                commandWrongUsage(sender, args);
                 return;
             }
             if (!parseResult.canExecuteCommand()) {
-                commandWrongUse(sender, args);
+                commandWrongUsage(sender, args);
                 return;
             }
             if (!hasPermission(sender, parseResult.getNeedPermission())) {
-                permissionNotEnough(sender, parseResult.getNeedPermission().toArray(new String[0]));
+                permissionNotEnough(sender, args, parseResult.getNeedPermission().toArray(String[]::new));
                 return;
             }
             execute(parseResult);
@@ -81,12 +79,14 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         node.getExecutor().accept(list);
     }
 
-    private void permissionNotEnough(CommandSender sender, String[] permission) {
-        sender.handleException(CommandException.exception(new PermissionNotEnoughException(this.getName(), permission), this));
+    private void permissionNotEnough(CommandSender sender, String[] args, String[] requiredPermissions) {
+        sender.sendCommandException(
+                new CommandException(CommandException.Type.PERMISSION_NOT_ENOUGH, sender, this, args, requiredPermissions));
     }
 
-    private void commandWrongUse(CommandSender sender, String[] args) {
-        sender.handleException(CommandException.exception(new CommandWrongUseException(this.getName(), args), this, args));
+    private void commandWrongUsage(CommandSender sender, String[] args) {
+        sender.sendCommandException(
+                new CommandException(CommandException.Type.COMMAND_WRONG_USAGE, sender, this, args, null));
     }
 
     private boolean hasPermission(Permissible permissible, Collection<String> needPermission) {

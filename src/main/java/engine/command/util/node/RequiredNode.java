@@ -1,11 +1,10 @@
-package nullengine.command.util.node;
+package engine.command.util.node;
 
-import com.google.common.collect.Lists;
-import nullengine.command.CommandSender;
-import nullengine.command.suggestion.Suggester;
-import nullengine.command.util.StringArgs;
+import engine.command.CommandSender;
+import engine.command.suggestion.Suggester;
+import engine.command.util.StringArgs;
 
-import java.util.Objects;
+import java.util.List;
 
 public class RequiredNode extends CommandNode {
 
@@ -30,7 +29,7 @@ public class RequiredNode extends CommandNode {
 
     @Override
     public Suggester getSuggester() {
-        return (sender, command, args) -> Lists.newArrayList(require);
+        return (sender, command, args) -> List.of(require);
     }
 
     public String getRequire() {
