@@ -1,12 +1,12 @@
-package nullengine.command.anno;
+package engine.command.anno;
 
-import nullengine.command.Command;
-import nullengine.command.CommandManager;
-import nullengine.command.argument.ArgumentManager;
-import nullengine.command.suggestion.SuggesterManager;
-import nullengine.command.util.CommandNodeUtil;
-import nullengine.command.util.node.CommandNode;
-import nullengine.command.util.node.Nodeable;
+import engine.command.Command;
+import engine.command.CommandManager;
+import engine.command.argument.ArgumentManager;
+import engine.command.suggestion.SuggesterManager;
+import engine.command.util.CommandNodeUtil;
+import engine.command.util.node.CommandNode;
+import engine.command.util.node.Nodeable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -64,7 +64,7 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
 
             for (Method method : o.getClass().getMethods()) {
 
-                nullengine.command.anno.Command commandAnnotation = method.getAnnotation(nullengine.command.anno.Command.class);
+                engine.command.anno.Command commandAnnotation = method.getAnnotation(engine.command.anno.Command.class);
 
                 if (commandAnnotation == null) {
                     continue;

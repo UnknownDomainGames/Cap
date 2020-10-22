@@ -1,8 +1,6 @@
 package main.swing;
 
 import javax.swing.*;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.concurrent.CopyOnWriteArrayList;
 

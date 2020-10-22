@@ -5,8 +5,6 @@ import engine.command.argument.Argument;
 import engine.command.suggestion.Suggester;
 import engine.command.util.StringArgs;
 
-import java.util.Objects;
-
 public class ArgumentNode extends CommandNode {
 
     private Argument argument;
