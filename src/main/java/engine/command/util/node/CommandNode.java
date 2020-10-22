@@ -79,7 +79,6 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
         commandNode.setParent(this);
         this.children.add(commandNode);
         Collections.sort(children);
-//        System.out.println("sort: " + children.stream().map(CommandNodeUtil::getNodeDescription).collect(Collectors.toList()));
     }
 
     private CommandNode matchChild(CommandNode commandNode) {
