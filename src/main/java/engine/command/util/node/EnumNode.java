@@ -37,11 +37,6 @@ public class EnumNode extends CommandNode {
     }
 
     @Override
-    public int hashCode() {
-        return super.hashCode() ^ Objects.hashCode(enumClass);
-    }
-
-    @Override
     protected Object parseArgs(CommandSender sender, StringArgs args) {
         String name = args.next();
         if (!enumNames.contains(name)) {

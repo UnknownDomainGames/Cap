@@ -96,11 +96,6 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
         }
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(needPermission, suggester, tip) + (executor == null ? 7 : 53);
-    }
-
     public boolean canExecuteCommand() {
         return getExecutor() != null;
     }
