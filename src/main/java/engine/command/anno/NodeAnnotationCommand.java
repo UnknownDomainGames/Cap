@@ -240,10 +240,12 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             return ArgumentCheckResult.Valid();
         }
         int index = args.length;
+        StringArgs stringArgs = new StringArgs(args);
         for (CommandNode node : getNodesOnArgumentIndex(index)) {
-//            if (node.parse(sender, this.getName(), args[index - 1])) {
-//                return ArgumentCheckResult.Valid();
-//            }
+            stringArgs.setIndex(index - 1);
+            if (node.parse(sender, stringArgs)) {
+                return ArgumentCheckResult.Valid();
+            }
         }
         return ArgumentCheckResult.Error("/" + this.getName() + " " + formatArgs(args) + " <- wrong");
     }
@@ -267,29 +269,6 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     @Override
     public CommandNode getNode() {
         return node;
-    }
-
-    private class ArrayCopy<T> {
-
-        private HashMap<Integer, T[]> cacheMap = new HashMap<>();
-        T[] arrays;
-
-        public ArrayCopy(T[] arrays) {
-            this.arrays = arrays;
-        }
-
-        public T[] copyOfRange(int i, int to) {
-            int key = geyKey(i, to);
-            if (cacheMap.containsKey(key))
-                return cacheMap.get(key);
-            T[] copy = Arrays.copyOfRange(arrays, i, to);
-            cacheMap.put(key, copy);
-            return copy;
-        }
-
-        private int geyKey(int i, int i2) {
-            return i * 100 + i2;
-        }
     }
 
     private static class ClassBuilderGetter extends CommandBuilderGetter<ClassAnnotationCommand.ClassAnnotationBuilder> {
