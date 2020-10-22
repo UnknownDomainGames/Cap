@@ -129,10 +129,9 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
 
                 CommandNode mainNode = nodeable.getNode();
 
-                mainNode.addChild(CommandNodeUtil.getTopParent(nodes.stream().findAny().get()));
-
-                for (CommandNode commandNode : nodes) {
-                    CommandNodeUtil.showLink(commandNode);
+                for (CommandNode node : nodes) {
+                    CommandNode clone = CommandNodeUtil.getTopParent(node).clone();
+                    mainNode.addChild(clone);
                 }
 
                 if (nodeable instanceof NodeAnnotationCommand) {

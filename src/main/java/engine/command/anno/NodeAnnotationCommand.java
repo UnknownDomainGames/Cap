@@ -52,7 +52,6 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         }
 
         Collections.sort(canExecuteNodes);
-
     }
 
 
@@ -136,6 +135,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             if (bestNodeCheck(bestResult, bestNodeDepth, result, depth)) {
                 bestResult = result;
                 bestNodeDepth = depth;
+                System.out.println("bestNode: "+CommandNodeUtil.getNodeDescription(result));
             }
         }
 

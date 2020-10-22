@@ -58,6 +58,10 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
 
     public void addChild(CommandNode commandNode) {
         if (commandNode.executor != null) {
+            for (CommandNode child : children) {
+                if (child.same(commandNode) && commandNode.executor.equals(child.executor))
+                    return;
+            }
             add(commandNode);
             return;
         }
@@ -90,11 +94,6 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
         if (this.children.remove(commandNode)) {
             commandNode.setParent(null);
         }
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(needPermission, suggester, tip) + (executor == null ? 7 : 53);
     }
 
     public boolean canExecuteCommand() {
