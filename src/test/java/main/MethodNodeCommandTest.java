@@ -31,120 +31,6 @@ public class MethodNodeCommandTest {
 
     public String message;
 
-    SimpleCommandManager simpleCommandManager = new SimpleCommandManager();
-
-    public MethodNodeCommandTest() {
-      /*  MethodAnnotationCommand.getBuilder(simpleCommandManager)
-                .addCommandHandler(this)
-                .register();*/
-    }
-
-    @Test
-    public void commandAttributeTest() {
-        engine.command.Command command = simpleCommandManager.getCommand("command").get();
-
-        Assertions.assertEquals(command.getDescription(), "desc");
-        Assertions.assertEquals(command.getHelpMessage(), "helpMessage");
-
-        simpleCommandManager.execute(testSender, "command");
-        Assertions.assertEquals(message, "command");
-    }
-
-    @Command(value = "command", desc = "desc", helpMessage = "helpMessage")
-    public void command() {
-        message = "command";
-    }
-
-    @Test
-    void permissionTest() {
-        testSender.removePermission("permission.use");
-        testSender.removePermission("permission");
-        testSender.removePermission("op");
-        engine.command.Command command = simpleCommandManager.getCommand("permission").get();
-        command.execute(testSender, new String[0]);
-        Assertions.assertEquals(CommandException.Type.PERMISSION_NOT_ENOUGH.name(), message);
-        testSender.setPermission("permission", true);
-        Assertions.assertDoesNotThrow(() -> command.execute(testSender, new String[0]));
-        testSender.setPermission("permission", false);
-        testSender.setPermission("permission.use", true);
-        Assertions.assertDoesNotThrow(() -> command.execute(testSender, new String[0]));
-        testSender.removePermission("permission.use");
-        testSender.removePermission("permission");
-        Assertions.assertEquals("p", message);
-    }
-
-    @Command(value = "permission")
-    @Permission({"permission.use"})
-    public void permission() {
-        message = "p";
-    }
-
-    @Test
-    public void senderTest() {
-        engine.command.Command command = simpleCommandManager.getCommand("sender").get();
-        Sender1 sender1 = new Sender1();
-        command.execute(sender1, new String[0]);
-        Assertions.assertEquals(sender1.getSenderName(), message);
-        Sender2 sender2 = new Sender2();
-        command.execute(sender2, new String[0]);
-        Assertions.assertEquals(sender2.getSenderName(), message);
-        command.execute(testSender, new String[0]);
-        Assertions.assertEquals(CommandException.Type.COMMAND_WRONG_USAGE.name(), message);
-    }
-
-    @Command("sender")
-    public void sender(@Sender({Sender1.class, Sender2.class}) CommandSender sender) {
-        message = sender.getSenderName();
-    }
-
-    private class Sender1 extends TestSender {
-
-        public Sender1() {
-            super("testSender1", s -> {
-            }, c -> {
-            });
-        }
-    }
-
-    private class Sender2 implements CommandSender {
-        @Override
-        public void sendMessage(String message) {
-        }
-
-        @Override
-        public String getSenderName() {
-            return "sender2";
-        }
-
-        @Override
-        public void sendCommandException(CommandException exception) {
-
-        }
-
-        @Override
-        public boolean hasPermission(@Nonnull String permission) {
-            return true;
-        }
-
-        @Override
-        public void setPermission(@Nonnull String permission, boolean bool) {
-        }
-
-        @Override
-        public void removePermission(String permission) {
-        }
-
-        @Override
-        public void clearPermission() {
-
-        }
-
-        @Override
-        public Map<String, Boolean> toPermissionMap() {
-            return null;
-        }
-    }
-
     @Test
     public void argumentTest() {
 
@@ -248,45 +134,6 @@ public class MethodNodeCommandTest {
     }
 
     @Test
-    public void requiredTest() throws Exception {
-        engine.command.Command command = simpleCommandManager.getCommand("required").get();
-
-        command.execute(testSender, new String[]{"c"});
-        Assertions.assertEquals(CommandException.Type.COMMAND_WRONG_USAGE.name(), message);
-
-        command.execute(testSender, new String[]{"a"});
-        Assertions.assertEquals("a", message);
-        command.execute(testSender, new String[]{"b"});
-        Assertions.assertEquals("b", message);
-    }
-
-    @Command("required")
-    public void required1(@Required("a") String a) {
-        message = a;
-    }
-
-    @Command("required")
-    public void required2(@Required("b") String a) {
-        message = a;
-    }
-
-    @Test
-    void tip() {
-        List<String> tips = simpleCommandManager.getTips(testSender, "tip ");
-        Assertions.assertArrayEquals(tips.toArray(), new String[]{"x", "y", "z"});
-        tips = simpleCommandManager.getTips(testSender, "tip 2");
-        Assertions.assertArrayEquals(tips.toArray(), new String[]{"x", "y", "z"});
-        tips = simpleCommandManager.getTips(testSender, "tip 2 5");
-        Assertions.assertArrayEquals(tips.toArray(), new String[]{"y", "z"});
-        tips = simpleCommandManager.getTips(testSender, "tip 2 5 6");
-        Assertions.assertArrayEquals(tips.toArray(), new String[]{"z"});
-    }
-
-    @Command("tip")
-    public void tip(@Tip("x") int x, @Tip("y") int y, @Tip("z") int z) {
-    }
-
-    @Test
     void provide() {
         Entity testEntity = new Entity() {
             HashPermissible permissible = new HashPermissible();
@@ -371,35 +218,6 @@ public class MethodNodeCommandTest {
     }
 
     @Test
-    void enumTest() {
-        simpleCommandManager.execute(testSender, "enum A");
-        Assertions.assertEquals("A", message);
-    }
-
-    @Command("enum")
-    public void enumCommand(TestEnum testEnum) {
-        message = testEnum.name();
-    }
-
-    @Test
-    void commandTest() {
-        simpleCommandManager.execute(testSender, "command1");
-        Assertions.assertEquals(message, testSender.getSenderName() + "command1");
-        simpleCommandManager.execute(testSender, "command1 abc");
-        Assertions.assertEquals(message, testSender.getSenderName() + "abc");
-    }
-
-    @Command("command1")
-    public void command1(@Sender CommandSender sender) {
-        message = sender.getSenderName() + "command1";
-    }
-
-    @Command("command1")
-    public void command1(@Sender CommandSender sender, String message) {
-        this.message = sender.getSenderName() + message;
-    }
-
-    @Test
     void commandTest1() {
         BaseCommandManager commandManager = new SimpleCommandManager();
 
@@ -410,26 +228,6 @@ public class MethodNodeCommandTest {
                 .setArgumentManager(argumentManager)
                 .addCommandHandler(new CommandTest())
                 .register();
-        NodeAnnotationCommand command = (NodeAnnotationCommand) commandManager.getCommand("command").get();
-        try {
-            Method parseArgsMethod = NodeAnnotationCommand.class.getDeclaredMethod("parseArgs", CommandSender.class, String[].class);
-            parseArgsMethod.setAccessible(true);
-            try {
-                Object invoke = parseArgsMethod.invoke(command, testSender, new String[]{"a", "asd"});
-                if (invoke == null) {
-                    System.out.println("null");
-                } else {
-                    System.out.println(CommandNodeUtil.getNodeDescription((CommandNode) invoke));
-                }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            }
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-
     }
 
     public class CommandTest {

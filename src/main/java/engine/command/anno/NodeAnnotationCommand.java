@@ -118,7 +118,6 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 bestNodeDepth = depth;
             }
         }
-
         return bestResult;
     }
 
@@ -156,6 +155,11 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             if (!bestNode.canExecuteCommand() && checkNode.canExecuteCommand()) {
                 return true;
             }
+            //假如两者都能执行命令，则检查合计优先级
+            else if (bestNode.canExecuteCommand() && checkNode.canExecuteCommand()) {
+                return CommandNodeUtil.getLinkedFromParent2Child(checkNode).stream().mapToInt(CommandNode::priority).sum() >
+                        CommandNodeUtil.getLinkedFromParent2Child(bestNode).stream().mapToInt(CommandNode::priority).sum();
+            }
             return checkNode.priority() > bestNode.priority();
         }
         return false;
@@ -167,7 +171,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         HashSet<CommandNode> results = new HashSet<>();
         parse(node, sender, stringArgs, results);
         HashSet<String> suggests = new HashSet<>();
-        for (CommandNode node : results.stream().filter(node1 -> leafNodePermissionEnough(sender, node1)).collect(Collectors.toList())) {
+        for (CommandNode node : results.stream().filter(node1 -> leafNodePermissionEnough(sender, node1) && CommandNodeUtil.getRequiredArgsSumFromParent2Child(node1) == args.length - 1).collect(Collectors.toList())) {
             for (CommandNode child : node.getChildren()) {
                 if (child.getSuggester() != null) {
                     suggests.addAll(child.getSuggester().suggest(sender, getName(), args));
