@@ -131,8 +131,6 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
                     e.printStackTrace();
                 }
 
-                if (nodeable instanceof NodeAnnotationCommand)
-                    ((NodeAnnotationCommand) nodeable).flush();
                 commands.add(command);
             }
             return commands;

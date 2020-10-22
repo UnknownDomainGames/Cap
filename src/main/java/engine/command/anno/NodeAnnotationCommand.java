@@ -195,7 +195,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         CommandNode nearestNode = null;
         int nearestDepth = Integer.MAX_VALUE;
 
-        for (CommandNode result : results) {
+        for (CommandNode result : results.stream().filter(node1 -> leafNodePermissionEnough(sender, node1)).collect(Collectors.toList())) {
             for (CommandNode child : result.getChildren()) {
                 int depth = CommandNodeUtil.getDepth(child);
                 if (depth < nearestDepth) {

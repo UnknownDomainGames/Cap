@@ -1,14 +1,15 @@
 package main.swing;
 
-import engine.command.CommandException;
-import engine.command.CommandSender;
-import engine.permission.HashPermissible;
-
-import javax.annotation.Nonnull;
-import java.util.Map;
+import nullengine.command.CommandException;
+import nullengine.command.CommandSender;
+import nullengine.permission.HashPermissible;
 
 public class ConsoleSender implements CommandSender {
     private HashPermissible permissible = new HashPermissible();
+    @Override
+    public void sendMessage(String message) {
+        System.out.println(message);
+    }
 
     @Override
     public String getSenderName() {
@@ -16,37 +17,22 @@ public class ConsoleSender implements CommandSender {
     }
 
     @Override
-    public void sendMessage(String message) {
-        System.out.println(message);
-    }
-
-    @Override
-    public void sendCommandException(CommandException exception) {
+    public void handleException(CommandException exception) {
         System.out.println(exception.toString());
     }
 
     @Override
-    public boolean hasPermission(@Nonnull String permission) {
-        return true;
+    public boolean hasPermission(String permission) {
+        return false;
     }
 
-    @Override
-    public void setPermission(@Nonnull String permission, boolean bool) {
-        throw new UnsupportedOperationException("Cannot set permission to console");
-    }
+    public void setPermission(String permission, boolean bool) {}
 
     @Override
-    public void removePermission(String permission) {
-        throw new UnsupportedOperationException("Cannot remove permission to console");
-    }
+    public void removePermission(String permission) {}
 
     @Override
-    public void clearPermission() {
-        throw new UnsupportedOperationException("Cannot clear permission to console");
-    }
+    public void clean() {
 
-    @Override
-    public Map<String, Boolean> toPermissionMap() {
-        return Map.of();
     }
 }
