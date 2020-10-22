@@ -32,28 +32,9 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
     private CommandNode node = new EmptyArgumentNode();
 
-    private List<CommandNode> canExecuteNodes = new ArrayList<>();
-
     public NodeAnnotationCommand(String name, String description, String helpMessage) {
         super(name, description, helpMessage);
     }
-
-    public void flush() {
-        canExecuteNodes.clear();
-
-        List<CommandNode> nodes = new LinkedList<>();
-        nodes.add(node);
-        while (!nodes.isEmpty()) {
-            CommandNode node = nodes.remove(0);
-            if (node.canExecuteCommand()) {
-                canExecuteNodes.add(node);
-            }
-            nodes.addAll(node.getChildren());
-        }
-
-        Collections.sort(canExecuteNodes);
-    }
-
 
     @Override
     public void execute(CommandSender sender, String[] args) {
@@ -239,12 +220,16 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         if (args == null || args.length == 0) {
             return ArgumentCheckResult.Valid();
         }
-        int index = args.length;
-        StringArgs stringArgs = new StringArgs(args);
-        for (CommandNode node : getNodesOnArgumentIndex(index)) {
-            stringArgs.setIndex(index - 1);
-            if (node.parse(sender, stringArgs)) {
-                return ArgumentCheckResult.Valid();
+        StringArgs stringArgs = new StringArgs(Arrays.copyOfRange(args, 0, args.length - 1));
+        HashSet<CommandNode> results = new HashSet<>();
+        parse(node, sender, stringArgs, results);
+
+        StringArgs args1 = new StringArgs(args);
+        for (CommandNode node : results) {
+            for (CommandNode child : node.getChildren()) {
+                args1.setIndex(args.length - 1);
+                if (child.parse(sender, args1))
+                    return ArgumentCheckResult.Valid();
             }
         }
         return ArgumentCheckResult.Error("/" + this.getName() + " " + formatArgs(args) + " <- wrong");
@@ -252,18 +237,6 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
     private String formatArgs(String[] args) {
         return Arrays.stream(args).map(s -> s + " ").collect(Collectors.joining());
-    }
-
-    private List<CommandNode> getNodesOnArgumentIndex(int index) {
-        return canExecuteNodes.stream()
-                .map(node1 -> CommandNodeUtil
-                        .getLinkedFromParent2Child(node1)
-                        .stream()
-                        .filter(node2 -> node2.getRequiredArgsNum() > 0)
-                        .filter(node2 -> CommandNodeUtil.getRequiredArgsSumFromParent2Child(node2) == index)
-                        .findFirst().orElse(null)
-                ).filter(Objects::nonNull)
-                .collect(Collectors.toList());
     }
 
     @Override
