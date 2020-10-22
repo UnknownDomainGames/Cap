@@ -135,7 +135,6 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             if (bestNodeCheck(bestResult, bestNodeDepth, result, depth)) {
                 bestResult = result;
                 bestNodeDepth = depth;
-                System.out.println("bestNode: "+CommandNodeUtil.getNodeDescription(result));
             }
         }
 
@@ -183,16 +182,25 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
     @Override
     public List<String> suggest(CommandSender sender, String[] args) {
-        CommandNode result = suggestParse(sender, args);
-        if (result == null)
-            return Collections.EMPTY_LIST;
-        Set<String> list = new HashSet<>();
-        for (CommandNode child : result.getChildren()) {
+        StringArgs stringArgs = new StringArgs(Arrays.copyOfRange(args, 0, args.length - 1));
+        HashSet<CommandNode> results = new HashSet<>();
+        parse(node, sender, stringArgs, results);
+        HashSet<String> suggests = new HashSet<>();
+        for (CommandNode child : results.stream().filter(node1 -> leafNodePermissionEnough(sender, node1)).collect(Collectors.toList())) {
             if (child.getSuggester() != null) {
-                list.addAll(child.getSuggester().suggest(sender, getName(), args));
+                suggests.addAll(child.getSuggester().suggest(sender, getName(), args));
             }
         }
-        return SuggesterHelper.filterStartWith(new ArrayList<>(list), args[args.length - 1]);
+        return SuggesterHelper.filterStartWith(new ArrayList<>(suggests), args[args.length - 1]);
+    }
+
+    private boolean leafNodePermissionEnough(CommandSender sender, CommandNode node) {
+        Collection<? extends CommandNode> allLeafNode = CommandNodeUtil.getAllLeafNode(node);
+        for (CommandNode commandNode : allLeafNode) {
+            if (sender.hasPermission(commandNode.getNeedPermission()))
+                return true;
+        }
+        return false;
     }
 
     protected CommandNode suggestParse(CommandSender sender, String[] args) {
