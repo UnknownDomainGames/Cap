@@ -225,7 +225,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         parse(node, sender, stringArgs, results);
 
         StringArgs args1 = new StringArgs(args);
-        for (CommandNode node : results) {
+        for (CommandNode node : results.stream().filter(node1 -> leafNodePermissionEnough(sender, node1)).collect(Collectors.toList())) {
             for (CommandNode child : node.getChildren()) {
                 args1.setIndex(args.length - 1);
                 if (child.parse(sender, args1))
