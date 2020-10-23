@@ -2,13 +2,12 @@ package engine.command.argument;
 
 import engine.command.argument.base.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class SimpleArgumentManager implements ArgumentManager {
 
-    private static List<Argument> baseArguments = new ArrayList<>();
+    private static List<Argument> baseArguments = List.of(new IntegerArgument(), new StringArgument(), new BooleanArgument(), new FloatArgument(), new DoubleArgument(), new LongArgument(), new ShortArgument());
 
     private HashMap<Class, Argument> argumentByClass = new HashMap<>();
     private HashMap<String, Argument> argumentByName = new HashMap<>();
@@ -55,15 +54,5 @@ public class SimpleArgumentManager implements ArgumentManager {
     @Override
     public Argument getArgument(String argumentName) {
         return argumentByName.get(argumentName);
-    }
-
-    static {
-        baseArguments.add(new IntegerArgument());
-        baseArguments.add(new StringArgument());
-        baseArguments.add(new BooleanArgument());
-        baseArguments.add(new FloatArgument());
-        baseArguments.add(new DoubleArgument());
-        baseArguments.add(new LongArgument());
-        baseArguments.add(new ShortArgument());
     }
 }
