@@ -13,7 +13,7 @@ public class SimpleArgumentManager implements ArgumentManager {
     private HashMap<String, Argument> argumentByName = new HashMap<>();
 
     public SimpleArgumentManager() {
-        baseArguments.stream().forEach(this::appendArgumentAndSetDefaultIfNotExist);
+        baseArguments.stream().forEach(this::setClassDefaultArgument);
     }
 
     @Override
@@ -23,7 +23,7 @@ public class SimpleArgumentManager implements ArgumentManager {
 
     @Override
     public void appendArgument(Argument argument) {
-        if (argumentByName.containsKey(argument.getName())){
+        if (argumentByName.containsKey(argument.getName())) {
             throw new RuntimeException("argument already exist");
         }
         argumentByName.put(argument.getName(), argument);
@@ -31,7 +31,7 @@ public class SimpleArgumentManager implements ArgumentManager {
 
     public void appendArgumentAndSetDefaultIfNotExist(Argument argument) {
         appendArgument(argument);
-        if (!argumentByClass.containsKey(argument.responsibleClass())){
+        if (!argumentByClass.containsKey(argument.responsibleClass())) {
             setClassDefaultArgument(argument);
         }
     }

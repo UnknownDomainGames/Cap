@@ -2,13 +2,13 @@ package engine.command.argument;
 
 import java.util.Objects;
 
-public abstract class SimpleArgument extends Argument {
+public abstract class SimpleArgument<T> extends Argument<T> {
 
     private String argumentName;
 
     private Class responsibleClass;
 
-    public SimpleArgument(Class responsibleClass, String argumentName) {
+    public SimpleArgument(Class<T> responsibleClass, String argumentName) {
         this.argumentName = argumentName;
         this.responsibleClass = responsibleClass;
     }
@@ -19,7 +19,7 @@ public abstract class SimpleArgument extends Argument {
     }
 
     @Override
-    public Class responsibleClass() {
+    public Class<T> responsibleClass() {
         return responsibleClass;
     }
 
