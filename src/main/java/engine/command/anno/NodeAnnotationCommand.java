@@ -39,15 +39,15 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         if (args == null || args.length == 0) {
             if (node.canExecuteCommand()) {
                 if (!hasPermission(sender, node.getNeedPermission())) {
-                    permissionNotEnough(sender, args, node.getNeedPermission().toArray(String[]::new));
+                    permissionNotEnough(sender, args, node.getNeedPermission().toArray(new String[0]));
                     return;
                 }
-                node.getExecutor().accept(List.of());
+                node.getExecutor().accept(Collections.EMPTY_LIST);
             } else {
                 CommandNode parseResult = parseArgs(sender, args);
                 if (parseResult != null && parseResult.canExecuteCommand()) {
                     if (!hasPermission(sender, parseResult.getNeedPermission())) {
-                        permissionNotEnough(sender, args, parseResult.getNeedPermission().toArray(String[]::new));
+                        permissionNotEnough(sender, args, parseResult.getNeedPermission().toArray(new String[0]));
                         return;
                     }
                     execute(parseResult);
@@ -66,7 +66,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 return;
             }
             if (!hasPermission(sender, parseResult.getNeedPermission())) {
-                permissionNotEnough(sender, args, parseResult.getNeedPermission().toArray(String[]::new));
+                permissionNotEnough(sender, args, parseResult.getNeedPermission().toArray(new String[0]));
                 return;
             }
             execute(parseResult);

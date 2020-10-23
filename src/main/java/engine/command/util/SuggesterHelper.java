@@ -1,5 +1,7 @@
 package engine.command.util;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,7 +15,7 @@ public class SuggesterHelper {
 
     public static List<String> filterStartWithLastString(List<String> list, String[] array) {
         if(array.length==0)
-            return List.of();
+            return Collections.emptyList();
         return list.stream()
                 .filter(s -> s.startsWith(array[array.length - 1]))
                 .collect(Collectors.toList());
