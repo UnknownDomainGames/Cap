@@ -124,7 +124,7 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
                 Permission permission = method.getAnnotation(Permission.class);
                 if (permission != null) {
                     nodes.forEach(commandNode ->
-                            commandNode.setNeedPermission(new HashSet<>(Arrays.asList(permission.value()))));
+                            commandNode.setPermissionExpression(permission.value()));
                 }
 
                 CommandNode mainNode = nodeable.getNode();

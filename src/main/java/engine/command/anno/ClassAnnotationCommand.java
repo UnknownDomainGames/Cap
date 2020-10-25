@@ -9,7 +9,8 @@ import engine.command.util.node.CommandNode;
 import engine.command.util.node.Nodeable;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class ClassAnnotationCommand extends NodeAnnotationCommand {
@@ -124,8 +125,7 @@ public class ClassAnnotationCommand extends NodeAnnotationCommand {
                 try {
                     Permission permission = commandHandler.getClass().getMethod("run", new Class[0]).getAnnotation(Permission.class);
                     if (permission != null) {
-                        Set<String> needPermission = new HashSet<>(Arrays.asList(permission.value()));
-                        nodeList.forEach(node -> node.setNeedPermission(needPermission));
+                        nodeList.forEach(node -> node.setPermissionExpression(permission.value()));
                     }
                 } catch (NoSuchMethodException e) {
                     e.printStackTrace();

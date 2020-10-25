@@ -20,6 +20,20 @@ import java.util.stream.Collectors;
 
 public class NodeAnnotationCommand extends Command implements Nodeable {
 
+    private static final PermissionWrapper TRUE = new PermissionWrapper(null, "") {
+        @Override
+        public boolean hasPermission() {
+            return true;
+        }
+    };
+
+    private static final PermissionWrapper FALSE = new PermissionWrapper(null, "") {
+        @Override
+        public boolean hasPermission() {
+            return false;
+        }
+    };
+
     protected final static ArgumentManager staticArgumentManage = new SimpleArgumentManager();
 
     protected final static SuggesterManager staticSuggesterManager = new SimpleSuggesterManager();
@@ -38,16 +52,16 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     public void execute(CommandSender sender, String[] args) {
         if (args == null || args.length == 0) {
             if (node.canExecuteCommand()) {
-                if (!hasPermission(sender, node.getNeedPermission())) {
-                    permissionNotEnough(sender, args, node.getNeedPermission().toArray(String[]::new));
+                if (!hasPermission(sender, node.getPermissionExpression())) {
+                    permissionNotEnough(sender, args, node.getPermissionExpression());
                     return;
                 }
                 node.getExecutor().accept(List.of());
             } else {
                 CommandNode parseResult = parseArgs(sender, args);
                 if (parseResult != null && parseResult.canExecuteCommand()) {
-                    if (!hasPermission(sender, parseResult.getNeedPermission())) {
-                        permissionNotEnough(sender, args, parseResult.getNeedPermission().toArray(String[]::new));
+                    if (!hasPermission(sender, parseResult.getPermissionExpression())) {
+                        permissionNotEnough(sender, args, parseResult.getPermissionExpression());
                         return;
                     }
                     execute(parseResult);
@@ -65,8 +79,8 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 commandWrongUsage(sender, args);
                 return;
             }
-            if (!hasPermission(sender, parseResult.getNeedPermission())) {
-                permissionNotEnough(sender, args, parseResult.getNeedPermission().toArray(String[]::new));
+            if (!hasPermission(sender, parseResult.getPermissionExpression())) {
+                permissionNotEnough(sender, args, parseResult.getPermissionExpression());
                 return;
             }
             execute(parseResult);
@@ -79,7 +93,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         node.getExecutor().accept(list);
     }
 
-    private void permissionNotEnough(CommandSender sender, String[] args, String[] requiredPermissions) {
+    private void permissionNotEnough(CommandSender sender, String[] args, String requiredPermissions) {
         sender.sendCommandException(
                 new CommandException(CommandException.Type.PERMISSION_NOT_ENOUGH, sender, this, args, requiredPermissions));
     }
@@ -89,13 +103,116 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 new CommandException(CommandException.Type.COMMAND_WRONG_USAGE, sender, this, args, null));
     }
 
-    private boolean hasPermission(Permissible permissible, Collection<String> needPermission) {
-        for (String s : needPermission) {
-            if (!permissible.hasPermission(s)) {
-                return false;
+    private boolean hasPermission(Permissible permissible, String permissionExpression) {
+        Stack<PermissionWrapper> permissionWrapperStack = new Stack<>();
+        Stack<Character> operatorStack = new Stack<>();
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (char c : permissionExpression.toCharArray()) {
+            switch (c) {
+                case '(':
+                case '!':
+                    stringBuilder.delete(0, stringBuilder.length());
+                    operatorStack.push(c);
+                    break;
+                case '|': {
+                    String s = stringBuilder.toString();
+                    if (!s.isBlank()) {
+                        permissionWrapperStack.push(new PermissionWrapper(permissible, s.trim()));
+                    }
+                    stringBuilder.delete(0, stringBuilder.length());
+
+                    if (!operatorStack.isEmpty()) {
+                        char peek = operatorStack.peek().charValue();
+                        if (peek == c || '(' == peek) {
+                            operatorStack.push(c);
+                            break;
+                        }
+                        while (!operatorStack.isEmpty() && peek != '(' && (peek == '|' || peek == '&' || peek == '!')) {
+                            computePermission(operatorStack.pop(), permissionWrapperStack);
+                            peek = operatorStack.peek();
+                        }
+                    }
+
+                    operatorStack.push(c);
+                    break;
+                }
+                case '&': {
+                    String s = stringBuilder.toString();
+                    if (!s.isBlank()) {
+                        permissionWrapperStack.push(new PermissionWrapper(permissible, s.trim()));
+                    }
+                    stringBuilder.delete(0, stringBuilder.length());
+                    operatorStack.push(c);
+                    break;
+                }
+                case ')': {
+                    String s = stringBuilder.toString();
+                    if (!s.isBlank()) {
+                        permissionWrapperStack.push(new PermissionWrapper(permissible, s.trim()));
+                    }
+                    stringBuilder.delete(0, stringBuilder.length());
+
+                    char peek = operatorStack.peek().charValue();
+                    while (peek != '(') {
+                        computePermission(operatorStack.pop(), permissionWrapperStack);
+                        peek = operatorStack.peek();
+                    }
+                    operatorStack.pop();
+                    break;
+                }
+                default:
+                    stringBuilder.append(c);
             }
         }
-        return true;
+
+        String s = stringBuilder.toString();
+        if (!s.isBlank())
+            permissionWrapperStack.push(new PermissionWrapper(permissible, s.trim()));
+
+        while (!operatorStack.isEmpty())
+            computePermission(operatorStack.pop(), permissionWrapperStack);
+
+        return permissionWrapperStack.peek().hasPermission();
+    }
+
+    private void computePermission(char operator, Stack<PermissionWrapper> stack) {
+        switch (operator) {
+            case '!':
+                stack.push(stack.pop().hasPermission() ? FALSE : TRUE);
+                break;
+            case '|': {
+                PermissionWrapper pop1 = stack.pop();
+                PermissionWrapper pop2 = stack.pop();
+                stack.push(pop1.hasPermission() || pop2.hasPermission() ? TRUE : FALSE);
+                break;
+            }
+            case '&': {
+                PermissionWrapper pop1 = stack.pop();
+                PermissionWrapper pop2 = stack.pop();
+                stack.push(pop1.hasPermission() && pop2.hasPermission() ? TRUE : FALSE);
+                break;
+            }
+            default:
+                throw new IllegalStateException("operator: " + operator);
+        }
+    }
+
+    private static class PermissionWrapper {
+        Permissible permissible;
+
+        String permission;
+
+        public PermissionWrapper(Permissible permissible, String permission) {
+            this.permissible = permissible;
+            this.permission = permission;
+        }
+
+        public boolean hasPermission() {
+            return permissible.hasPermission(permission);
+        }
+
     }
 
     private CommandNode parseArgs(CommandSender sender, String[] args) {
@@ -186,7 +303,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     private boolean leafNodePermissionEnough(CommandSender sender, CommandNode node) {
         Collection<? extends CommandNode> allLeafNode = CommandNodeUtil.getAllLeafNode(node);
         for (CommandNode commandNode : allLeafNode) {
-            if (sender.hasPermission(commandNode.getNeedPermission()))
+            if (sender.hasPermission(commandNode.getPermissionExpression()))
                 return true;
         }
         return false;

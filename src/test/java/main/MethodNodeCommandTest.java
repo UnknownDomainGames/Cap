@@ -207,6 +207,7 @@ public class MethodNodeCommandTest {
 
     public class ProvideTest {
         @Command("location")
+        @Permission("player.admin | player.location & player.teleport")
         public void location(int i, Location location, String b, Location location2) {
             message = i + location.toString() + b + location2.toString();
         }
