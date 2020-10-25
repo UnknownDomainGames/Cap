@@ -12,9 +12,9 @@ public abstract class BaseCommandManager implements CommandManager {
 
     @Override
     public void registerCommand(Command command) {
-        if (commands.containsKey(command.getName()))
+        if (hasCommand(command.getName()))
             throw new RuntimeException("Command \"" + command.getName() + "\" already exists");
-        commands.put(command.getName(), command);
+        commands.put(command.getName().toLowerCase(), command);
     }
 
     @Override
@@ -24,12 +24,12 @@ public abstract class BaseCommandManager implements CommandManager {
 
     @Override
     public Optional<Command> getCommand(String name) {
-        return Optional.ofNullable(commands.get(name));
+        return Optional.ofNullable(commands.get(name.toLowerCase()));
     }
 
     @Override
     public boolean hasCommand(String name) {
-        return commands.containsKey(name);
+        return commands.containsKey(name.toLowerCase());
     }
 
     @Override
@@ -40,7 +40,7 @@ public abstract class BaseCommandManager implements CommandManager {
 
     @Override
     public void execute(CommandSender sender, String name, String... args) {
-        Command command = commands.get(name);
+        Command command = commands.get(name.toLowerCase());
         if (command == null) {
             sender.sendCommandException(new CommandException(CommandException.Type.COMMAND_NOT_FOUND, sender, name, args));
             return;
@@ -56,7 +56,7 @@ public abstract class BaseCommandManager implements CommandManager {
 
     @Override
     public List<String> complete(CommandSender sender, String commandName, String... args) {
-        Command command = commands.get(commandName);
+        Command command = commands.get(commandName.toLowerCase());
         if (command == null) {
             return commands.keySet()
                     .stream()
@@ -81,7 +81,7 @@ public abstract class BaseCommandManager implements CommandManager {
     public List<String> getTips(CommandSender sender, String name, String... args) {
         if (name == null || name.isEmpty())
             return List.of();
-        Command commandInstance = commands.get(name);
+        Command commandInstance = commands.get(name.toLowerCase());
         if (commandInstance == null)
             return List.of();
         return commandInstance.getTips(sender, args);
@@ -95,7 +95,7 @@ public abstract class BaseCommandManager implements CommandManager {
 
     @Override
     public ArgumentCheckResult checkLastArgument(CommandSender sender, String name, String... args) {
-        Command command1 = commands.get(name);
+        Command command1 = commands.get(name.toLowerCase());
         if (command1 == null)
             return ArgumentCheckResult.Error("/" + name + "  command not found");
         return command1.checkLastArgument(sender, args);
