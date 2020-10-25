@@ -183,14 +183,14 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 stack.push(stack.pop().hasPermission() ? FALSE : TRUE);
                 break;
             case '|': {
-                PermissionWrapper pop1 = stack.pop();
                 PermissionWrapper pop2 = stack.pop();
+                PermissionWrapper pop1 = stack.pop();
                 stack.push(pop1.hasPermission() || pop2.hasPermission() ? TRUE : FALSE);
                 break;
             }
             case '&': {
-                PermissionWrapper pop1 = stack.pop();
                 PermissionWrapper pop2 = stack.pop();
+                PermissionWrapper pop1 = stack.pop();
                 stack.push(pop1.hasPermission() && pop2.hasPermission() ? TRUE : FALSE);
                 break;
             }
