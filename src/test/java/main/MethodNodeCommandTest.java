@@ -12,16 +12,11 @@ import engine.command.suggestion.NamedSuggester;
 import engine.command.suggestion.SimpleSuggesterManager;
 import engine.command.suggestion.Suggester;
 import engine.command.suggestion.SuggesterManager;
-import engine.command.util.CommandNodeUtil;
 import engine.command.util.SuggesterHelper;
-import engine.command.util.node.CommandNode;
 import engine.permission.HashPermissible;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nonnull;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 
 
@@ -182,27 +177,29 @@ public class MethodNodeCommandTest {
                 return permissible.toPermissionMap();
             }
         };
-        for (int i = 0; i < 10000; i++) {
-            BaseCommandManager commandManager = new SimpleCommandManager();
-            ArgumentManager argumentManager = new SimpleArgumentManager();
-            argumentManager.setClassDefaultArgument(new WorldArgument());
 
-            NodeAnnotationCommand.METHOD.getBuilder(commandManager)
-                    .setArgumentManager(argumentManager)
-                    .addProvider(new LocationProvider())
-                    .addCommandHandler(new ProvideTest())
-                    .register();
+        testEntity.setPermission("player.admin", true);
+
+        BaseCommandManager commandManager = new SimpleCommandManager();
+        ArgumentManager argumentManager = new SimpleArgumentManager();
+        argumentManager.setClassDefaultArgument(new WorldArgument());
+
+        NodeAnnotationCommand.METHOD.getBuilder(commandManager)
+                .setArgumentManager(argumentManager)
+                .addProvider(new LocationProvider())
+                .addCommandHandler(new ProvideTest())
+                .register();
 
 
-            World commandWorld = new World("commandWorld");
+        World commandWorld = new World("commandWorld");
 
-            commandManager.execute(testEntity, "location 11 1 2 3 \"hello world\" commandWorld 4 5 6");
-            Assertions.assertEquals(message, 11 + new Location(testEntity.getWorld(), 1, 2, 3).toString() + "hello world" + new Location(commandWorld, 4, 5, 6).toString());
-            commandManager.execute(testEntity, "location 12 commandWorld 1 2 3 \"hello world\" 4 5 6");
-            Assertions.assertEquals(message, 12 + new Location(commandWorld, 1, 2, 3).toString() + "hello world" + new Location(testEntity.getWorld(), 4, 5, 6).toString());
-            commandManager.execute(testEntity, "location 13 commandWorld 1 2 3 \"hello world\" commandWorld 4 5 6");
-            Assertions.assertEquals(message, 13 + new Location(commandWorld, 1, 2, 3).toString() + "hello world" + new Location(commandWorld, 4, 5, 6).toString());
-        }
+        commandManager.execute(testEntity, "location 11 1 2 3 \"hello world\" commandWorld 4 5 6");
+        Assertions.assertEquals(message, 11 + new Location(testEntity.getWorld(), 1, 2, 3).toString() + "hello world" + new Location(commandWorld, 4, 5, 6).toString());
+        commandManager.execute(testEntity, "location 12 commandWorld 1 2 3 \"hello world\" 4 5 6");
+        Assertions.assertEquals(message, 12 + new Location(commandWorld, 1, 2, 3).toString() + "hello world" + new Location(testEntity.getWorld(), 4, 5, 6).toString());
+        commandManager.execute(testEntity, "location 13 commandWorld 1 2 3 \"hello world\" commandWorld 4 5 6");
+        Assertions.assertEquals(message, 13 + new Location(commandWorld, 1, 2, 3).toString() + "hello world" + new Location(commandWorld, 4, 5, 6).toString());
+        commandManager.execute(testEntity,"aaa bbb ccc");
     }
 
     public class ProvideTest {
@@ -216,6 +213,7 @@ public class MethodNodeCommandTest {
         public void location(int i, Location location) {
             message = i + location.toString();
         }
+
     }
 
     @Test

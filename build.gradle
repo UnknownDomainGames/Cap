@@ -16,13 +16,24 @@ repositories {
     mavenCentral()
 }
 
+jar {
+    from {
+        configurations.runtimeClasspath.collect  { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
 test {
     useJUnitPlatform()
 }
 
 dependencies {
-    compile 'com.google.guava:guava:27.1-jre'
-    compile 'org.apache.commons:commons-lang3:3.8.1'
+    compileOnly 'com.google.guava:guava:27.1-jre'
+    compileOnly 'org.apache.commons:commons-lang3:3.8.1'
+
+    implementation  group: 'org.ow2.asm', name: 'asm', version: '7.1'
+    implementation  group: 'org.ow2.asm', name: 'asm-tree', version: '7.1'
+    implementation  group: 'org.ow2.asm', name: 'asm-util', version: '7.1'
+    implementation  group: 'org.ow2.asm', name: 'asm-commons', version: '7.1'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.0'

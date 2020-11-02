@@ -133,7 +133,6 @@ public class MethodAnnotationCommand extends NodeAnnotationCommand implements No
                     CommandNode clone = CommandNodeUtil.getTopParent(node).clone();
                     mainNode.addChild(clone);
                 }
-                CommandNodeUtil.getAllLeafNode(mainNode).forEach(CommandNodeUtil::showLink);
 
                 list.add((Command) nodeable);
             }

@@ -14,6 +14,7 @@ import engine.command.util.node.EmptyArgumentNode;
 import engine.command.util.node.Nodeable;
 import engine.command.util.node.SenderNode;
 import engine.permission.Permissible;
+import jdk.jshell.execution.Util;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -104,6 +105,8 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     }
 
     private boolean hasPermission(Permissible permissible, String permissionExpression) {
+        if (permissionExpression == null)
+            return true;
         Stack<PermissionWrapper> permissionWrapperStack = new Stack<>();
         Stack<Character> operatorStack = new Stack<>();
 
@@ -226,7 +229,6 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
         CommandNode bestResult = null;
         int bestNodeDepth = 0;
-
         //筛选最佳结果
         for (CommandNode result : results) {
             int depth = CommandNodeUtil.getDepth(result);
@@ -303,7 +305,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
     private boolean leafNodePermissionEnough(CommandSender sender, CommandNode node) {
         Collection<? extends CommandNode> allLeafNode = CommandNodeUtil.getAllLeafNode(node);
         for (CommandNode commandNode : allLeafNode) {
-            if (sender.hasPermission(commandNode.getPermissionExpression()))
+            if (commandNode.getPermissionExpression() == null || sender.hasPermission(commandNode.getPermissionExpression()))
                 return true;
         }
         return false;
