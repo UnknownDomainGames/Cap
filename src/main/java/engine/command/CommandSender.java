@@ -8,5 +8,5 @@ public interface CommandSender extends Permissible {
 
     void sendMessage(String message);
 
-    void sendCommandException(CommandException exception);
+    void sendCommandFailure(CommandFailure failure);
 }

@@ -2,7 +2,7 @@ package engine.command;
 
 import java.util.Arrays;
 
-public final class CommandException {
+public final class CommandFailure {
 
     private final Type type;
     private final CommandSender sender;
@@ -17,15 +17,14 @@ public final class CommandException {
         COMMAND_WRONG_SENDER,
         COMMAND_ILLEGAL_ARGUMENT,
         PERMISSION_NOT_ENOUGH,
-        COMMAND_RUNTIME_EXCEPTION,
-        UNKNOWN
+        CUSTOM
     }
 
-    public CommandException(Type type, CommandSender sender, Command command, String[] args) {
+    public CommandFailure(Type type, CommandSender sender, Command command, String[] args) {
         this(type, sender, command, args, null);
     }
 
-    public CommandException(Type type, CommandSender sender, Command command, String[] args, Object message) {
+    public CommandFailure(Type type, CommandSender sender, Command command, String[] args, Object message) {
         this.type = type;
         this.sender = sender;
         this.commandName = command.getName();
@@ -34,11 +33,11 @@ public final class CommandException {
         this.message = message;
     }
 
-    public CommandException(Type type, CommandSender sender, String commandName, String[] args) {
+    public CommandFailure(Type type, CommandSender sender, String commandName, String[] args) {
         this(type, sender, commandName, args, null);
     }
 
-    public CommandException(Type type, CommandSender sender, String commandName, String[] args, Object message) {
+    public CommandFailure(Type type, CommandSender sender, String commandName, String[] args, Object message) {
         this.type = type;
         this.sender = sender;
         this.commandName = commandName;
