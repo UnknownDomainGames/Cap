@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 public abstract class BaseCommandManager implements CommandManager {
 
     private final Map<String, Command> commands = new HashMap<>();
-    private final CommandParser resolver = createCommandParser();
+    private final CommandParser parser = createCommandParser();
 
     protected abstract CommandParser createCommandParser();
 
@@ -34,7 +34,7 @@ public abstract class BaseCommandManager implements CommandManager {
 
     @Override
     public void execute(CommandSender sender, String command) {
-        CommandParser.Result parsedCommand = resolver.parse(command);
+        CommandParser.Result parsedCommand = parser.parse(command);
         execute(sender, parsedCommand.getName(), parsedCommand.getArgs());
     }
 
@@ -50,7 +50,7 @@ public abstract class BaseCommandManager implements CommandManager {
 
     @Override
     public List<String> complete(CommandSender sender, String command) {
-        CommandParser.Result result = resolver.parse(command);
+        CommandParser.Result result = parser.parse(command);
         return complete(sender, result.getName(), result.getArgs());
     }
 
@@ -73,7 +73,7 @@ public abstract class BaseCommandManager implements CommandManager {
 
     @Override
     public List<String> getTips(CommandSender sender, String command) {
-        CommandParser.Result result = resolver.parse(command);
+        CommandParser.Result result = parser.parse(command);
         return getTips(sender, result.getName(), result.getArgs());
     }
 
@@ -89,7 +89,7 @@ public abstract class BaseCommandManager implements CommandManager {
 
     @Override
     public ArgumentCheckResult checkLastArgument(CommandSender sender, String command) {
-        CommandParser.Result result = this.resolver.parse(command);
+        CommandParser.Result result = this.parser.parse(command);
         return checkLastArgument(sender, result.getName(), result.getArgs());
     }
 
