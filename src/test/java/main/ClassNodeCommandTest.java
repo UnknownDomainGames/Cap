@@ -1,7 +1,7 @@
 package main;
 
 import engine.command.Command;
-import engine.command.CommandException;
+import engine.command.CommandFailure;
 import engine.command.CommandSender;
 import engine.command.anno.*;
 import engine.command.argument.SimpleArgumentManager;
@@ -69,8 +69,8 @@ public class ClassNodeCommandTest {
             }
 
             @Override
-            public void sendCommandException(CommandException exception) {
-                message = exception.getType().name();
+            public void sendCommandFailure(CommandFailure failure) {
+                message = failure.getType().name();
             }
 
             @Override
@@ -140,7 +140,7 @@ public class ClassNodeCommandTest {
         Command command = simpleCommandManager.getCommand("test").get();
 
         command.execute(entitySender, new String[]{"1", "2", "3", Integer.valueOf(seed).toString(), text});
-        Assertions.assertEquals(CommandException.Type.PERMISSION_NOT_ENOUGH.name(), message);
+        Assertions.assertEquals(CommandFailure.Type.PERMISSION_NOT_ENOUGH.name(), message);
 
         entitySender.setPermission("test", true);
 

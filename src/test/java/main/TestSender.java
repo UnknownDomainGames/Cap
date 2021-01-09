@@ -1,6 +1,6 @@
 package main;
 
-import engine.command.CommandException;
+import engine.command.CommandFailure;
 import engine.command.CommandSender;
 import engine.permission.HashPermissible;
 
@@ -15,9 +15,9 @@ public class TestSender implements CommandSender {
 
     private Consumer<String> sendConsumer;
 
-    private Consumer<CommandException> commandExceptionConsumer;
+    private Consumer<CommandFailure> commandExceptionConsumer;
 
-    public TestSender(String name, Consumer<String> sendConsumer, Consumer<CommandException> commandExceptionConsumer) {
+    public TestSender(String name, Consumer<String> sendConsumer, Consumer<CommandFailure> commandExceptionConsumer) {
         this.name = name;
         this.sendConsumer = sendConsumer;
         this.commandExceptionConsumer = commandExceptionConsumer;
@@ -34,9 +34,9 @@ public class TestSender implements CommandSender {
     }
 
     @Override
-    public void sendCommandException(CommandException exception) {
-        System.out.println(exception);
-        commandExceptionConsumer.accept(exception);
+    public void sendCommandFailure(CommandFailure failure) {
+        System.out.println(failure);
+        commandExceptionConsumer.accept(failure);
     }
 
     @Override

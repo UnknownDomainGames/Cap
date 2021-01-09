@@ -1,7 +1,7 @@
 package main.swing;
 
 
-import engine.command.CommandException;
+import engine.command.CommandFailure;
 import engine.command.CommandSender;
 
 import java.util.Map;
@@ -18,8 +18,8 @@ public class ConsoleSender implements CommandSender {
     }
 
     @Override
-    public void sendCommandException(CommandException exception) {
-        System.out.println(exception.toString());
+    public void sendCommandFailure(CommandFailure failure) {
+        System.out.println(failure.toString());
     }
 
     @Override
