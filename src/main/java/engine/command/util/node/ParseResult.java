@@ -14,6 +14,10 @@ public class ParseResult {
         return success;
     }
 
+    public boolean isFail(){
+        return !success;
+    }
+
     public Object getValue() {
         return value;
     }

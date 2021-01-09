@@ -18,4 +18,6 @@ public interface ContextNode {
 
     ContextNode getPre();
 
+    ContextNode clone();
+
 }

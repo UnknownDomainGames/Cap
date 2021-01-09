@@ -15,4 +15,6 @@ public interface LinkedContext extends Context {
     void removeLast();
 
     List<Object> valueToArray();
+
+    LinkedContext clone();
 }
