@@ -3,7 +3,7 @@ package engine.command.util.node;
 import engine.command.CommandSender;
 import engine.command.suggestion.Suggester;
 import engine.command.util.StringArgs;
-import engine.command.util.context.DequeContext;
+import engine.command.util.context.LinkedContext;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,7 +22,7 @@ public class SenderNode extends CommandNode {
     }
 
     @Override
-    public Object parseArgs(DequeContext context, StringArgs args) {
+    public Object parse(LinkedContext context, StringArgs args) {
         if (allowedSender(context.getSender())) {
             return context.getSender();
         }

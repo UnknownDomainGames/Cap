@@ -7,14 +7,14 @@ public interface Context {
 
     CommandSender getSender();
 
-    int length();
+    int size();
 
     int first(Type type);
 
     int last(Type type);
 
-    Type typeAt(int index);
+    Type getTypeAt(int index);
 
-    Object valueAt(int index);
+    Object getValueAt(int index);
 
 }

@@ -3,7 +3,7 @@ package engine.command.util.node;
 import engine.command.argument.Argument;
 import engine.command.suggestion.Suggester;
 import engine.command.util.StringArgs;
-import engine.command.util.context.DequeContext;
+import engine.command.util.context.LinkedContext;
 
 public class ArgumentNode extends CommandNode {
 
@@ -22,7 +22,7 @@ public class ArgumentNode extends CommandNode {
     }
 
     @Override
-    public Object parseArgs(DequeContext context, StringArgs args) {
+    public Object parse(LinkedContext context, StringArgs args) {
         String next = args.next();
         if (next.isEmpty()) {
             return null;

@@ -10,7 +10,8 @@ import engine.command.util.CommandNodeUtil;
 import engine.command.util.StringArgs;
 import engine.command.util.SuggesterHelper;
 import engine.command.util.Type;
-import engine.command.util.context.DequeContext;
+import engine.command.util.context.ContextNode;
+import engine.command.util.context.LinkedContext;
 import engine.command.util.node.CommandNode;
 import engine.command.util.node.EmptyArgumentNode;
 import engine.command.util.node.Nodeable;
@@ -52,6 +53,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
+        SimpleLinkedContext context = new SimpleLinkedContext(sender);
         if (args == null || args.length == 0) {
             if (node.canExecuteCommand()) {
                 if (!hasPermission(sender, node.getPermissionExpression())) {
@@ -60,19 +62,19 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 }
                 node.getExecutor().accept(List.of());
             } else {
-                CommandNode parseResult = parseArgs(sender, args);
+                CommandNode parseResult = parseArgs(context, args);
                 if (parseResult != null && parseResult.canExecuteCommand()) {
                     if (!hasPermission(sender, parseResult.getPermissionExpression())) {
                         permissionNotEnough(sender, args, parseResult.getPermissionExpression());
                         return;
                     }
-                    execute(parseResult);
+                    execute(context, parseResult);
                     return;
                 }
                 commandWrongUsage(sender, args);
             }
         } else {
-            CommandNode parseResult = parseArgs(sender, args);
+            CommandNode parseResult = parseArgs(context, args);
             if (CommandNodeUtil.getRequiredArgsSumFromParent2Child(parseResult) != args.length) {
                 commandWrongUsage(sender, args);
                 return;
@@ -85,14 +87,17 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 permissionNotEnough(sender, args, parseResult.getPermissionExpression());
                 return;
             }
-            execute(parseResult);
+            execute(context, parseResult);
         }
     }
 
-    private void execute(CommandNode node) {
-        List list = node.collect();
-        Collections.reverse(list);
-        node.getExecutor().accept(list);
+    private void execute(SimpleLinkedContext context, CommandNode node) {
+        ContextNode contextNode = context.root.getNext();
+        while (contextNode != null) {
+            contextNode.getOwner().collect(contextNode);
+            contextNode = contextNode.getNext();
+        }
+        node.getExecutor().accept(context.valueToArray());
     }
 
     private void permissionNotEnough(CommandSender sender, String[] args, String requiredPermissions) {
@@ -219,14 +224,14 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
     }
 
-    private CommandNode parseArgs(CommandSender sender, String[] args) {
+    private CommandNode parseArgs(SimpleLinkedContext context, String[] args) {
 
         StringArgs stringArgs = new StringArgs(args);
 
         HashSet<CommandNode> results = new HashSet<>();
 
         //解析递归从根Node开始
-        parse(node, sender, stringArgs, results);
+        parse(node, context, stringArgs, results);
 
         CommandNode bestResult = null;
         int bestNodeDepth = 0;
@@ -241,56 +246,15 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         return bestResult;
     }
 
-    private class LinkedDequeContext extends LinkedList<Object> implements DequeContext {
-
-        private final CommandSender sender;
-
-        public LinkedDequeContext(CommandSender sender) {
-            this.sender = sender;
-        }
-
-        @Override
-        public CommandSender getSender() {
-            return sender;
-        }
-
-        @Override
-        public int length() {
-            return this.size();
-        }
-
-        @Override
-        public int first(Type type) {
-            for (int i = 0; i < size(); i++) {
-                if (typeAt(i).is(type))
-                    return i;
+    private void parse(CommandNode node, SimpleLinkedContext context, StringArgs stringArgs, Set<CommandNode> result) {
+        //如果当前的Args指针+Node需要的指针小于等于Args的长度
+        if (stringArgs.getIndex() + node.getRequiredArgsNum() <= stringArgs.getLength()) {
+            Object parse = node.parse(context, stringArgs);
+            if (parse == null) {
+                result.add(node.getParent());
+                return;
             }
-            return -1;
-        }
-
-        @Override
-        public int last(Type type) {
-            for (int i = size() - 1; i >= 0; i--) {
-                if (typeAt(i).is(type))
-                    return i;
-            }
-            return -1;
-        }
-
-        @Override
-        public Type typeAt(int index) {
-            return Type.of(get(index).getClass());
-        }
-
-        @Override
-        public Object valueAt(int index) {
-            return get(index);
-        }
-    }
-
-    private void parse(CommandNode node, CommandSender sender, StringArgs stringArgs, Set<CommandNode> result) {
-        //如果当前的Args指针+Node需要的指针小于等于Args的长度，并且Node解析成功
-        if (stringArgs.getIndex() + node.getRequiredArgsNum() <= stringArgs.getLength() && node.parse(sender, stringArgs)) {
+            context.add(node, parse);
             //所有叶子节点都是可执行节点，如果不是那肯定是构建树时出了问题
             //假如Node能执行命令，则必然是叶子节点，直接加入待选结果
             if (node.canExecuteCommand()) {
@@ -300,9 +264,10 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 int index = stringArgs.getIndex();
                 for (CommandNode child : node.getChildren()) {
                     //子节点递归解析
-                    parse(child, sender, stringArgs, result);
+                    parse(child, context, stringArgs, result);
                     //重设指针
                     stringArgs.setIndex(index);
+                    context.getNodeAt(index).setNext(null);
                 }
             }
         } else {
@@ -336,9 +301,10 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
     @Override
     public List<String> suggest(CommandSender sender, String[] args) {
+        SimpleLinkedContext context = new SimpleLinkedContext(sender);
         StringArgs stringArgs = new StringArgs(Arrays.copyOfRange(args, 0, args.length - 1));
         HashSet<CommandNode> results = new HashSet<>();
-        parse(node, sender, stringArgs, results);
+        parse(node, context, stringArgs, results);
         HashSet<String> suggests = new HashSet<>();
         for (CommandNode node : results.stream().filter(node1 -> leafNodePermissionEnough(sender, node1) && CommandNodeUtil.getRequiredArgsSumFromParent2Child(node1) == args.length - 1).collect(Collectors.toList())) {
             for (CommandNode child : node.getChildren()) {
@@ -361,9 +327,10 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
 
     @Override
     public List<String> getTips(CommandSender sender, String[] args) {
+        SimpleLinkedContext context = new SimpleLinkedContext(sender);
         StringArgs stringArgs = new StringArgs(Arrays.copyOfRange(args, 0, args.length - 1));
         HashSet<CommandNode> results = new HashSet<>();
-        parse(node, sender, stringArgs, results);
+        parse(node, context, stringArgs, results);
 
         CommandNode nearestNode = null;
         int nearestDepth = Integer.MAX_VALUE;
@@ -393,15 +360,16 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         if (args == null || args.length == 0) {
             return ArgumentCheckResult.Valid();
         }
+        SimpleLinkedContext context = new SimpleLinkedContext(sender);
         StringArgs stringArgs = new StringArgs(Arrays.copyOfRange(args, 0, args.length - 1));
         HashSet<CommandNode> results = new HashSet<>();
-        parse(node, sender, stringArgs, results);
+        parse(node, context, stringArgs, results);
 
         StringArgs args1 = new StringArgs(args);
         for (CommandNode node : results.stream().filter(node1 -> leafNodePermissionEnough(sender, node1)).collect(Collectors.toList())) {
             for (CommandNode child : node.getChildren()) {
                 args1.setIndex(args.length - 1);
-                if (child.parse(sender, args1))
+                if (child.parse(context, args1) != null)
                     return ArgumentCheckResult.Valid();
             }
         }
@@ -430,4 +398,180 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             return MethodAnnotationCommand.getBuilder(commandManager);
         }
     }
+
+    private static class SimpleLinkedContext implements LinkedContext {
+
+        private final CommandSender sender;
+        private final SimpleContextNode root = new SimpleContextNode(null, null);
+
+        public SimpleLinkedContext(CommandSender sender) {
+            this.sender = sender;
+        }
+
+        @Override
+        public CommandSender getSender() {
+            return sender;
+        }
+
+        @Override
+        public int first(Type type) {
+            for (int i = 0; i < size(); i++) {
+                if (getTypeAt(i).is(type))
+                    return i;
+            }
+            return -1;
+        }
+
+        @Override
+        public int last(Type type) {
+            for (int i = size() - 1; i >= 0; i--) {
+                if (getTypeAt(i).is(type))
+                    return i;
+            }
+            return -1;
+        }
+
+        @Override
+        public Type getTypeAt(int index) {
+            return Type.of(getValueAt(index).getClass());
+        }
+
+        @Override
+        public Object getValueAt(int index) {
+            return getNodeAt(index).getValue();
+        }
+
+        private ContextNode getNodeAt(int index) {
+            ContextNode node = root.getNext();
+            while (index != 0) {
+                index--;
+                if (node == null) {
+                    throw new IllegalStateException();
+                }
+                node = node.getNext();
+            }
+            return node;
+        }
+
+        @Override
+        public int size() {
+            int i = 0;
+            ContextNode node = root.getNext();
+            if (node != null) {
+                i++;
+                node = node.getNext();
+            }
+            return i;
+        }
+
+        private ContextNode getLastNode() {
+            ContextNode node = root;
+            while (node.getNext() != null) {
+                node = node.getNext();
+            }
+            return node;
+        }
+
+        @Override
+        public void add(CommandNode handler, Object object) {
+            setNext(getLastNode(), new SimpleContextNode(handler, object));
+        }
+
+        private void setNext(ContextNode node, ContextNode next) {
+            node.setNext(next);
+            next.setPre(node);
+        }
+
+        @Override
+        public void add(CommandNode handler, int index, Object object) {
+            ContextNode node = new SimpleContextNode(handler, object);
+            ContextNode nodeAt = getNodeAt(index);
+            if (nodeAt.getNext() != null) {
+                ContextNode next = nodeAt.getNext();
+                setNext(nodeAt, node);
+                setNext(node, next);
+                return;
+            }
+            setNext(nodeAt, node);
+        }
+
+        @Override
+        public void remove(int index) {
+            ContextNode nodeAt = getNodeAt(index);
+            ContextNode pre = nodeAt.getPre();
+            if (nodeAt.getNext() != null) {
+                ContextNode next = nodeAt.getNext();
+                setNext(pre, next);
+            } else {
+                pre.setNext(null);
+            }
+        }
+
+        @Override
+        public void removeLast() {
+            ContextNode pre = getLastNode().getPre();
+            pre.setNext(null);
+        }
+
+        @Override
+        public List<Object> valueToArray() {
+            List<Object> list = new ArrayList<>();
+            ContextNode node = root.getNext();
+            while (node != null) {
+                list.add(node.getValue());
+                node = node.getNext();
+            }
+            return list;
+        }
+
+        private static class SimpleContextNode implements ContextNode {
+
+            private CommandNode owner;
+            private Object value;
+
+            private ContextNode next;
+            private ContextNode pre;
+
+            public SimpleContextNode(CommandNode owner, Object value) {
+                this.owner = owner;
+                this.value = value;
+            }
+
+            @Override
+            public Object getValue() {
+                return value;
+            }
+
+            @Override
+            public void setNext(ContextNode node) {
+                this.next = node;
+            }
+
+            @Override
+            public void setPre(ContextNode node) {
+                this.pre = node;
+            }
+
+            @Override
+            public ContextNode getNext() {
+                return next;
+            }
+
+            @Override
+            public ContextNode getPre() {
+                return pre;
+            }
+
+            @Override
+            public CommandNode getOwner() {
+                return owner;
+            }
+
+            @Override
+            public void setValue(Object value) {
+                this.value = value;
+            }
+        }
+    }
+
 }

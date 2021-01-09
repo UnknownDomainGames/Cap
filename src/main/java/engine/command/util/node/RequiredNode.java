@@ -1,9 +1,8 @@
 package engine.command.util.node;
 
-import engine.command.CommandSender;
 import engine.command.suggestion.Suggester;
 import engine.command.util.StringArgs;
-import engine.command.util.context.DequeContext;
+import engine.command.util.context.LinkedContext;
 
 import java.util.List;
 
@@ -21,7 +20,7 @@ public class RequiredNode extends CommandNode {
     }
 
     @Override
-    public Object parseArgs(DequeContext context, StringArgs args) {
+    public Object parse(LinkedContext context, StringArgs args) {
         if (args.next().equals(require)) {
             return require;
         }
