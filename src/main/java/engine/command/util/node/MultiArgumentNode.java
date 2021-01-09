@@ -34,11 +34,11 @@ public class MultiArgumentNode extends CommandNode {
     public void collect(ContextNode node) {
         List<Object> objectList = new ArrayList<>();
         ContextNode headNode = node;
-        ContextNode pre = headNode.getPre();
         for (int i = 0; i < argsNum; i++) {
             headNode = headNode.getPre();
         }
-        for (int i = 0; i < argsNum; i++) {
+        ContextNode pre = headNode.getPre();
+        for (int i = 0; i < argsNum + 1; i++) {
             objectList.add(headNode.getValue());
             headNode = headNode.getNext();
         }

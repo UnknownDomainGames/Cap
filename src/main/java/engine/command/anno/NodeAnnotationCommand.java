@@ -533,7 +533,8 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         @Override
         public LinkedContext clone() {
             SimpleLinkedContext simpleLinkedContext = new SimpleLinkedContext(sender);
-            simpleLinkedContext.root.setNext(this.root.getNext().clone());
+            if (this.root.getNext() != null)
+                simpleLinkedContext.root.setNext(this.root.getNext().clone());
             return simpleLinkedContext;
         }
 
@@ -598,7 +599,7 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
                 if (this.next != null) {
                     ContextNode cloneNext = this.next.clone();
                     simpleContextNode.setNext(cloneNext);
-                    cloneNext.setPre(this);
+                    cloneNext.setPre(simpleContextNode);
                 }
                 return simpleContextNode;
             }
