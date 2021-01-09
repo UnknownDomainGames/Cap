@@ -13,6 +13,7 @@ import engine.command.suggestion.SimpleSuggesterManager;
 import engine.command.suggestion.Suggester;
 import engine.command.suggestion.SuggesterManager;
 import engine.command.util.SuggesterHelper;
+import engine.command.util.context.Context;
 import engine.permission.HashPermissible;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -43,7 +44,7 @@ public class MethodNodeCommandTest {
             }
 
             @Override
-            public Optional parse(String arg) {
+            public Optional parse(Context context, String arg) {
                 return Optional.of("test" + arg);
             }
 
@@ -65,7 +66,7 @@ public class MethodNodeCommandTest {
             }
 
             @Override
-            public Optional parse(String arg) {
+            public Optional parse(Context context, String arg) {
                 return Optional.of(new Random(Integer.valueOf(arg)));
             }
 
@@ -199,7 +200,7 @@ public class MethodNodeCommandTest {
         Assertions.assertEquals(message, 12 + new Location(commandWorld, 1, 2, 3).toString() + "hello world" + new Location(testEntity.getWorld(), 4, 5, 6).toString());
         commandManager.execute(testEntity, "location 13 commandWorld 1 2 3 \"hello world\" commandWorld 4 5 6");
         Assertions.assertEquals(message, 13 + new Location(commandWorld, 1, 2, 3).toString() + "hello world" + new Location(commandWorld, 4, 5, 6).toString());
-        commandManager.execute(testEntity,"aaa bbb ccc");
+        commandManager.execute(testEntity, "aaa bbb ccc");
     }
 
     public class ProvideTest {
@@ -273,7 +274,7 @@ public class MethodNodeCommandTest {
             }
 
             @Override
-            public Optional parse(String arg) {
+            public Optional parse(Context context, String arg) {
                 return Optional.ofNullable(entityHashMap.get(arg));
             }
 
@@ -352,7 +353,7 @@ public class MethodNodeCommandTest {
             }
 
             @Override
-            public Optional parse(String arg) {
+            public Optional parse(Context context, String arg) {
                 return Optional.ofNullable(entityHashMap.get(arg));
             }
 

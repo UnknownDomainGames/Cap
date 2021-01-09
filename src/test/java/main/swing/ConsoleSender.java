@@ -4,7 +4,6 @@ package main.swing;
 import engine.command.CommandException;
 import engine.command.CommandSender;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
 
 public class ConsoleSender implements CommandSender {
@@ -24,12 +23,12 @@ public class ConsoleSender implements CommandSender {
     }
 
     @Override
-    public boolean hasPermission(@Nonnull String permission) {
+    public boolean hasPermission(String permission) {
         return true;
     }
 
     @Override
-    public void setPermission(@Nonnull String permission, boolean bool) {
+    public void setPermission(String permission, boolean bool) {
         throw new UnsupportedOperationException("Cannot set permission to console");
     }
 

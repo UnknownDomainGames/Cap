@@ -5,7 +5,6 @@ import engine.permission.HashPermissible;
 import main.Entity;
 import main.World;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
 
 public class SwingEntity implements Entity {
@@ -38,12 +37,12 @@ public class SwingEntity implements Entity {
     }
 
     @Override
-    public boolean hasPermission(@Nonnull String permission) {
+    public boolean hasPermission(String permission) {
         return permissible.hasPermission(permission);
     }
 
     @Override
-    public void setPermission(@Nonnull String permission, boolean bool) {
+    public void setPermission(String permission, boolean bool) {
         permissible.setPermission(permission, bool);
     }
 

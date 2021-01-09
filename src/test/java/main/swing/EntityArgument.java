@@ -2,6 +2,7 @@ package main.swing;
 
 import engine.command.argument.Argument;
 import engine.command.suggestion.Suggester;
+import engine.command.util.context.Context;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +20,7 @@ public class EntityArgument extends Argument {
     }
 
     @Override
-    public Optional parse(String arg) {
+    public Optional parse(Context context, String arg) {
         return Optional.ofNullable(SwingTest.getInstance().getEntityManager().getEntity(arg));
     }
 
@@ -27,8 +28,8 @@ public class EntityArgument extends Argument {
     public Suggester getSuggester() {
         return (sender, command, args) -> {
             List<String> entityNames = SwingTest.getInstance().getEntityManager().getEntities().stream().map(SwingEntity::getName).collect(Collectors.toList());
-            if(args!=null&&!args[args.length-1].isEmpty())
-                return entityNames.stream().filter(name->name.startsWith(args[args.length-1])).collect(Collectors.toList());
+            if (args != null && !args[args.length - 1].isEmpty())
+                return entityNames.stream().filter(name -> name.startsWith(args[args.length - 1])).collect(Collectors.toList());
             return entityNames;
         };
     }

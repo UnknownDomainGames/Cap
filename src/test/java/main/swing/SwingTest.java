@@ -123,7 +123,7 @@ public class SwingTest {
                 } else if (e.getKeyChar() == KeyEvent.VK_SPACE) {
                     CommandParser.Result result = resolve.parse(text.substring(1));
                     ArgumentCheckResult argumentCheckResult = commandManager.checkLastArgument(consoleSender, result.getName(), Arrays.copyOfRange(result.getArgs(), 0, result.getArgs().length - 1));
-                    if(!argumentCheckResult.isValid()){
+                    if (!argumentCheckResult.isValid()) {
                         System.out.println(argumentCheckResult.getHelpMessage());
                     }
                     if (text.startsWith("/")) {
