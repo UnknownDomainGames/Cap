@@ -38,18 +38,18 @@ public class EnumNode extends CommandNode {
     }
 
     @Override
-    public Object parse(LinkedContext context, StringArgs args) {
+    public ParseResult parse(LinkedContext context, StringArgs args) {
         String name = args.next();
         if (!enumNames.contains(name)) {
             return null;
         }
         if (enumMap.containsKey(name)) {
-            return enumMap.get(name);
+            return ParseResult.success(enumMap.get(name));
         }
         try {
             Object o = enumClass.getMethod("valueOf", String.class).invoke(null, name);
             enumMap.put(name, o);
-            return o;
+            return ParseResult.success(o);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
@@ -57,7 +57,7 @@ public class EnumNode extends CommandNode {
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
-        return null;
+        return ParseResult.fail();
     }
 
     public Suggester getSuggester() {

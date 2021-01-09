@@ -22,11 +22,11 @@ public class SenderNode extends CommandNode {
     }
 
     @Override
-    public Object parse(LinkedContext context, StringArgs args) {
+    public ParseResult parse(LinkedContext context, StringArgs args) {
         if (allowedSender(context.getSender())) {
-            return context.getSender();
+            return ParseResult.success(context.getSender());
         }
-        return null;
+        return ParseResult.fail();
     }
 
     public boolean allowedSender(CommandSender sender) {

@@ -20,11 +20,11 @@ public class RequiredNode extends CommandNode {
     }
 
     @Override
-    public Object parse(LinkedContext context, StringArgs args) {
+    public ParseResult parse(LinkedContext context, StringArgs args) {
         if (args.next().equals(require)) {
-            return require;
+            return ParseResult.success(require);
         }
-        return null;
+        return ParseResult.fail();
     }
 
     @Override

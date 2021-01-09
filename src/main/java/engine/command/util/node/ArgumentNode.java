@@ -5,6 +5,8 @@ import engine.command.suggestion.Suggester;
 import engine.command.util.StringArgs;
 import engine.command.util.context.LinkedContext;
 
+import java.util.Optional;
+
 public class ArgumentNode extends CommandNode {
 
     private Argument argument;
@@ -22,12 +24,17 @@ public class ArgumentNode extends CommandNode {
     }
 
     @Override
-    public Object parse(LinkedContext context, StringArgs args) {
+    public ParseResult parse(LinkedContext context, StringArgs args) {
         String next = args.next();
         if (next.isEmpty()) {
             return null;
         }
-        return argument.parse(context, next).orElse(null);
+        Optional parse = argument.parse(context, next);
+        if (parse.isPresent()) {
+            return ParseResult.success(parse.get());
+        } else {
+            return ParseResult.fail();
+        }
     }
 
     @Override

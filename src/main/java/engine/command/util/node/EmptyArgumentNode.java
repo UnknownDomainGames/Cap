@@ -2,7 +2,9 @@ package engine.command.util.node;
 
 import engine.command.argument.Argument;
 import engine.command.suggestion.Suggester;
+import engine.command.util.StringArgs;
 import engine.command.util.context.Context;
+import engine.command.util.context.LinkedContext;
 
 import java.util.Optional;
 
@@ -35,6 +37,11 @@ public class EmptyArgumentNode extends ArgumentNode {
     @Override
     public int getRequiredArgsNum() {
         return 0;
+    }
+
+    @Override
+    public ParseResult parse(LinkedContext context, StringArgs args) {
+        return ParseResult.success();
     }
 
     @Override

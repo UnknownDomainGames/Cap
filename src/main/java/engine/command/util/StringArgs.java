@@ -1,5 +1,7 @@
 package engine.command.util;
 
+import java.util.Arrays;
+
 public class StringArgs {
 
     private final String[] args;
@@ -30,4 +32,11 @@ public class StringArgs {
         this.index = index;
     }
 
+    @Override
+    public String toString() {
+        return "StringArgs{" +
+                "args=" + Arrays.toString(args) +
+                ", index=" + index +
+                '}';
+    }
 }

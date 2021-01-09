@@ -26,7 +26,7 @@ public class MultiArgumentNode extends CommandNode {
     }
 
     @Override
-    public Object parse(LinkedContext sender, StringArgs args) {
+    public ParseResult parse(LinkedContext sender, StringArgs args) {
         return commandNode.parse(sender, args);
     }
 

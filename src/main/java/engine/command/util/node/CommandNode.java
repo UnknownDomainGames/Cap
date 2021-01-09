@@ -25,7 +25,7 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
     public CommandNode() {
     }
 
-    public abstract Object parse(LinkedContext context, StringArgs args);
+    public abstract ParseResult parse(LinkedContext context, StringArgs args);
 
     public abstract int getRequiredArgsNum();
 
