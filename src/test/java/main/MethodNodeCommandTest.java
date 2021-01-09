@@ -303,6 +303,10 @@ public class MethodNodeCommandTest {
         commandManager.execute(testSender, "money set 100");
         commandManager.execute(testSender, "money");
         Assertions.assertEquals(message, "100.0");
+
+        commandManager.execute(testSender, "money set asd 100");
+        commandManager.execute(testSender, "money asd");
+        Assertions.assertEquals(message, "100.0");
     }
 
     public class moneyTest {
