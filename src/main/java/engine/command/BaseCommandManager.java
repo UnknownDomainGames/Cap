@@ -7,8 +7,11 @@ public abstract class BaseCommandManager implements CommandManager {
 
     private final Map<String, Command> commands = new HashMap<>();
     private final CommandParser parser = createCommandParser();
+    private final CommandExceptionHandler exceptionHandler = createExceptionHandler();
 
     protected abstract CommandParser createCommandParser();
+
+    protected abstract CommandExceptionHandler createExceptionHandler();
 
     @Override
     public void registerCommand(Command command) {
@@ -45,7 +48,11 @@ public abstract class BaseCommandManager implements CommandManager {
             sender.sendCommandException(new CommandException(CommandException.Type.COMMAND_NOT_FOUND, sender, name, args));
             return;
         }
-        command.execute(sender, args != null ? args : new String[0]);
+        try {
+            command.execute(sender, args != null ? args : new String[0]);
+        } catch (Exception e) {
+            exceptionHandler.handleOnExecuting(e);
+        }
     }
 
     @Override
@@ -68,7 +75,12 @@ public abstract class BaseCommandManager implements CommandManager {
             return List.of();
         }
 
-        return command.suggest(sender, args);
+        try {
+            return command.suggest(sender, args);
+        } catch (Exception e) {
+            exceptionHandler.handleOnSuggesting(e);
+            return List.of();
+        }
     }
 
     @Override
@@ -81,10 +93,15 @@ public abstract class BaseCommandManager implements CommandManager {
     public List<String> getTips(CommandSender sender, String name, String... args) {
         if (name == null || name.isEmpty())
             return List.of();
-        Command commandInstance = commands.get(name.toLowerCase());
-        if (commandInstance == null)
+        Command command = commands.get(name.toLowerCase());
+        if (command == null)
             return List.of();
-        return commandInstance.getTips(sender, args);
+        try {
+            return command.getTips(sender, args);
+        } catch (Exception e) {
+            exceptionHandler.handleOnGettingTips(e);
+            return List.of();
+        }
     }
 
     @Override
@@ -95,10 +112,15 @@ public abstract class BaseCommandManager implements CommandManager {
 
     @Override
     public ArgumentCheckResult checkLastArgument(CommandSender sender, String name, String... args) {
-        Command command1 = commands.get(name.toLowerCase());
-        if (command1 == null)
-            return ArgumentCheckResult.Error("/" + name + "  command not found");
-        return command1.checkLastArgument(sender, args);
+        Command command = commands.get(name.toLowerCase());
+        if (command == null)
+            return ArgumentCheckResult.Error("/" + name + "  command not found"); // TODO: L10n
+        try {
+            return command.checkLastArgument(sender, args);
+        } catch (Exception e) {
+            exceptionHandler.handleOnCheckingArgument(e);
+            return ArgumentCheckResult.Error("Caught an exception when check last argument"); // TODO: L10n
+        }
     }
 
     @Override
