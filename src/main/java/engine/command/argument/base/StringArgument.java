@@ -2,6 +2,7 @@ package engine.command.argument.base;
 
 import engine.command.argument.SimpleArgument;
 import engine.command.suggestion.Suggester;
+import engine.command.util.context.Context;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +14,7 @@ public class StringArgument extends SimpleArgument {
     }
 
     @Override
-    public Optional parse(String arg) {
+    public Optional parse(Context context, String arg) {
         return Optional.of(arg);
     }
 

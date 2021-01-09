@@ -1,13 +1,14 @@
 package engine.command.argument;
 
 import engine.command.suggestion.Suggester;
+import engine.command.util.context.Context;
 
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public class FunctionArgument<T> extends SimpleArgument<T> {
 
-    private Function<String, Optional<T>> parseFunction;
+    private BiFunction<Context, String, Optional<T>> parseFunction;
     private Suggester suggester;
 
     private FunctionArgument(Class responsibleClass, String argumentName) {
@@ -15,7 +16,7 @@ public class FunctionArgument<T> extends SimpleArgument<T> {
     }
 
     @Override
-    public Optional parse(String arg) {
+    public Optional parse(Context context, String arg) {
         return Optional.empty();
     }
 
@@ -32,7 +33,7 @@ public class FunctionArgument<T> extends SimpleArgument<T> {
             this.argument = argument;
         }
 
-        public void setParse(Function<String, Optional<T>> function) {
+        public void setParse(BiFunction<Context, String, Optional<T>> function) {
             argument.parseFunction = function;
         }
 

@@ -2,6 +2,7 @@ package engine.command.argument.base;
 
 import engine.command.argument.Argument;
 import engine.command.suggestion.Suggester;
+import engine.command.util.context.Context;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +19,7 @@ public class DoubleArgument extends Argument {
     }
 
     @Override
-    public Optional parse(String arg) {
+    public Optional parse(Context context, String arg) {
         try {
             return Optional.of(Double.valueOf(arg));
         }catch (Exception e){
