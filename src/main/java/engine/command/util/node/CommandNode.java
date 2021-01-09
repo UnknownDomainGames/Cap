@@ -3,6 +3,7 @@ package engine.command.util.node;
 import engine.command.CommandSender;
 import engine.command.suggestion.Suggester;
 import engine.command.util.StringArgs;
+import engine.command.util.context.DequeContext;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -26,8 +27,8 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
     public CommandNode() {
     }
 
-    public boolean parse(CommandSender sender, StringArgs args) {
-        Object result = parseArgs(sender, args);
+    public boolean parse(DequeContext context, StringArgs args) {
+        Object result = parseArgs(context, args);
         if (result != null) {
             parseResult = result;
             return true;
@@ -46,7 +47,7 @@ public abstract class CommandNode implements Cloneable, Comparable<CommandNode> 
 
     public abstract int getRequiredArgsNum();
 
-    protected abstract Object parseArgs(CommandSender sender, StringArgs args);
+    protected abstract Object parseArgs(DequeContext context, StringArgs args);
 
     public CommandNode getParent() {
         return parent;

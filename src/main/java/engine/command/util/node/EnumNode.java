@@ -4,6 +4,7 @@ import engine.command.CommandSender;
 import engine.command.suggestion.Suggester;
 import engine.command.util.StringArgs;
 import engine.command.util.SuggesterHelper;
+import engine.command.util.context.DequeContext;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -39,7 +40,7 @@ public class EnumNode extends CommandNode {
     }
 
     @Override
-    protected Object parseArgs(CommandSender sender, StringArgs args) {
+    protected Object parseArgs(DequeContext context, StringArgs args) {
         String name = args.next();
         if (!enumNames.contains(name)) {
             return null;

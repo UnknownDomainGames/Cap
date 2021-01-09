@@ -9,12 +9,13 @@ import engine.command.suggestion.SuggesterManager;
 import engine.command.util.CommandNodeUtil;
 import engine.command.util.StringArgs;
 import engine.command.util.SuggesterHelper;
+import engine.command.util.Type;
+import engine.command.util.context.DequeContext;
 import engine.command.util.node.CommandNode;
 import engine.command.util.node.EmptyArgumentNode;
 import engine.command.util.node.Nodeable;
 import engine.command.util.node.SenderNode;
 import engine.permission.Permissible;
-import jdk.jshell.execution.Util;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -238,6 +239,53 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             }
         }
         return bestResult;
+    }
+
+    private class LinkedDequeContext extends LinkedList<Object> implements DequeContext {
+
+        private final CommandSender sender;
+
+        public LinkedDequeContext(CommandSender sender) {
+            this.sender = sender;
+        }
+
+        @Override
+        public CommandSender getSender() {
+            return sender;
+        }
+
+        @Override
+        public int length() {
+            return this.size();
+        }
+
+        @Override
+        public int first(Type type) {
+            for (int i = 0; i < size(); i++) {
+                if (typeAt(i).is(type))
+                    return i;
+            }
+            return -1;
+        }
+
+        @Override
+        public int last(Type type) {
+            for (int i = size() - 1; i >= 0; i--) {
+                if (typeAt(i).is(type))
+                    return i;
+            }
+            return -1;
+        }
+
+        @Override
+        public Type typeAt(int index) {
+            return Type.of(get(index).getClass());
+        }
+
+        @Override
+        public Object valueAt(int index) {
+            return get(index);
+        }
     }
 
     private void parse(CommandNode node, CommandSender sender, StringArgs stringArgs, Set<CommandNode> result) {

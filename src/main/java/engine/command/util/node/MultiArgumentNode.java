@@ -2,6 +2,7 @@ package engine.command.util.node;
 
 import engine.command.CommandSender;
 import engine.command.util.StringArgs;
+import engine.command.util.context.DequeContext;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,7 +58,7 @@ public class MultiArgumentNode extends CommandNode {
     }
 
     @Override
-    protected Object parseArgs(CommandSender sender, StringArgs args) {
+    protected Object parseArgs(DequeContext sender, StringArgs args) {
         return commandNode.parseArgs(sender, args);
     }
 
