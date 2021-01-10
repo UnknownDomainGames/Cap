@@ -281,7 +281,8 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             }
         } else {
             //假如不满足条件，则直接将父Node加入待选结果
-            result.put(node.getParent(), (SimpleLinkedContext) context.clone());
+            if (!result.containsKey(node.getParent()))
+                result.put(node.getParent(), (SimpleLinkedContext) context.clone());
         }
     }
 
