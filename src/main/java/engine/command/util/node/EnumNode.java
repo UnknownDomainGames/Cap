@@ -12,7 +12,7 @@ import java.util.List;
 
 public class EnumNode extends CommandNode {
 
-    private Class enumClass;
+    private final Class enumClass;
 
     private List<String> enumNames;
 

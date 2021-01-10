@@ -8,7 +8,7 @@ import java.util.List;
 
 public class RequiredNode extends CommandNode {
 
-    private String require;
+    private final String require;
 
     public RequiredNode(String require) {
         this.require = require;

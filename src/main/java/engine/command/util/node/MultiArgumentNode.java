@@ -10,9 +10,9 @@ import java.util.function.Function;
 
 public class MultiArgumentNode extends CommandNode {
 
-    private CommandNode commandNode;
-    private Function<Object[], Object> instanceFunction;
-    private int argsNum;
+    private final CommandNode commandNode;
+    private final Function<Object[], Object> instanceFunction;
+    private final int argsNum;
 
     public MultiArgumentNode(CommandNode commandNode, Function<Object[], Object> instanceFunction, int argsNum) {
         this.commandNode = commandNode;

@@ -2,7 +2,7 @@ package engine.command.util.node;
 
 public class ParseResult {
 
-    private static final ParseResult FINAL_SUCCESS = success(null);
+    private static final ParseResult EMPTY_SUCCESS = success(null);
     private static final ParseResult FAIL = new ParseResult(false,null);
 
     private final boolean success;
@@ -30,7 +30,7 @@ public class ParseResult {
     }
 
     public static ParseResult success() {
-        return FINAL_SUCCESS;
+        return EMPTY_SUCCESS;
     }
 
     public static ParseResult fail() {
