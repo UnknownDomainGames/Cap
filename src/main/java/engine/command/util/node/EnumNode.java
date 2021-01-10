@@ -41,7 +41,7 @@ public class EnumNode extends CommandNode {
     public ParseResult parse(LinkedContext context, StringArgs args) {
         String name = args.next();
         if (!enumNames.contains(name)) {
-            return null;
+            return ParseResult.fail();
         }
         if (enumMap.containsKey(name)) {
             return ParseResult.success(enumMap.get(name));

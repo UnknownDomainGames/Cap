@@ -27,7 +27,7 @@ public class ArgumentNode extends CommandNode {
     public ParseResult parse(LinkedContext context, StringArgs args) {
         String next = args.next();
         if (next.isEmpty()) {
-            return null;
+            return ParseResult.fail();
         }
         Optional parse = argument.parse(context, next);
         if (parse.isPresent()) {
