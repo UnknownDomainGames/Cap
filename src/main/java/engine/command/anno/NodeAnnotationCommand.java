@@ -254,7 +254,8 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         if (stringArgs.getIndex() + node.getRequiredArgsNum() <= stringArgs.getLength()) {
             ParseResult parseResult = node.parse(context, stringArgs);
             if (parseResult.isFail()) {
-                result.put(node.getParent(), (SimpleLinkedContext) context.clone());
+                if (!result.containsKey(node.getParent()))
+                    result.put(node.getParent(), (SimpleLinkedContext) context.clone());
                 return;
             } else if (parseResult.getValue() != null) {
                 context.add(node, parseResult.getValue());
