@@ -25,7 +25,8 @@ public class TestSender implements CommandSender {
 
     @Override
     public void sendMessage(String message) {
-        sendConsumer.accept(message);
+        if (sendConsumer != null)
+            sendConsumer.accept(message);
     }
 
     @Override
@@ -36,7 +37,8 @@ public class TestSender implements CommandSender {
     @Override
     public void sendCommandFailure(CommandFailure failure) {
         System.out.println(failure);
-        commandExceptionConsumer.accept(failure);
+        if (commandExceptionConsumer != null)
+            commandExceptionConsumer.accept(failure);
     }
 
     @Override
@@ -62,5 +64,12 @@ public class TestSender implements CommandSender {
     @Override
     public Map<String, Boolean> toPermissionMap() {
         return permissible.toPermissionMap();
+    }
+
+    @Override
+    public String toString() {
+        return "TestSender{" +
+                "name='" + name + '\'' +
+                '}';
     }
 }
