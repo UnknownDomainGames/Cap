@@ -230,23 +230,37 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
         StringArgs stringArgs = new StringArgs(args);
 
         HashMap<CommandNode, SimpleLinkedContext> results = new HashMap<>();
-
         //解析递归从根Node开始
         parse(node, context, stringArgs, results);
+        List<Map.Entry<CommandNode, SimpleLinkedContext>> executableNodes = results.entrySet().stream().filter(entry -> entry.getKey().canExecuteCommand()).collect(Collectors.toList());
 
+        //筛选最佳结果
+        if (!executableNodes.isEmpty()) {
+            return filterResult(executableNodes);
+        } else {
+            return filterResult(results.entrySet());
+        }
+    }
+
+    private Map.Entry<CommandNode, SimpleLinkedContext> filterResult(Collection<Map.Entry<CommandNode, SimpleLinkedContext>> results) {
         Map.Entry<CommandNode, SimpleLinkedContext> entry = null;
         CommandNode bestResult = null;
         int bestNodeDepth = 0;
-        //筛选最佳结果
-        for (Map.Entry<CommandNode, SimpleLinkedContext> result : results.entrySet()) {
+        for (Map.Entry<CommandNode, SimpleLinkedContext> result : results) {
             int depth = CommandNodeUtil.getDepth(result.getKey());
-            if (bestNodeCheck(bestResult, bestNodeDepth, result.getKey(), depth)) {
+            if (bestNodeCheck(bestResult, bestNodeDepth, depth)) {
                 bestResult = result.getKey();
                 bestNodeDepth = depth;
                 entry = result;
             }
         }
         return entry;
+    }
+
+    private boolean bestNodeCheck(CommandNode bestNode, int bestNodeDepth, int checkNodeDepth) {
+        if (bestNode == null)
+            return true;
+        return checkNodeDepth > bestNodeDepth;
     }
 
     private void parse(CommandNode node, SimpleLinkedContext context, StringArgs stringArgs, HashMap<CommandNode, SimpleLinkedContext> result) {
@@ -285,29 +299,6 @@ public class NodeAnnotationCommand extends Command implements Nodeable {
             if (!result.containsKey(node.getParent()))
                 result.put(node.getParent(), (SimpleLinkedContext) context.clone());
         }
-    }
-
-    private boolean bestNodeCheck(CommandNode bestNode, int bestNodeDepth, CommandNode checkNode, int checkNodeDepth) {
-        if (bestNode == null)
-            return true;
-        //假如检查的节点的深度比最佳节点的深度深
-        if (checkNodeDepth > bestNodeDepth)
-            return true;
-        else if (checkNodeDepth == bestNodeDepth) {
-            //假如最佳节点不能执行命令，但检查节点可以
-            if (!bestNode.canExecuteCommand() && checkNode.canExecuteCommand()) {
-                return true;
-            }
-            //假如两者都能执行命令，则检查合计优先级
-            else if (bestNode.canExecuteCommand() && checkNode.canExecuteCommand()) {
-                return CommandNodeUtil.getLinkedFromParent2Child(checkNode).stream().mapToInt(CommandNode::priority).sum() >
-                        CommandNodeUtil.getLinkedFromParent2Child(bestNode).stream().mapToInt(CommandNode::priority).sum();
-            } else if (bestNode.canExecuteCommand() && !checkNode.canExecuteCommand()) {
-                return false;
-            }
-            return checkNode.priority() > bestNode.priority();
-        }
-        return false;
     }
 
     @Override
