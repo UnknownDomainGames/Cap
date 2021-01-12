@@ -406,5 +406,82 @@ public class MethodNodeCommandTest {
 
     }
 
+    @Test
+    public void teleportTest() {
+        HashMap<String, TestSender> entityHashMap = new HashMap<>();
+        TestSender asdSender = new TestSender("asd", message -> this.message = message, null);
+        TestSender sender = new TestSender("123", message -> this.message = message, null);
+        TestSender zxcSender = new TestSender("zxc", message -> this.message = message, null);
+
+        entityHashMap.put("asd", asdSender);
+        entityHashMap.put("123", sender);
+        entityHashMap.put("zxc", zxcSender);
+
+        BaseCommandManager commandManager = new SimpleCommandManager();
+        ArgumentManager argumentManager = new SimpleArgumentManager();
+        argumentManager.setClassDefaultArgument(new WorldArgument());
+        argumentManager.setClassDefaultArgument(new Argument() {
+            @Override
+            public String getName() {
+                return "TestSender";
+            }
+
+            @Override
+            public Class responsibleClass() {
+                return TestSender.class;
+            }
+
+            @Override
+            public Optional parse(Context context, String arg) {
+                return Optional.ofNullable(entityHashMap.get(arg));
+            }
+
+            @Override
+            public String toString() {
+                return "class:" + getClass().getName();
+            }
+
+            @Override
+            public Suggester getSuggester() {
+                return (sender, command, args) -> SuggesterHelper.filterStartWith(new ArrayList<>(entityHashMap.keySet()), args[args.length - 1]);
+            }
+        });
+
+
+        NodeAnnotationCommand.METHOD.getBuilder(commandManager)
+                .setArgumentManager(argumentManager)
+                .addProvider(new LocationProvider())
+                .addCommandHandler(new teleportTestClass())
+                .register();
+
+        commandManager.execute(asdSender, "tp zxc");
+        Assertions.assertEquals(message, "asd tp zxc");
+
+    }
+
+    public class teleportTestClass {
+
+        @Command("tp")
+        public void tp(@Sender TestSender sender, Location location) {
+            sender.sendMessage(sender.getSenderName() + " tp " + location.toString());
+        }
+
+        @Command("tp")
+        public void tp(@Sender TestSender sender, TestSender player) {
+            sender.sendMessage(sender.getSenderName() + " tp " + player.getSenderName());
+        }
+
+        @Command("tp")
+        public void tp1(TestSender player, Location location) {
+            tp(player, location);
+        }
+
+        @Command("tp")
+        public void tp1(TestSender player, TestSender location) {
+            tp(player, location);
+        }
+
+    }
+
 
 }
