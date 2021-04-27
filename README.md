@@ -20,7 +20,7 @@ public void say(@Sender CommandSender sender,String message){
 
 ```java
 SimpleCommandManager simpleCommandManager = new SimpleCommandManager();
-        MethodAnnotationCommand.getBuilder(simpleCommandManager)
+MethodAnnotationCommand.getBuilder(simpleCommandManager)
         .addCommandHandler(this)
         .register();
 ```
