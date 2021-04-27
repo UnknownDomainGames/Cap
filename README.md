@@ -6,8 +6,6 @@ Command &amp; permission library
 
 ## How to use
 
----
-
 ### Handler method:
 ```java
 @Command("say")
