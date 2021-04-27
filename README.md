@@ -4,11 +4,11 @@
 
 Command &amp; permission library
 
-##How to use
+## How to use
 
 ---
 
-###Handler method:
+### Handler method:
 ```java
 @Command("say")
 public void say(@Sender CommandSender sender,String message){
@@ -16,7 +16,7 @@ public void say(@Sender CommandSender sender,String message){
 }
 ```
 
-###Register
+### Register
 
 ```java
 SimpleCommandManager simpleCommandManager = new SimpleCommandManager();
@@ -25,7 +25,7 @@ MethodAnnotationCommand.getBuilder(simpleCommandManager)
         .register();
 ```
 
-###Execute
+### Execute
 
 ```java
 simpleCommandManager.execute(testSender, "say hello!");
